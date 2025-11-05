@@ -1,3 +1,4 @@
+import { Producto } from 'src/productos/entities/producto.entity';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity()
@@ -9,7 +10,7 @@ export class ShoppingCart {
   userId: string;
 
   @Column('jsonb')
-  items: ShoppingCartItem[];
+  items: CartItem[];
 
   @Column('decimal', { precision: 10, scale: 2 })
   totalPrice: number;
@@ -35,10 +36,7 @@ export class ShoppingCart {
   status: 'active' | 'completed' | 'abandoned';
 }
 
-export class ShoppingCartItem {
+export interface CartItem {
   productId: string;
   quantity: number;
-  unitPrice: number;
-  totalPrice: number;
-  addedAt: Date;
 }
