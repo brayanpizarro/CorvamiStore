@@ -1,12 +1,13 @@
 import { min } from 'rxjs';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity
+@Index(['name'])
 export class Producto {
   @PrimaryGeneratedColumn('uuid')
   productId: string;
 
-  @Column({length: 50})
+  @Column({ length: 50 })
   name: string;
 
   @Column('text')
