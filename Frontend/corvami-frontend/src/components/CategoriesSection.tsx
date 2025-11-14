@@ -1,15 +1,19 @@
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
-const CategoriesSection: React.FC = () => {
+interface CategoriesSectionProps {
+  onCategoryClick?: (categorySlug: string) => void;
+}
+
+const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }) => {
   const { theme } = useTheme();
   const categories = [
-    { name: "Laptops", icon: "💻", count: 45 },
-    { name: "Gaming", icon: "🎮", count: 32 },
-    { name: "Periféricos", icon: "⌨️", count: 89 },
-    { name: "Componentes", icon: "🔧", count: 67 },
-    { name: "Audio", icon: "🎧", count: 28 },
-    { name: "Móviles", icon: "📱", count: 54 }
+    { name: "Laptops", icon: "💻", count: 45, slug: "laptops" },
+    { name: "Gaming", icon: "🎮", count: 32, slug: "gaming" },
+    { name: "Periféricos", icon: "⌨️", count: 89, slug: "perifericos" },
+    { name: "Componentes", icon: "🔧", count: 67, slug: "componentes" },
+    { name: "Audio", icon: "🎧", count: 28, slug: "audifonos" },
+    { name: "Móviles", icon: "📱", count: 54, slug: "smartphones" }
   ];
 
   return (
@@ -40,7 +44,10 @@ const CategoriesSection: React.FC = () => {
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {categories.map((category, index) => (
-            <div key={index} className={`backdrop-blur-sm rounded-xl p-6 text-center border-2 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer group shadow-lg ${
+            <div 
+              key={index} 
+              onClick={() => onCategoryClick?.(category.slug)}
+              className={`backdrop-blur-sm rounded-xl p-6 text-center border-2 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer group shadow-lg ${
               theme === 'dark'
                 ? 'bg-gray-800/50 border-green-500/30 hover:border-green-400/60 hover:bg-gray-700/70 hover:shadow-green-500/25'
                 : 'bg-white/80 border-green-400/40 hover:border-green-500/60 hover:bg-white/90 hover:shadow-green-400/25'

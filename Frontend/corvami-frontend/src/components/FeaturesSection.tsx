@@ -1,12 +1,11 @@
 import React from 'react';
-import { Zap, Shield, Truck, HeartHandshake } from 'lucide-react';
 import { useTheme } from '../contexts/ThemeContext';
 
 const FeaturesSection: React.FC = () => {
   const { theme } = useTheme();
   const features = [
     {
-      icon: Zap,
+      icon: "⚡",
       title: "Envío Rápido",
       description: "Recibe tus productos en 24-48 horas",
       bgColor: "bg-gray-800/50",
@@ -15,7 +14,7 @@ const FeaturesSection: React.FC = () => {
       borderColor: "border-green-500/30"
     },
     {
-      icon: Shield,
+      icon: "🛡️",
       title: "Garantía Total",
       description: "2 años de garantía en todos los productos",
       bgColor: "bg-gray-800/50",
@@ -24,7 +23,7 @@ const FeaturesSection: React.FC = () => {
       borderColor: "border-emerald-500/30"
     },
     {
-      icon: Truck,
+      icon: "🚚",
       title: "Envío Gratis",
       description: "En compras superiores a $20.000",
       bgColor: "bg-gray-800/50",
@@ -33,9 +32,9 @@ const FeaturesSection: React.FC = () => {
       borderColor: "border-lime-500/30"
     },
     {
-      icon: HeartHandshake,
-      title: "Soporte 24/7",
-      description: "Atención personalizada todos los días",
+      icon: "💳",
+      title: "Todo medio de pago",
+      description: "Paga tus compras de forma segura y fácil",
       bgColor: "bg-gray-800/50",
       hoverColor: "group-hover:bg-gray-700/70",
       iconColor: "text-green-300",
@@ -58,7 +57,6 @@ const FeaturesSection: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {features.map((feature, index) => {
-            const IconComponent = feature.icon;
             return (
               <div key={index} className="text-center group">
                 <div className={`w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 transition-all duration-300 border-2 backdrop-blur-sm hover:scale-110 shadow-lg ${
@@ -66,7 +64,7 @@ const FeaturesSection: React.FC = () => {
                     ? 'bg-gray-800/50 border-green-500/30 hover:bg-gray-700/70 hover:shadow-green-500/20'
                     : 'bg-white/80 border-green-400/40 hover:bg-white/90 hover:shadow-green-400/25'
                 }`}>
-                  <IconComponent className={`${feature.iconColor} group-hover:scale-110 transition-transform duration-300`} size={28} />
+                  <span className="text-3xl group-hover:scale-110 transition-transform duration-300">{feature.icon}</span>
                 </div>
                 <h3 className={`font-bold mb-3 text-lg group-hover:text-green-300 transition-colors ${
                   theme === 'dark' ? 'text-white' : 'text-gray-900'

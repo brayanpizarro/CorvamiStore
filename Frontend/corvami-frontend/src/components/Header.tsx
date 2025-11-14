@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, Search, ShoppingCart, X } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import CategoriesDropdown from './CategoriesDropdown';
 
 interface HeaderProps {
   cartItems: number;
+  onNavigateHome?: () => void;
+  onNavigateToCategory?: (categorySlug: string) => void;
+  currentPage?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ cartItems }) => {
+const Header: React.FC<HeaderProps> = ({ cartItems, onNavigateHome, onNavigateToCategory, currentPage }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -34,16 +38,28 @@ const Header: React.FC<HeaderProps> = ({ cartItems }) => {
 
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 className="text-xl md:text-2xl font-bold text-white">Corvami Store</h1>
+            <h1 
+              className="text-xl md:text-2xl font-bold text-white cursor-pointer hover:text-green-400 transition-colors"
+              onClick={onNavigateHome}
+            >
+              Corvami Store
+            </h1>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            <a href="#" className="text-white hover:text-emerald-100 transition-colors font-medium">Inicio</a>
-            <a href="#" className="text-white hover:text-emerald-100 transition-colors font-medium">Productos</a>
-            <a href="#" className="text-white hover:text-emerald-100 transition-colors font-medium">Categorías</a>
-            <a href="#" className="text-white hover:text-emerald-100 transition-colors font-medium">Ofertas</a>
-            <a href="#" className="text-white hover:text-emerald-100 transition-colors font-medium">Contacto</a>
+          <nav className="hidden md:flex space-x-8 items-center">
+            <button 
+              onClick={onNavigateHome}
+              className={`hover:text-emerald-100 transition-colors font-medium ${
+                currentPage === 'home' ? 'text-green-400' : 'text-white'
+              }`}
+            >
+              Inicio
+            </button>
+            <button className="text-white hover:text-emerald-100 transition-colors font-medium">Productos</button>
+            <CategoriesDropdown onCategorySelect={onNavigateToCategory} />
+            <button className="text-white hover:text-emerald-100 transition-colors font-medium">Ofertas</button>
+            <button className="text-white hover:text-emerald-100 transition-colors font-medium">Contacto</button>
           </nav>
 
           {/* Right Icons */}
@@ -67,11 +83,19 @@ const Header: React.FC<HeaderProps> = ({ cartItems }) => {
         {isMenuOpen && (
           <div className="md:hidden bg-emerald-600 border-t border-emerald-400">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <a href="#" className="block px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Inicio</a>
-              <a href="#" className="block px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Productos</a>
-              <a href="#" className="block px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Categorías</a>
-              <a href="#" className="block px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Ofertas</a>
-              <a href="#" className="block px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Contacto</a>
+              <button 
+                onClick={() => {
+                  onNavigateHome?.();
+                  setIsMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md"
+              >
+                Inicio
+              </button>
+              <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Productos</button>
+              <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Categorías</button>
+              <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Ofertas</button>
+              <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Contacto</button>
             </div>
           </div>
         )}

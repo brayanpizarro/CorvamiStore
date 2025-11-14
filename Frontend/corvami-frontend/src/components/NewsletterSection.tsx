@@ -22,11 +22,11 @@ const NewsletterSection: React.FC = () => {
           theme === 'dark' ? 'text-white' : 'text-gray-900'
         }`}>
           ¡No te pierdas las mejores{' '}
-          <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">ofertas</span>!
+          <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">tecnologías</span>!
         </h2>
         <p className={`text-xl mb-8 ${
           theme === 'dark' ? 'text-gray-300' : 'text-gray-600'
-        }`}>Suscríbete y recibe descuentos exclusivos cada semana</p>
+        }`}>Suscríbete y entérate de todo lo nuevo!</p>
         <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
           <input 
             type="email" 
