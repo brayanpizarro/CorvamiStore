@@ -1,26 +1,50 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { MongoRepository } from 'typeorm';
+import { randomUUID } from 'crypto';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
+import { Producto } from './entities/producto.entity';
 
 @Injectable()
 export class ProductosService {
-  create(createProductoDto: CreateProductoDto) {
-    return 'This action adds a new producto';
+  constructor(
+    @InjectRepository(Producto)
+    private readonly repo: MongoRepository<Producto>,
+  ) {}
+
+  async create(dto: CreateProductoDto) {
+    const entity: Partial<Producto> = {
+      productId: randomUUID(),
+      name: dto.name,
+      description: dto.description,
+      price: dto.price,
+      stock: dto.stock,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    const result = await this.repo.insert(entity as Producto);
+    return { productId: entity.productId, insertedId: result.identifiers[0]?._id };
   }
 
   findAll() {
-    return `This action returns all productos`;
+    return this.repo.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} producto`;
+  findOne(productId: string) {
+    return this.repo.findOneBy({ productId });
   }
 
-  update(id: number, updateProductoDto: UpdateProductoDto) {
-    return `This action updates a #${id} producto`;
+  async update(productId: string, dto: UpdateProductoDto) {
+    const result = await this.repo.updateOne(
+      { productId },
+      { $set: { ...dto, updatedAt: new Date() } },
+    );
+    return { matched: result.matchedCount, modified: result.modifiedCount };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} producto`;
+  async remove(productId: string) {
+    const result = await this.repo.deleteOne({ productId });
+    return { deleted: result.deletedCount };
   }
 }

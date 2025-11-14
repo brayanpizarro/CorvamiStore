@@ -4,9 +4,8 @@ import {
   ValidateNested,
   IsNumber,
   IsPositive,
-  Min,
   IsOptional,
-  IsEnum,
+  IsIn,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -43,7 +42,7 @@ export class CreateShoppingCartDto {
   currency?: string = 'USD';
 
   @IsOptional()
-  @IsEnum(['active', 'completed', 'abandoned'])
+  @IsIn(['active', 'completed', 'abandoned'])
   status?: 'active' | 'completed' | 'abandoned' = 'active';
 
   @IsOptional()

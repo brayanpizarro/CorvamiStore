@@ -1,6 +1,6 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { IsString, IsNumber, IsPositive, IsEnum, IsOptional } from 'class-validator';
-import { CreateShoppingCartDto, CartItemDto } from './create-shopping-cart.dto';
+import { IsString, IsNumber, IsPositive, IsOptional, IsIn } from 'class-validator';
+import { CreateShoppingCartDto } from './create-shopping-cart.dto';
 
 export class UpdateShoppingCartDto extends PartialType(CreateShoppingCartDto) {}
 
@@ -29,7 +29,7 @@ export class RemoveItemFromCartDto {
 }
 
 export class CartOperationDto {
-  @IsEnum(['add', 'update', 'remove', 'clear'])
+  @IsIn(['add', 'update', 'remove', 'clear'])
   operation: 'add' | 'update' | 'remove' | 'clear';
 
   @IsOptional()

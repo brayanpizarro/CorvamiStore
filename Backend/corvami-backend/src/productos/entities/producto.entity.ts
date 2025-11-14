@@ -1,11 +1,14 @@
-import { min } from 'rxjs';
-import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, CreateDateColumn, UpdateDateColumn, ObjectIdColumn } from 'typeorm';
+import { ObjectId } from 'mongodb';
 
-@Entity
+@Entity()
 @Index(['name'])
 export class Producto {
-  @PrimaryGeneratedColumn('uuid')
-  productId: string;
+  @ObjectIdColumn()
+  _id: ObjectId;
+
+  @Column({ unique: true })
+  productId: string; // UUID asignado en el servicio
 
   @Column({ length: 50 })
   name: string;
@@ -19,13 +22,9 @@ export class Producto {
   @Column('int')
   stock: number;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 
-  @Column({
-    type: 'timestamp',
-    default: () => 'CURRENT_TIMESTAMP',
-    onUpdate: () => 'CURRENT_TIMESTAMP',
-  })
+  @UpdateDateColumn({ type: 'timestamp' })
   updatedAt: Date;
 }
