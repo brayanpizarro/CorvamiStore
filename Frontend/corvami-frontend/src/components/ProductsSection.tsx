@@ -13,7 +13,7 @@ interface Product {
 }
 
 interface ProductsSectionProps {
-  onAddToCart: (productId: number) => void;
+  onAddToCart: () => void;
 }
 
 const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
@@ -23,36 +23,36 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
     {
       id: 1,
       name: "Laptop Gaming RTX 4080",
-      price: 1299,
-      originalPrice: 1599,
-      image: "https://images.pexels.com/photos/205421/pexels-photo-205421.jpeg?auto=compress&cs=tinysrgb&w=400",
+      price: 100000,
+      originalPrice: 149000,
+      image: " ",
       rating: 4.8,
       reviews: 124
     },
     {
       id: 2,
       name: "Teclado Mecánico RGB",
-      price: 89,
-      originalPrice: 129,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
+      price: 59000,
+      originalPrice: 89990,
+      image: " ",
       rating: 4.9,
       reviews: 89
     },
     {
       id: 3,
       name: "Mouse Gaming Pro",
-      price: 49,
-      originalPrice: 79,
-      image: "https://images.pexels.com/photos/2115257/pexels-photo-2115257.jpeg?auto=compress&cs=tinysrgb&w=400",
+      price: 39990,
+      originalPrice: 25000,
+      image: " ",
       rating: 4.7,
       reviews: 156
     },
     {
       id: 4,
       name: "RAM 32GB DDR5",
-      price: 199,
-      originalPrice: 249,
-      image: "https://images.pexels.com/photos/163100/circuit-circuit-board-resistor-computer-163100.jpeg?auto=compress&cs=tinysrgb&w=400",
+      price: 125990,
+      originalPrice: 249990,
+      image: " ",
       rating: 4.6,
       reviews: 73
     }
@@ -124,7 +124,7 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
                   </div>
                 </div>
                 <button 
-                  onClick={() => onAddToCart(product.id)}
+                  onClick={() => onAddToCart()}
                   className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/50"
                 >
                   Agregar al Carrito
