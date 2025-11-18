@@ -1,0 +1,513 @@
+import React, { useState } from 'react';
+import { useTheme } from '../contexts/ThemeContext';
+import { Star, Heart, ShoppingCart, Truck, Shield, RotateCcw, Award, ChevronLeft, ChevronRight, Check, Minus, Plus } from 'lucide-react';
+
+interface Product {
+  id: number;
+  name: string;
+  price: number;
+  originalPrice?: number;
+  image: string;
+  images?: string[];
+  rating: number;
+  reviews: number;
+  brand: string;
+  category: string;
+  subcategory: string;
+  features: string[];
+  inStock: boolean;
+  discount?: number;
+  description?: string;
+  specifications?: { [key: string]: string };
+  warranty?: string;
+  stockQuantity?: number;
+}
+
+interface ProductDetailProps {
+  product: Product;
+  onBack?: () => void;
+  onAddToCart?: (quantity: number) => void;
+}
+
+const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToCart }) => {
+  const { theme } = useTheme();
+  const [selectedImage, setSelectedImage] = useState(0);
+  const [quantity, setQuantity] = useState(1);
+  const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description');
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const images = product.images || [product.image];
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0
+    }).format(price);
+  };
+
+  const handleQuantityChange = (delta: number) => {
+    const newQuantity = quantity + delta;
+    if (newQuantity >= 1 && newQuantity <= (product.stockQuantity || 10)) {
+      setQuantity(newQuantity);
+    }
+  };
+
+  const handleAddToCart = () => {
+    if (onAddToCart) {
+      onAddToCart(quantity);
+    }
+  };
+
+  return (
+    <div className={`min-h-screen transition-all duration-300 ${
+      theme === 'dark' ? 'bg-black' : 'bg-gray-50'
+    }`}>
+      {/* Botón de regreso */}
+      <div className={`py-4 ${
+        theme === 'dark' ? 'bg-gray-900' : 'bg-white'
+      } border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} shadow-sm`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all hover:gap-3 ${
+                theme === 'dark'
+                  ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900'
+              }`}
+            >
+              <span>←</span>
+              Volver
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Galería de Imágenes */}
+          <div>
+            {/* Imagen Principal */}
+            <div className={`relative rounded-2xl overflow-hidden mb-4 ${
+              theme === 'dark' ? 'bg-gray-900' : 'bg-white'
+            } border ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} p-8`}>
+              <img
+                src={images[selectedImage]}
+                alt={product.name}
+                className="w-full h-96 object-contain"
+              />
+              
+              {/* Badge de Descuento */}
+              {product.discount && (
+                <div className="absolute top-4 left-4 bg-red-500 text-white px-4 py-2 rounded-lg text-lg font-bold shadow-lg">
+                  -{product.discount}%
+                </div>
+              )}
+
+              {/* Botón de Favorito */}
+              <button
+                onClick={() => setIsFavorite(!isFavorite)}
+                className={`absolute top-4 right-4 p-3 rounded-full transition-all ${
+                  isFavorite
+                    ? 'bg-red-500 text-white'
+                    : theme === 'dark'
+                      ? 'bg-gray-800 text-gray-300 hover:bg-red-500 hover:text-white'
+                      : 'bg-white text-gray-600 hover:bg-red-500 hover:text-white'
+                } shadow-lg`}
+              >
+                <Heart size={20} className={isFavorite ? 'fill-current' : ''} />
+              </button>
+
+              {/* Navegación de imágenes */}
+              {images.length > 1 && (
+                <>
+                  <button
+                    onClick={() => setSelectedImage((prev) => (prev - 1 + images.length) % images.length)}
+                    className={`absolute left-4 top-1/2 transform -translate-y-1/2 p-2 rounded-full ${
+                      theme === 'dark' ? 'bg-gray-800/90 hover:bg-gray-700' : 'bg-white/90 hover:bg-gray-100'
+                    } shadow-lg transition-all`}
+                  >
+                    <ChevronLeft size={20} />
+                  </button>
+                  <button
+                    onClick={() => setSelectedImage((prev) => (prev + 1) % images.length)}
+                    className={`absolute right-4 top-1/2 transform -translate-y-1/2 p-2 rounded-full ${
+                      theme === 'dark' ? 'bg-gray-800/90 hover:bg-gray-700' : 'bg-white/90 hover:bg-gray-100'
+                    } shadow-lg transition-all`}
+                  >
+                    <ChevronRight size={20} />
+                  </button>
+                </>
+              )}
+            </div>
+
+            {/* Miniaturas */}
+            {images.length > 1 && (
+              <div className="grid grid-cols-4 gap-3">
+                {images.map((img, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setSelectedImage(index)}
+                    className={`rounded-lg overflow-hidden border-2 transition-all ${
+                      selectedImage === index
+                        ? 'border-green-500 shadow-lg scale-105'
+                        : theme === 'dark'
+                          ? 'border-gray-700 hover:border-gray-600'
+                          : 'border-gray-200 hover:border-gray-300'
+                    } ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} p-2`}
+                  >
+                    <img src={img} alt={`${product.name} ${index + 1}`} className="w-full h-20 object-contain" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Información del Producto */}
+          <div>
+            {/* Marca y Nombre */}
+            <div className="mb-4">
+              <p className={`text-sm font-medium mb-2 ${
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                {product.brand}
+              </p>
+              <h1 className={`text-3xl md:text-4xl font-bold mb-2 ${
+                theme === 'dark' ? 'text-white' : 'text-gray-900'
+              }`}>
+                {product.name}
+              </h1>
+            </div>
+
+            {/* Rating y Reviews */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={20}
+                      className={i < Math.floor(product.rating)
+                        ? 'text-yellow-400 fill-current'
+                        : 'text-gray-300'
+                      }
+                    />
+                  ))}
+                </div>
+                <span className={`font-semibold ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {product.rating}
+                </span>
+              </div>
+              <span className={`text-sm ${
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                ({product.reviews} reseñas)
+              </span>
+            </div>
+
+            {/* Precio */}
+            <div className="mb-6">
+              <div className={`text-4xl font-bold mb-2 ${
+                theme === 'dark' ? 'text-green-400' : 'text-green-600'
+              }`}>
+                {formatPrice(product.price)}
+              </div>
+              {product.originalPrice && (
+                <div className="flex items-center gap-3">
+                  <span className={`text-xl line-through ${
+                    theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                  }`}>
+                    {formatPrice(product.originalPrice)}
+                  </span>
+                  <span className="bg-red-500 text-white px-3 py-1 rounded-lg text-sm font-bold">
+                    Ahorra {formatPrice(product.originalPrice - product.price)}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Estado de Stock */}
+            <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg mb-6 ${
+              product.inStock
+                ? theme === 'dark' ? 'bg-green-500/20 text-green-400' : 'bg-green-50 text-green-700'
+                : theme === 'dark' ? 'bg-red-500/20 text-red-400' : 'bg-red-50 text-red-700'
+            }`}>
+              <Check size={16} />
+              <span className="font-semibold">
+                {product.inStock ? 'En Stock' : 'Agotado'}
+              </span>
+            </div>
+
+            {/* Características Principales */}
+            <div className={`rounded-xl p-4 mb-6 ${
+              theme === 'dark' ? 'bg-gray-900 border border-gray-800' : 'bg-gray-50 border border-gray-200'
+            }`}>
+              <h3 className={`font-semibold mb-3 ${
+                theme === 'dark' ? 'text-white' : 'text-gray-900'
+              }`}>
+                Características Principales
+              </h3>
+              <ul className="space-y-2">
+                {product.features.map((feature, index) => (
+                  <li key={index} className={`flex items-start gap-2 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Selector de Cantidad */}
+            {product.inStock && (
+              <div className="mb-6">
+                <label className={`block text-sm font-semibold mb-3 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Cantidad
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className={`flex items-center border rounded-lg ${
+                    theme === 'dark' ? 'border-gray-700' : 'border-gray-300'
+                  }`}>
+                    <button
+                      onClick={() => handleQuantityChange(-1)}
+                      disabled={quantity <= 1}
+                      className={`p-3 ${
+                        quantity <= 1
+                          ? 'opacity-50 cursor-not-allowed'
+                          : theme === 'dark'
+                            ? 'hover:bg-gray-800'
+                            : 'hover:bg-gray-100'
+                      } transition-colors`}
+                    >
+                      <Minus size={18} />
+                    </button>
+                    <span className={`px-6 font-semibold ${
+                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    }`}>
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => handleQuantityChange(1)}
+                      disabled={quantity >= (product.stockQuantity || 10)}
+                      className={`p-3 ${
+                        quantity >= (product.stockQuantity || 10)
+                          ? 'opacity-50 cursor-not-allowed'
+                          : theme === 'dark'
+                            ? 'hover:bg-gray-800'
+                            : 'hover:bg-gray-100'
+                      } transition-colors`}
+                    >
+                      <Plus size={18} />
+                    </button>
+                  </div>
+                  <span className={`text-sm ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    {product.stockQuantity || 10} disponibles
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Botones de Acción */}
+            <div className="flex gap-3 mb-6">
+              <button
+                onClick={handleAddToCart}
+                disabled={!product.inStock}
+                className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-bold text-lg transition-all ${
+                  product.inStock
+                    ? theme === 'dark'
+                      ? 'bg-green-500 hover:bg-green-400 text-black shadow-lg hover:shadow-green-500/50'
+                      : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-green-600/50'
+                    : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                }`}
+              >
+                <ShoppingCart size={24} />
+                Agregar al Carrito
+              </button>
+            </div>
+
+            {/* Beneficios */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
+              }`}>
+                <Truck className="text-green-500" size={20} />
+                <div>
+                  <p className={`text-xs font-semibold ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Envío Gratis
+                  </p>
+                  <p className={`text-xs ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    En compras +$100k
+                  </p>
+                </div>
+              </div>
+              <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
+              }`}>
+                <Shield className="text-blue-500" size={20} />
+                <div>
+                  <p className={`text-xs font-semibold ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Garantía
+                  </p>
+                  <p className={`text-xs ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    {product.warranty || '1 año'}
+                  </p>
+                </div>
+              </div>
+              <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
+              }`}>
+                <RotateCcw className="text-purple-500" size={20} />
+                <div>
+                  <p className={`text-xs font-semibold ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Devolución
+                  </p>
+                  <p className={`text-xs ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    30 días
+                  </p>
+                </div>
+              </div>
+              <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
+              }`}>
+                <Award className="text-yellow-500" size={20} />
+                <div>
+                  <p className={`text-xs font-semibold ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    Producto Original
+                  </p>
+                  <p className={`text-xs ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    Certificado
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Tabs de Información */}
+        <div className={`rounded-2xl overflow-hidden ${
+          theme === 'dark' ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200'
+        }`}>
+          {/* Tab Headers */}
+          <div className={`flex border-b ${
+            theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+          }`}>
+            <button
+              onClick={() => setActiveTab('description')}
+              className={`flex-1 px-6 py-4 font-semibold transition-colors ${
+                activeTab === 'description'
+                  ? theme === 'dark'
+                    ? 'bg-green-500/10 text-green-400 border-b-2 border-green-500'
+                    : 'bg-green-50 text-green-600 border-b-2 border-green-600'
+                  : theme === 'dark'
+                    ? 'text-gray-400 hover:text-white'
+                    : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Descripción
+            </button>
+            <button
+              onClick={() => setActiveTab('specs')}
+              className={`flex-1 px-6 py-4 font-semibold transition-colors ${
+                activeTab === 'specs'
+                  ? theme === 'dark'
+                    ? 'bg-green-500/10 text-green-400 border-b-2 border-green-500'
+                    : 'bg-green-50 text-green-600 border-b-2 border-green-600'
+                  : theme === 'dark'
+                    ? 'text-gray-400 hover:text-white'
+                    : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Especificaciones
+            </button>
+            <button
+              onClick={() => setActiveTab('reviews')}
+              className={`flex-1 px-6 py-4 font-semibold transition-colors ${
+                activeTab === 'reviews'
+                  ? theme === 'dark'
+                    ? 'bg-green-500/10 text-green-400 border-b-2 border-green-500'
+                    : 'bg-green-50 text-green-600 border-b-2 border-green-600'
+                  : theme === 'dark'
+                    ? 'text-gray-400 hover:text-white'
+                    : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              Reseñas ({product.reviews})
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          <div className="p-6">
+            {activeTab === 'description' && (
+              <div className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>
+                <p className="text-lg leading-relaxed">
+                  {product.description || `${product.name} es un producto de alta calidad de ${product.brand}. 
+                  Diseñado para ofrecer el mejor rendimiento y durabilidad. Ideal para usuarios que buscan 
+                  tecnología de punta con las mejores características del mercado.`}
+                </p>
+              </div>
+            )}
+
+            {activeTab === 'specs' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {product.specifications ? (
+                  Object.entries(product.specifications).map(([key, value]) => (
+                    <div key={key} className={`flex justify-between p-3 rounded-lg ${
+                      theme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'
+                    }`}>
+                      <span className={`font-semibold ${
+                        theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      }`}>
+                        {key}:
+                      </span>
+                      <span className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                        {value}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>
+                    No hay especificaciones disponibles
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'reviews' && (
+              <div className={`text-center py-8 ${
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                <p>Las reseñas estarán disponibles próximamente</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProductDetail;

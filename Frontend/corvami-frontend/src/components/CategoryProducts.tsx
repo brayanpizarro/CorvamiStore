@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { ChevronDown, Filter, Grid3X3, List, Star, Heart, ShoppingCart } from 'lucide-react';
+import ProductDetail from './ProductDetail';
 
 interface Product {
   id: number;
@@ -8,6 +9,7 @@ interface Product {
   price: number;
   originalPrice?: number;
   image: string;
+  images?: string[];
   rating: number;
   reviews: number;
   brand: string;
@@ -16,6 +18,10 @@ interface Product {
   features: string[];
   inStock: boolean;
   discount?: number;
+  description?: string;
+  specifications?: { [key: string]: string };
+  warranty?: string;
+  stockQuantity?: number;
 }
 
 interface CategoryProductsProps {
@@ -28,6 +34,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
   const { theme } = useTheme();
   
   // Estados para filtros y vista
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('relevance');
   const [priceRange, setPriceRange] = useState([0, 2000000]);
@@ -44,14 +51,31 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
       price: 450000,
       originalPrice: 550000,
       image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
+      images: [
+        "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=800",
+        "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=800",
+        "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=800"
+      ],
       rating: 4.8,
       reviews: 342,
       brand: "Corsair",
       category: "perifericos",
       subcategory: "teclados",
-      features: ["RGB", "Mecánico", "Cherry MX", "USB-C"],
+      features: ["RGB Personalizable", "Switches Cherry MX", "Teclas Macro", "USB-C Extraíble"],
       inStock: true,
-      discount: 18
+      discount: 18,
+      description: "El Corsair K95 RGB es un teclado mecánico premium diseñado para gaming profesional. Con switches Cherry MX de alta calidad, iluminación RGB personalizable y construcción en aluminio, este teclado ofrece durabilidad y rendimiento excepcionales.",
+      specifications: {
+        "Tipo de Switch": "Cherry MX Red/Brown/Blue",
+        "Retroiluminación": "RGB 16.8M colores",
+        "Teclas Macro": "6 teclas dedicadas",
+        "Material": "Aluminio cepillado",
+        "Conectividad": "USB-C extraíble",
+        "Dimensiones": "465 x 170 x 38 mm",
+        "Peso": "1.2 kg"
+      },
+      warranty: "2 años",
+      stockQuantity: 15
     },
     {
       id: 2,
@@ -59,14 +83,28 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
       price: 380000,
       originalPrice: 420000,
       image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
+      images: [
+        "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=800",
+        "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=800"
+      ],
       rating: 4.6,
       reviews: 218,
       brand: "Razer",
       category: "perifericos",
       subcategory: "teclados",
-      features: ["RGB", "Mecánico", "Razer Green", "USB"],
+      features: ["Razer Green Switches", "RGB Chroma", "Reposamanos Magnético", "Cable Trenzado"],
       inStock: true,
-      discount: 10
+      discount: 10,
+      description: "El Razer BlackWidow V3 combina tecnología de switches mecánicos Razer con iluminación Chroma RGB avanzada para una experiencia gaming inmersiva.",
+      specifications: {
+        "Tipo de Switch": "Razer Green Mechanical",
+        "Retroiluminación": "Razer Chroma RGB",
+        "Material": "Plástico ABS Premium",
+        "Conectividad": "USB 2.0",
+        "Dimensiones": "440 x 145 x 42 mm"
+      },
+      warranty: "1 año",
+      stockQuantity: 23
     },
     {
       id: 3,
@@ -534,170 +572,250 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
     }).format(price);
   };
 
+  const clearFilters = () => {
+    setPriceRange([0, 2000000]);
+    setSelectedBrands([]);
+    setSelectedRating(0);
+  };
+
+  const hasActiveFilters = selectedBrands.length > 0 || selectedRating > 0 || priceRange[1] < 2000000;
+
+  // Si hay un producto seleccionado, mostrar el detalle
+  if (selectedProduct) {
+    return (
+      <ProductDetail
+        product={selectedProduct}
+        onBack={() => setSelectedProduct(null)}
+        onAddToCart={(quantity) => {
+          console.log(`Agregando ${quantity} x ${selectedProduct.name} al carrito`);
+          // Aquí irá la lógica del carrito
+          setSelectedProduct(null); // Volver a la lista después de agregar
+        }}
+      />
+    );
+  }
+
   return (
     <div className={`min-h-screen transition-all duration-300 ${
       theme === 'dark' ? 'bg-black' : 'bg-gray-50'
     }`}>
-      {/* Header de Categoría */}
-      <div className={`py-8 ${
+      {/* Header de Categoría - Compacto */}
+      <div className={`py-4 ${
         theme === 'dark' ? 'bg-gray-900' : 'bg-white'
-      } border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+      } border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} shadow-sm`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              {/* Botón de regreso */}
-              {onNavigateHome && (
-                <button
-                  onClick={onNavigateHome}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                    theme === 'dark'
-                      ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900'
-                  }`}
-                >
-                  <span className="text-xl">←</span>
-                  Regresar
-                </button>
-              )}
-              
-              <div>
-                <h1 className={`text-3xl font-bold mb-2 ${
-                  theme === 'dark' ? 'text-white' : 'text-gray-900'
-                }`}>
-                  {categoryTitle}
-                </h1>
-                <p className={`text-lg ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
-                  {filteredProducts.length} productos encontrados
-                </p>
-              </div>
+          {/* Botón de regreso */}
+          {onNavigateHome && (
+            <button
+              onClick={onNavigateHome}
+              className={`flex items-center gap-1.5 px-3 py-1.5 mb-3 rounded-lg text-sm font-medium transition-all hover:gap-2 ${
+                theme === 'dark'
+                  ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900'
+              }`}
+            >
+              <span>←</span>
+              Volver
+            </button>
+          )}
+          
+          {/* Título y controles en la misma línea */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
+            {/* Título y contador */}
+            <div>
+              <h1 className={`text-2xl md:text-3xl font-bold mb-1 ${
+                theme === 'dark' ? 'text-white' : 'text-gray-900'
+              }`}>
+                {categoryTitle}
+              </h1>
+              <p className={`text-sm ${
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              }`}>
+                {filteredProducts.length} {filteredProducts.length === 1 ? 'producto' : 'productos'}
+              </p>
             </div>
-            
-            {/* Controles de Vista */}
-            <div className="flex items-center gap-4">
-              <div className="flex border rounded-lg overflow-hidden">
+
+            {/* Controles compactos */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Botón de Filtros */}
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                  showFilters
+                    ? theme === 'dark'
+                      ? 'bg-green-500 text-black'
+                      : 'bg-green-600 text-white'
+                    : theme === 'dark'
+                      ? 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-700'
+                      : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
+                }`}
+              >
+                <Filter size={16} />
+                Filtros
+                {hasActiveFilters && (
+                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
+                    showFilters
+                      ? 'bg-black/20'
+                      : theme === 'dark' ? 'bg-green-500 text-black' : 'bg-green-600 text-white'
+                  }`}>
+                    {selectedBrands.length + (selectedRating > 0 ? 1 : 0) + (priceRange[1] < 2000000 ? 1 : 0)}
+                  </span>
+                )}
+              </button>
+
+              {hasActiveFilters && (
                 <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 ${
-                    viewMode === 'grid'
-                      ? theme === 'dark' ? 'bg-green-500 text-black' : 'bg-green-600 text-white'
-                      : theme === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  onClick={clearFilters}
+                  className={`text-xs font-medium underline ${
+                    theme === 'dark'
+                      ? 'text-gray-400 hover:text-white'
+                      : 'text-gray-600 hover:text-gray-900'
                   } transition-colors`}
                 >
-                  <Grid3X3 size={18} />
+                  Limpiar
+                </button>
+              )}
+
+              {/* Controles de Vista */}
+              <div className={`flex border rounded-lg overflow-hidden ${
+                theme === 'dark' ? 'border-gray-700' : 'border-gray-300'
+              }`}>
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-1.5 transition-colors ${
+                    viewMode === 'grid'
+                      ? theme === 'dark' ? 'bg-green-500 text-black' : 'bg-green-600 text-white'
+                      : theme === 'dark' ? 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700' : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                  title="Vista en cuadrícula"
+                >
+                  <Grid3X3 size={16} />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 ${
+                  className={`p-1.5 transition-colors ${
                     viewMode === 'list'
                       ? theme === 'dark' ? 'bg-green-500 text-black' : 'bg-green-600 text-white'
-                      : theme === 'dark' ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  } transition-colors`}
+                      : theme === 'dark' ? 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700' : 'bg-white text-gray-600 hover:bg-gray-50'
+                  }`}
+                  title="Vista en lista"
                 >
-                  <List size={18} />
+                  <List size={16} />
                 </button>
               </div>
-            </div>
-          </div>
 
-          {/* Ordenamiento */}
-          <div className="flex justify-end">
-            {/* Ordenamiento */}
-            <div className="relative">
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className={`appearance-none pr-10 pl-4 py-3 rounded-lg border ${
-                  theme === 'dark'
-                    ? 'bg-gray-800 border-gray-700 text-white'
-                    : 'bg-white border-gray-300 text-gray-900'
-                } focus:outline-none focus:ring-2 focus:ring-green-500`}
-              >
-                <option value="relevance">Más Relevante</option>
-                <option value="price_asc">Precio: Menor a Mayor</option>
-                <option value="price_desc">Precio: Mayor a Menor</option>
-                <option value="rating">Mejor Calificación</option>
-                <option value="name">Nombre A-Z</option>
-              </select>
-              <ChevronDown className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-              }`} size={20} />
+              {/* Ordenamiento */}
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className={`appearance-none pr-8 pl-3 py-1.5 rounded-lg border text-sm font-medium ${
+                    theme === 'dark'
+                      ? 'bg-gray-800 border-gray-700 text-white'
+                      : 'bg-white border-gray-300 text-gray-900'
+                  } focus:outline-none focus:ring-2 focus:ring-green-500 transition-all`}
+                >
+                  <option value="relevance">Relevante</option>
+                  <option value="price_asc">Menor precio</option>
+                  <option value="price_desc">Mayor precio</option>
+                  <option value="rating">Mejor calificación</option>
+                  <option value="name">A-Z</option>
+                </select>
+                <ChevronDown className={`absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+                }`} size={16} />
+              </div>
             </div>
-
-            {/* Botón de Filtros */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-4 py-3 rounded-lg border ${
-                theme === 'dark'
-                  ? 'bg-gray-800 border-gray-700 text-white hover:bg-gray-700'
-                  : 'bg-white border-gray-300 text-gray-900 hover:bg-gray-50'
-              } transition-colors`}
-            >
-              <Filter size={18} />
-              Filtros
-            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex flex-col lg:flex-row gap-4">
           {/* Sidebar de Filtros */}
           {showFilters && (
-            <div className={`w-80 ${
+            <aside className={`w-full lg:w-80 ${
               theme === 'dark' ? 'bg-gray-900' : 'bg-white'
-            } rounded-lg p-6 h-fit sticky top-8`}>
-              <h3 className={`text-lg font-bold mb-6 ${
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
-              }`}>
-                Filtros
-              </h3>
+            } rounded-xl p-4 h-fit lg:sticky lg:top-4 shadow-sm border ${
+              theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+            }`}>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className={`text-lg font-bold ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  Filtros
+                </h3>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className={`text-xs font-medium px-2 py-1 rounded-full ${
+                      theme === 'dark'
+                        ? 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    } transition-colors`}
+                  >
+                    Limpiar
+                  </button>
+                )}
+              </div>
 
               {/* Rango de Precio */}
-              <div className="mb-6">
-                <h4 className={`font-semibold mb-3 ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              <div className={`mb-4 pb-4 border-b ${
+                theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+              }`}>
+                <h4 className={`font-semibold mb-3 text-sm ${
+                  theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
                 }`}>
-                  Precio
+                  Rango de Precio
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <input
                     type="range"
                     min="0"
                     max="2000000"
-                    step="10000"
+                    step="50000"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
-                    className="w-full accent-green-500"
+                    className="w-full h-2 accent-green-500 cursor-pointer"
                   />
-                  <div className={`text-sm ${
-                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  <div className={`flex items-center justify-between text-sm font-medium ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                   }`}>
-                    Hasta {formatPrice(priceRange[1])}
+                    <span>{formatPrice(0)}</span>
+                    <span className={`px-3 py-1 rounded-lg ${
+                      theme === 'dark' ? 'bg-gray-800 text-green-400' : 'bg-green-50 text-green-700'
+                    }`}>
+                      {formatPrice(priceRange[1])}
+                    </span>
                   </div>
                 </div>
               </div>
 
               {/* Marcas */}
-              <div className="mb-6">
-                <h4 className={`font-semibold mb-3 ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              <div className={`mb-4 pb-4 border-b ${
+                theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+              }`}>
+                <h4 className={`font-semibold mb-3 text-sm ${
+                  theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
                 }`}>
                   Marcas
                 </h4>
-                <div className="space-y-2">
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
                   {brands.map(brand => (
-                    <label key={brand} className="flex items-center">
+                    <label key={brand} className={`flex items-center cursor-pointer group p-1.5 rounded-lg transition-colors ${
+                      theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'
+                    }`}>
                       <input
                         type="checkbox"
                         checked={selectedBrands.includes(brand)}
                         onChange={() => toggleBrand(brand)}
-                        className="mr-2 accent-green-500"
+                        className="w-4 h-4 accent-green-500 cursor-pointer"
                       />
-                      <span className={`text-sm ${
-                        theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                      }`}>
+                      <span className={`ml-2 text-sm font-medium ${
+                        selectedBrands.includes(brand)
+                          ? theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                          : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      } group-hover:text-green-500 transition-colors`}>
                         {brand}
                       </span>
                     </label>
@@ -706,32 +824,56 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
               </div>
 
               {/* Calificación */}
-              <div className="mb-6">
-                <h4 className={`font-semibold mb-3 ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+              <div>
+                <h4 className={`font-semibold mb-3 text-sm ${
+                  theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
                 }`}>
                   Calificación Mínima
                 </h4>
                 <div className="space-y-2">
+                  <label className={`flex items-center cursor-pointer group p-1.5 rounded-lg transition-colors ${
+                    theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'
+                  }`}>
+                    <input
+                      type="radio"
+                      name="rating"
+                      checked={selectedRating === 0}
+                      onChange={() => setSelectedRating(0)}
+                      className="w-4 h-4 accent-green-500 cursor-pointer"
+                    />
+                    <span className={`ml-2 text-sm font-medium ${
+                      selectedRating === 0
+                        ? theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                        : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    }`}>
+                      Todas las calificaciones
+                    </span>
+                  </label>
                   {[4, 3, 2, 1].map(rating => (
-                    <label key={rating} className="flex items-center">
+                    <label key={rating} className={`flex items-center cursor-pointer group p-1.5 rounded-lg transition-colors ${
+                      theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'
+                    }`}>
                       <input
                         type="radio"
                         name="rating"
                         checked={selectedRating === rating}
                         onChange={() => setSelectedRating(rating)}
-                        className="mr-2 accent-green-500"
+                        className="w-4 h-4 accent-green-500 cursor-pointer"
                       />
-                      <div className="flex items-center gap-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            size={14}
-                            className={i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}
-                          />
-                        ))}
-                        <span className={`text-sm ml-1 ${
-                          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                      <div className="flex items-center gap-2 ml-2">
+                        <div className="flex items-center">
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              size={14}
+                              className={i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}
+                            />
+                          ))}
+                        </div>
+                        <span className={`text-xs font-medium ${
+                          selectedRating === rating
+                            ? theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                            : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                         }`}>
                           y más
                         </span>
@@ -740,129 +882,164 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                   ))}
                 </div>
               </div>
-            </div>
+            </aside>
           )}
 
           {/* Grid/Lista de Productos */}
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             {filteredProducts.length === 0 ? (
-              <div className={`text-center py-12 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              <div className={`text-center py-16 px-4 ${
+                theme === 'dark' ? 'bg-gray-900' : 'bg-white'
+              } rounded-xl border ${
+                theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
               }`}>
-                <p className="text-xl mb-4">No se encontraron productos</p>
-                <p>Intenta ajustar los filtros o buscar algo diferente</p>
+                <div className={`text-6xl mb-4 ${
+                  theme === 'dark' ? 'text-gray-700' : 'text-gray-300'
+                }`}>
+                  🔍
+                </div>
+                <p className={`text-xl font-semibold mb-2 ${
+                  theme === 'dark' ? 'text-white' : 'text-gray-900'
+                }`}>
+                  No se encontraron productos
+                </p>
+                <p className={`text-base ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  Intenta ajustar los filtros o buscar en otra categoría
+                </p>
+                {hasActiveFilters && (
+                  <button
+                    onClick={clearFilters}
+                    className={`mt-6 px-6 py-2.5 rounded-lg font-medium ${
+                      theme === 'dark'
+                        ? 'bg-green-500 text-black hover:bg-green-400'
+                        : 'bg-green-600 text-white hover:bg-green-700'
+                    } transition-colors`}
+                  >
+                    Limpiar filtros
+                  </button>
+                )}
               </div>
             ) : (
               <div className={viewMode === 'grid' 
-                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6' 
+                ? 'grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6' 
                 : 'space-y-4'
               }>
                 {filteredProducts.map(product => (
-                  <div
+                  <article
                     key={product.id}
+                    onClick={() => setSelectedProduct(product)}
                     className={`${
                       theme === 'dark' ? 'bg-gray-900' : 'bg-white'
-                    } rounded-lg border ${
+                    } rounded-xl border ${
                       theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
-                    } overflow-hidden hover:shadow-lg transition-all duration-300 group ${
-                      viewMode === 'list' ? 'flex' : ''
-                    }`}
+                    } overflow-hidden hover:shadow-xl transition-all duration-300 group cursor-pointer ${
+                      viewMode === 'list' ? 'flex flex-col sm:flex-row' : ''
+                    } ${!product.inStock ? 'opacity-75' : ''}`}
                   >
                     {/* Imagen del Producto */}
-                    <div className={`relative ${viewMode === 'list' ? 'w-48 flex-shrink-0' : ''}`}>
+                    <div className={`relative overflow-hidden ${
+                      viewMode === 'list' ? 'w-full sm:w-56 flex-shrink-0' : ''
+                    }`}>
                       <img
                         src={product.image}
                         alt={product.name}
-                        className={`w-full object-cover group-hover:scale-105 transition-transform duration-300 ${
-                          viewMode === 'list' ? 'h-32' : 'h-48'
+                        className={`w-full object-cover group-hover:scale-110 transition-transform duration-500 ${
+                          viewMode === 'list' ? 'h-48 sm:h-full' : 'h-56'
                         }`}
                       />
                       
                       {/* Badge de Descuento */}
                       {product.discount && (
-                        <div className="absolute top-3 left-3 bg-red-500 text-white px-2 py-1 rounded text-sm font-bold">
+                        <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow-lg">
                           -{product.discount}%
                         </div>
                       )}
                       
                       {/* Estado de Stock */}
                       {!product.inStock && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <span className="bg-red-600 text-white px-3 py-1 rounded font-semibold">
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
+                          <span className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg">
                             Agotado
                           </span>
                         </div>
                       )}
 
                       {/* Botón de Favorito */}
-                      <button className={`absolute top-3 right-3 p-2 rounded-full ${
-                        theme === 'dark' ? 'bg-gray-800/80' : 'bg-white/80'
-                      } hover:bg-red-500 hover:text-white transition-colors group/heart`}>
-                        <Heart size={16} className="group-hover/heart:fill-current" />
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // Lógica de favoritos aquí
+                        }}
+                        className={`absolute top-3 right-3 p-2.5 rounded-full ${
+                          theme === 'dark' ? 'bg-gray-900/90' : 'bg-white/90'
+                        } hover:bg-red-500 hover:text-white transition-all hover:scale-110 group/heart shadow-lg`}
+                        title="Agregar a favoritos"
+                      >
+                        <Heart size={18} className="group-hover/heart:fill-current" />
                       </button>
                     </div>
 
                     {/* Información del Producto */}
-                    <div className="p-4 flex-1">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className={`font-semibold ${
+                    <div className="p-5 flex-1 flex flex-col">
+                      <div className="flex-1">
+                        <h3 className={`font-semibold mb-2 group-hover:text-green-500 transition-colors line-clamp-2 ${
                           theme === 'dark' ? 'text-white' : 'text-gray-900'
-                        } group-hover:text-green-500 transition-colors ${
-                          viewMode === 'list' ? 'text-lg' : ''
-                        }`}>
+                        } ${viewMode === 'list' ? 'text-lg' : 'text-base'}`}>
                           {product.name}
                         </h3>
-                      </div>
 
-                      <p className={`text-sm mb-2 ${
-                        theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                      }`}>
-                        {product.brand}
-                      </p>
-
-                      {/* Rating */}
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              size={14}
-                              className={i < Math.floor(product.rating) 
-                                ? 'text-yellow-400 fill-current' 
-                                : 'text-gray-300'
-                              }
-                            />
-                          ))}
-                        </div>
-                        <span className={`text-sm ${
+                        <p className={`text-sm mb-3 font-medium ${
                           theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                         }`}>
-                          {product.rating} ({product.reviews})
-                        </span>
+                          {product.brand}
+                        </p>
+
+                        {/* Rating */}
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="flex items-center">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                size={16}
+                                className={i < Math.floor(product.rating) 
+                                  ? 'text-yellow-400 fill-current' 
+                                  : 'text-gray-300'
+                                }
+                              />
+                            ))}
+                          </div>
+                          <span className={`text-sm font-medium ${
+                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                          }`}>
+                            {product.rating} ({product.reviews})
+                          </span>
+                        </div>
+
+                        {/* Características */}
+                        {viewMode === 'list' && (
+                          <div className="flex flex-wrap gap-2 mb-4">
+                            {product.features.slice(0, 4).map((feature, index) => (
+                              <span
+                                key={index}
+                                className={`px-2.5 py-1 text-xs font-medium rounded-lg ${
+                                  theme === 'dark' 
+                                    ? 'bg-gray-800 text-gray-300' 
+                                    : 'bg-gray-100 text-gray-700'
+                                }`}
+                              >
+                                {feature}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
 
-                      {/* Características */}
-                      {viewMode === 'list' && (
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {product.features.slice(0, 4).map((feature, index) => (
-                            <span
-                              key={index}
-                              className={`px-2 py-1 text-xs rounded ${
-                                theme === 'dark' 
-                                  ? 'bg-gray-800 text-gray-300' 
-                                  : 'bg-gray-100 text-gray-700'
-                              }`}
-                            >
-                              {feature}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Precio */}
-                      <div className="flex items-center justify-between">
+                      {/* Precio y Botón */}
+                      <div className="flex items-end justify-between gap-4 mt-auto">
                         <div>
-                          <div className={`text-xl font-bold ${
+                          <div className={`text-2xl font-bold ${
                             theme === 'dark' ? 'text-green-400' : 'text-green-600'
                           }`}>
                             {formatPrice(product.price)}
@@ -878,21 +1055,27 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
 
                         {/* Botón de Compra */}
                         <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Lógica de agregar al carrito aquí
+                            console.log('Agregado al carrito:', product.name);
+                          }}
                           disabled={!product.inStock}
-                          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all ${
+                          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all whitespace-nowrap ${
                             product.inStock
                               ? theme === 'dark'
-                                ? 'bg-green-500 hover:bg-green-400 text-black'
-                                : 'bg-green-600 hover:bg-green-700 text-white'
-                              : 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                          }`}
+                                ? 'bg-green-500 hover:bg-green-400 text-black shadow-lg hover:shadow-green-500/50'
+                                : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-green-600/50'
+                              : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                          } ${viewMode === 'grid' ? 'hover:scale-105' : ''}`}
+                          title={product.inStock ? 'Agregar al carrito' : 'Producto agotado'}
                         >
-                          <ShoppingCart size={16} />
-                          {viewMode === 'list' ? 'Agregar' : ''}
+                          <ShoppingCart size={18} />
+                          {viewMode === 'list' && 'Agregar'}
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
             )}
