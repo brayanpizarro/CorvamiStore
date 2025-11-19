@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
-import { CreateShoppingCartDto, CartItemDto } from './dto/create-shopping-cart.dto';
+import {
+  CreateShoppingCartDto,
+  CartItemDto,
+} from './dto/create-shopping-cart.dto';
 import {
   AddItemToCartDto,
   UpdateCartItemDto,
@@ -10,7 +13,9 @@ import type Redis from 'ioredis';
 
 @Injectable()
 export class ShoppingCartService {
-  private readonly ttlSeconds = Number(process.env.CART_TTL_SECONDS || 60 * 60 * 24 * 7); // 7 días
+  private readonly ttlSeconds = Number(
+    process.env.CART_TTL_SECONDS || 60 * 60 * 24 * 7,
+  ); // 7 días
 
   constructor(@Inject('REDIS_CLIENT') private readonly redis: Redis) {}
 
@@ -36,14 +41,22 @@ export class ShoppingCartService {
       createdAt: this.nowISO(),
       updatedAt: this.nowISO(),
     };
-    await this.redis.set(this.key(id), JSON.stringify(cart), 'EX', this.ttlSeconds);
+    await this.redis.set(
+      this.key(id),
+      JSON.stringify(cart),
+      'EX',
+      this.ttlSeconds,
+    );
     return cart;
   }
 
   private calculateTotal(items: CartItemDto[]) {
     return Number(
       (items || [])
-        .reduce((sum, it) => sum + (it.unitPrice ? it.unitPrice * it.quantity : 0), 0)
+        .reduce(
+          (sum, it) => sum + (it.unitPrice ? it.unitPrice * it.quantity : 0),
+          0,
+        )
         .toFixed(2),
     );
   }
@@ -69,25 +82,46 @@ export class ShoppingCartService {
       createdAt: this.nowISO(),
       updatedAt: this.nowISO(),
     };
-    await this.redis.set(this.key(id), JSON.stringify(cart), 'EX', this.ttlSeconds);
+    await this.redis.set(
+      this.key(id),
+      JSON.stringify(cart),
+      'EX',
+      this.ttlSeconds,
+    );
     return cart;
   }
 
   private async save(id: string, cart: any) {
     cart.updatedAt = this.nowISO();
-    await this.redis.set(this.key(id), JSON.stringify(cart), 'EX', this.ttlSeconds);
+    await this.redis.set(
+      this.key(id),
+      JSON.stringify(cart),
+      'EX',
+      this.ttlSeconds,
+    );
     return cart;
   }
 
   async addItem(id: string, dto: AddItemToCartDto) {
     const cart = (await this.get(id)) ?? (await this.upsertEmpty(id));
-    const idx = cart.items.findIndex((i: CartItemDto) => i.productId === dto.productId);
+    const idx = cart.items.findIndex(
+      (i: CartItemDto) => i.productId === dto.productId,
+    );
     if (idx >= 0) {
       cart.items[idx].quantity += dto.quantity;
     } else {
-      cart.items.push({ productId: dto.productId, quantity: dto.quantity });
+      cart.items.push({ 
+        productId: dto.productId, 
+        quantity: dto.quantity,
+        unitPrice: dto.unitPrice,
+        name: dto.name,
+        image: dto.image,
+      });
     }
-    cart.totalItems = cart.items.reduce((a: number, it: CartItemDto) => a + it.quantity, 0);
+    cart.totalItems = cart.items.reduce(
+      (a: number, it: CartItemDto) => a + it.quantity,
+      0,
+    );
     cart.totalPrice = this.calculateTotal(cart.items);
     return this.save(id, cart);
   }
@@ -95,11 +129,16 @@ export class ShoppingCartService {
   async updateItem(id: string, dto: UpdateCartItemDto) {
     const cart = await this.get(id);
     if (!cart) return null;
-    const idx = cart.items.findIndex((i: CartItemDto) => i.productId === dto.productId);
+    const idx = cart.items.findIndex(
+      (i: CartItemDto) => i.productId === dto.productId,
+    );
     if (idx < 0) return cart;
     cart.items[idx].quantity = dto.quantity;
     cart.items = cart.items.filter((i: CartItemDto) => i.quantity > 0);
-    cart.totalItems = cart.items.reduce((a: number, it: CartItemDto) => a + it.quantity, 0);
+    cart.totalItems = cart.items.reduce(
+      (a: number, it: CartItemDto) => a + it.quantity,
+      0,
+    );
     cart.totalPrice = this.calculateTotal(cart.items);
     return this.save(id, cart);
   }
@@ -107,8 +146,13 @@ export class ShoppingCartService {
   async removeItem(id: string, dto: RemoveItemFromCartDto) {
     const cart = await this.get(id);
     if (!cart) return null;
-    cart.items = cart.items.filter((i: CartItemDto) => i.productId !== dto.productId);
-    cart.totalItems = cart.items.reduce((a: number, it: CartItemDto) => a + it.quantity, 0);
+    cart.items = cart.items.filter(
+      (i: CartItemDto) => i.productId !== dto.productId,
+    );
+    cart.totalItems = cart.items.reduce(
+      (a: number, it: CartItemDto) => a + it.quantity,
+      0,
+    );
     cart.totalPrice = this.calculateTotal(cart.items);
     return this.save(id, cart);
   }

@@ -12,6 +12,19 @@ export class AddItemToCartDto {
   @IsNumber()
   @IsPositive()
   quantity: number;
+
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  unitPrice?: number;
+
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  image?: string;
 }
 
 export class UpdateCartItemDto {

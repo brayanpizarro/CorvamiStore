@@ -20,6 +20,11 @@ export class ProductosService {
       description: dto.description,
       price: dto.price,
       stock: dto.stock,
+      imageUrl: dto.imageUrl,
+      category: dto.category,
+      brand: dto.brand,
+      tags: dto.tags,
+      isActive: dto.isActive !== undefined ? dto.isActive : true,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -46,5 +51,13 @@ export class ProductosService {
   async remove(productId: string) {
     const result = await this.repo.deleteOne({ productId });
     return { deleted: result.deletedCount };
+  }
+
+  async setImage(productId: string, imageUrl: string) {
+    const result = await this.repo.updateOne(
+      { productId },
+      { $set: { imageUrl, updatedAt: new Date() } },
+    );
+    return { matched: result.matchedCount, modified: result.modifiedCount, imageUrl };
   }
 }

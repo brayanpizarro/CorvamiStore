@@ -1,10 +1,12 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { ChevronDown, Filter, Grid3X3, List, Star, Heart, ShoppingCart } from 'lucide-react';
+import { useCart } from '../contexts/CartContext';
+import { ChevronDown, Star, Heart, ShoppingCart } from 'lucide-react';
 import ProductDetail from './ProductDetail';
+import { productApi, type Product as ApiProduct } from '../api/products';
 
 interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   originalPrice?: number;
@@ -19,7 +21,7 @@ interface Product {
   inStock: boolean;
   discount?: number;
   description?: string;
-  specifications?: { [key: string]: string };
+  specifications?: Record<string, string>;
   warranty?: string;
   stockQuantity?: number;
 }
@@ -32,489 +34,64 @@ interface CategoryProductsProps {
 
 const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryTitle, onNavigateHome }) => {
   const { theme } = useTheme();
+  const { addItem, loading: cartLoading } = useCart();
   
   // Estados para filtros y vista
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('relevance');
-  const [priceRange, setPriceRange] = useState([0, 2000000]);
+  const [priceRange, setPriceRange] = useState([0, 5000000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [selectedRating, setSelectedRating] = useState(0);
-
   const [showFilters, setShowFilters] = useState(false);
+  const [products, setProducts] = useState<ApiProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Datos mock de productos (en una app real vendría de una API)
-  const allProducts: Product[] = useMemo(() => [
-    {
-      id: 1,
-      name: "Teclado Mecánico RGB Corsair K95",
-      price: 450000,
-      originalPrice: 550000,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
-      images: [
-        "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=800"
-      ],
-      rating: 4.8,
-      reviews: 342,
-      brand: "Corsair",
-      category: "perifericos",
-      subcategory: "teclados",
-      features: ["RGB Personalizable", "Switches Cherry MX", "Teclas Macro", "USB-C Extraíble"],
-      inStock: true,
-      discount: 18,
-      description: "El Corsair K95 RGB es un teclado mecánico premium diseñado para gaming profesional. Con switches Cherry MX de alta calidad, iluminación RGB personalizable y construcción en aluminio, este teclado ofrece durabilidad y rendimiento excepcionales.",
-      specifications: {
-        "Tipo de Switch": "Cherry MX Red/Brown/Blue",
-        "Retroiluminación": "RGB 16.8M colores",
-        "Teclas Macro": "6 teclas dedicadas",
-        "Material": "Aluminio cepillado",
-        "Conectividad": "USB-C extraíble",
-        "Dimensiones": "465 x 170 x 38 mm",
-        "Peso": "1.2 kg"
-      },
-      warranty: "2 años",
-      stockQuantity: 15
-    },
-    {
-      id: 2,
-      name: "Teclado Gaming Razer BlackWidow V3",
-      price: 380000,
-      originalPrice: 420000,
-      image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
-      images: [
-        "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=800",
-        "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=800"
-      ],
-      rating: 4.6,
-      reviews: 218,
-      brand: "Razer",
-      category: "perifericos",
-      subcategory: "teclados",
-      features: ["Razer Green Switches", "RGB Chroma", "Reposamanos Magnético", "Cable Trenzado"],
-      inStock: true,
-      discount: 10,
-      description: "El Razer BlackWidow V3 combina tecnología de switches mecánicos Razer con iluminación Chroma RGB avanzada para una experiencia gaming inmersiva.",
-      specifications: {
-        "Tipo de Switch": "Razer Green Mechanical",
-        "Retroiluminación": "Razer Chroma RGB",
-        "Material": "Plástico ABS Premium",
-        "Conectividad": "USB 2.0",
-        "Dimensiones": "440 x 145 x 42 mm"
-      },
-      warranty: "1 año",
-      stockQuantity: 23
-    },
-    {
-      id: 3,
-      name: "Teclado Logitech MX Keys",
-      price: 320000,
-      image: "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.4,
-      reviews: 156,
-      brand: "Logitech",
-      category: "perifericos",
-      subcategory: "teclados",
-      features: ["Inalámbrico", "Bluetooth", "USB-C", "Retroiluminado"],
-      inStock: true
-    },
-    {
-      id: 4,
-      name: "Teclado Steelseries Apex Pro",
-      price: 520000,
-      originalPrice: 600000,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.9,
-      reviews: 89,
-      brand: "Steelseries",
-      category: "perifericos",
-      subcategory: "teclados",
-      features: ["OLED Display", "Mecánico", "RGB", "USB"],
-      inStock: false,
-      discount: 13
-    },
-    {
-      id: 5,
-      name: "Teclado HyperX Alloy FPS Pro",
-      price: 280000,
-      image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.5,
-      reviews: 203,
-      brand: "HyperX",
-      category: "perifericos",
-      subcategory: "teclados",
-      features: ["Mecánico", "Compacto", "Cherry MX", "LED Rojo"],
-      inStock: true
-    },
-    {
-      id: 6,
-      name: "Teclado ASUS ROG Strix Scope",
-      price: 410000,
-      originalPrice: 480000,
-      image: "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.7,
-      reviews: 167,
-      brand: "ASUS",
-      category: "perifericos",
-      subcategory: "teclados",
-      features: ["RGB", "Mecánico", "Cherry MX Red", "USB"],
-      inStock: true,
-      discount: 15
-    },
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
-    // RATONES
-    {
-      id: 7,
-      name: "Mouse Gaming Logitech G Pro X Superlight",
-      price: 350000,
-      originalPrice: 400000,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.9,
-      reviews: 456,
-      brand: "Logitech",
-      category: "perifericos",
-      subcategory: "ratones",
-      features: ["Inalámbrico", "25600 DPI", "63g", "HERO Sensor"],
-      inStock: true,
-      discount: 12
-    },
-    {
-      id: 8,
-      name: "Mouse Razer DeathAdder V3 Pro",
-      price: 320000,
-      image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.6,
-      reviews: 234,
-      brand: "Razer",
-      category: "perifericos",
-      subcategory: "ratones",
-      features: ["Inalámbrico", "30000 DPI", "Focus Pro Sensor", "RGB"],
-      inStock: true
-    },
-    {
-      id: 9,
-      name: "Mouse Corsair Dark Core RGB Pro SE",
-      price: 280000,
-      originalPrice: 320000,
-      image: "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.4,
-      reviews: 189,
-      brand: "Corsair",
-      category: "perifericos",
-      subcategory: "ratones",
-      features: ["Inalámbrico", "18000 DPI", "Qi Wireless", "RGB"],
-      inStock: true,
-      discount: 13
-    },
-    {
-      id: 10,
-      name: "Mouse SteelSeries Rival 650",
-      price: 260000,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.3,
-      reviews: 145,
-      brand: "Steelseries",
-      category: "perifericos",
-      subcategory: "ratones",
-      features: ["12000 DPI", "Peso Ajustable", "RGB", "Cable"],
-      inStock: true
-    },
-
-    // AUDÍFONOS
-    {
-      id: 11,
-      name: "Audífonos Gaming HyperX Cloud III",
-      price: 420000,
-      originalPrice: 480000,
-      image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.7,
-      reviews: 312,
-      brand: "HyperX",
-      category: "audio",
-      subcategory: "audifonos",
-      features: ["7.1 Surround", "Micrófono", "Cómodos", "Multi-plataforma"],
-      inStock: true,
-      discount: 12
-    },
-    {
-      id: 12,
-      name: "Audífonos Razer BlackShark V2 Pro",
-      price: 380000,
-      image: "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.5,
-      reviews: 267,
-      brand: "Razer",
-      category: "audio",
-      subcategory: "audifonos",
-      features: ["Inalámbrico", "THX Spatial Audio", "Micrófono", "50mm Drivers"],
-      inStock: true
-    },
-    {
-      id: 13,
-      name: "Audífonos Logitech G935",
-      price: 340000,
-      originalPrice: 390000,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.4,
-      reviews: 198,
-      brand: "Logitech",
-      category: "audio",
-      subcategory: "audifonos",
-      features: ["Inalámbrico", "RGB", "7.1 Surround", "Micrófono"],
-      inStock: true,
-      discount: 13
-    },
-    {
-      id: 14,
-      name: "Audífonos SteelSeries Arctis 7P",
-      price: 300000,
-      image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.6,
-      reviews: 223,
-      brand: "Steelseries",
-      category: "audio",
-      subcategory: "audifonos",
-      features: ["Inalámbrico", "PS5 Compatible", "Micrófono", "24hrs Batería"],
-      inStock: false
-    },
-
-    // LAPTOPS
-    {
-      id: 15,
-      name: "Laptop Gaming ASUS ROG Strix G15",
-      price: 4200000,
-      originalPrice: 4800000,
-      image: "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.8,
-      reviews: 89,
-      brand: "ASUS",
-      category: "computadoras",
-      subcategory: "laptops",
-      features: ["RTX 4060", "AMD Ryzen 7", "16GB RAM", "512GB SSD"],
-      inStock: true,
-      discount: 12
-    },
-    {
-      id: 16,
-      name: "Laptop HP Pavilion Gaming",
-      price: 3800000,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.4,
-      reviews: 156,
-      brand: "HP",
-      category: "computadoras",
-      subcategory: "laptops",
-      features: ["GTX 1650", "Intel i5", "8GB RAM", "256GB SSD"],
-      inStock: true
-    },
-    {
-      id: 17,
-      name: "MacBook Pro 14 M3",
-      price: 8500000,
-      originalPrice: 9200000,
-      image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.9,
-      reviews: 234,
-      brand: "Apple",
-      category: "computadoras",
-      subcategory: "laptops",
-      features: ["M3 Chip", "16GB RAM", "512GB SSD", "Retina Display"],
-      inStock: true,
-      discount: 8
-    },
-    {
-      id: 18,
-      name: "Laptop Dell XPS 13",
-      price: 4500000,
-      image: "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.6,
-      reviews: 178,
-      brand: "Dell",
-      category: "computadoras",
-      subcategory: "laptops",
-      features: ["Intel i7", "16GB RAM", "512GB SSD", "13.3 4K"],
-      inStock: true
-    },
-
-    // MONITORES
-    {
-      id: 19,
-      name: "Monitor Gaming ASUS TUF 27 144Hz",
-      price: 1200000,
-      originalPrice: 1400000,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.7,
-      reviews: 267,
-      brand: "ASUS",
-      category: "perifericos",
-      subcategory: "monitores",
-      features: ["27 pulgadas", "144Hz", "Full HD", "1ms"],
-      inStock: true,
-      discount: 14
-    },
-    {
-      id: 20,
-      name: "Monitor LG UltraGear 32 4K",
-      price: 2800000,
-      image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.8,
-      reviews: 145,
-      brand: "LG",
-      category: "perifericos",
-      subcategory: "monitores",
-      features: ["32 pulgadas", "4K", "160Hz", "G-Sync"],
-      inStock: true
-    },
-    {
-      id: 21,
-      name: "Monitor Samsung Odyssey G7",
-      price: 2200000,
-      originalPrice: 2500000,
-      image: "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.6,
-      reviews: 189,
-      brand: "Samsung",
-      category: "perifericos",
-      subcategory: "monitores",
-      features: ["27 pulgadas", "240Hz", "Curvo", "QHD"],
-      inStock: true,
-      discount: 12
-    },
-
-    // SMARTPHONES
-    {
-      id: 22,
-      name: "iPhone 15 Pro Max 256GB",
-      price: 5800000,
-      originalPrice: 6200000,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.9,
-      reviews: 456,
-      brand: "Apple",
-      category: "moviles",
-      subcategory: "smartphones",
-      features: ["A17 Pro", "256GB", "48MP", "Titanio"],
-      inStock: true,
-      discount: 6
-    },
-    {
-      id: 23,
-      name: "Samsung Galaxy S24 Ultra",
-      price: 5200000,
-      image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.8,
-      reviews: 334,
-      brand: "Samsung",
-      category: "moviles",
-      subcategory: "smartphones",
-      features: ["Snapdragon 8 Gen 3", "256GB", "200MP", "S Pen"],
-      inStock: true
-    },
-    {
-      id: 24,
-      name: "Google Pixel 8 Pro",
-      price: 4200000,
-      originalPrice: 4600000,
-      image: "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.7,
-      reviews: 234,
-      brand: "Google",
-      category: "moviles",
-      subcategory: "smartphones",
-      features: ["Tensor G3", "128GB", "50MP", "AI Features"],
-      inStock: true,
-      discount: 9
-    },
-
-    // TABLETS
-    {
-      id: 25,
-      name: "iPad Pro 12.9 M2 256GB",
-      price: 4800000,
-      originalPrice: 5200000,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.9,
-      reviews: 189,
-      brand: "Apple",
-      category: "moviles",
-      subcategory: "tablets",
-      features: ["M2 Chip", "256GB", "12.9 pulgadas", "Liquid Retina"],
-      inStock: true,
-      discount: 8
-    },
-    {
-      id: 26,
-      name: "Samsung Galaxy Tab S9 Ultra",
-      price: 4200000,
-      image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.6,
-      reviews: 156,
-      brand: "Samsung",
-      category: "moviles",
-      subcategory: "tablets",
-      features: ["Snapdragon 8 Gen 2", "256GB", "14.6 pulgadas", "S Pen"],
-      inStock: true
-    },
-
-    // COMPONENTES
-    {
-      id: 27,
-      name: "Tarjeta Gráfica RTX 4070 Ti",
-      price: 3200000,
-      originalPrice: 3600000,
-      image: "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.8,
-      reviews: 267,
-      brand: "NVIDIA",
-      category: "componentes",
-      subcategory: "graficas",
-      features: ["12GB GDDR6X", "Ray Tracing", "DLSS 3", "4K Gaming"],
-      inStock: true,
-      discount: 11
-    },
-    {
-      id: 28,
-      name: "Procesador AMD Ryzen 7 7700X",
-      price: 1800000,
-      image: "https://images.pexels.com/photos/2115256/pexels-photo-2115256.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.7,
-      reviews: 234,
-      brand: "AMD",
-      category: "componentes",
-      subcategory: "procesadores",
-      features: ["8 Cores", "16 Threads", "5.4GHz", "AM5"],
-      inStock: true
-    },
-    {
-      id: 29,
-      name: "Memoria RAM Corsair 32GB DDR5",
-      price: 800000,
-      originalPrice: 900000,
-      image: "https://images.pexels.com/photos/1194713/pexels-photo-1194713.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.6,
-      reviews: 189,
-      brand: "Corsair",
-      category: "componentes",
-      subcategory: "memorias",
-      features: ["32GB", "DDR5-5600", "RGB", "Kit 2x16GB"],
-      inStock: true,
-      discount: 11
-    },
-    {
-      id: 30,
-      name: "SSD Samsung 980 PRO 2TB",
-      price: 1200000,
-      image: "https://images.pexels.com/photos/1772123/pexels-photo-1772123.jpeg?auto=compress&cs=tinysrgb&w=400",
-      rating: 4.9,
-      reviews: 345,
-      brand: "Samsung",
-      category: "componentes",
-      subcategory: "almacenamiento",
-      features: ["2TB", "NVMe", "7000 MB/s", "PCIe 4.0"],
-      inStock: true
+  const loadProducts = async () => {
+    try {
+      const data = await productApi.getAll();
+      setProducts(data);
+    } catch (error) {
+      console.error('Error cargando productos:', error);
+    } finally {
+      setLoading(false);
     }
-  ], []);
+  };
+
+  const handleAddToCart = async (product: Product) => {
+    try {
+      await addItem({
+        productId: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      }, 1);
+    } catch (error) {
+      console.error('Error agregando al carrito:', error);
+    }
+  };
+
+  // Convertir productos de API a formato interno
+  const allProducts: Product[] = useMemo(() => products.map(p => ({
+    id: p.productId,
+    name: p.name,
+    price: p.price,
+    image: p.imageUrl || 'https://via.placeholder.com/400',
+    images: [p.imageUrl || 'https://via.placeholder.com/400'],
+    rating: 4.5,
+    reviews: 50,
+    brand: p.brand || 'Sin marca',
+    category: p.category || 'Sin categoría',
+    subcategory: p.category || 'Sin categoría',
+    features: [p.description || 'Sin descripción'],
+    inStock: p.stock > 0,
+    description: p.description,
+    stockQuantity: p.stock,
+  })), [products]);
 
   // Obtener marcas únicas
   const brands = useMemo(() => {
@@ -524,8 +101,8 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
   // Filtrar productos
   const filteredProducts = useMemo(() => {
     const filtered = allProducts.filter(product => {
-      // Filtro por categoría
-      if (category !== 'all' && product.subcategory !== category) return false;
+      // Filtro por categoría (comparación exacta, ya viene normalizada desde CategoryPage)
+      if (category !== 'all' && product.category !== category) return false;
       
 
       
@@ -578,7 +155,18 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
     setSelectedRating(0);
   };
 
-  const hasActiveFilters = selectedBrands.length > 0 || selectedRating > 0 || priceRange[1] < 2000000;
+  const hasActiveFilters = selectedBrands.length > 0 || selectedRating > 0 || priceRange[1] < 5000000;
+
+  // Mostrar loading
+  if (loading) {
+    return (
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+        <div className="max-w-7xl mx-auto px-4 py-16 text-center">
+          <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>Cargando productos...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Si hay un producto seleccionado, mostrar el detalle
   if (selectedProduct) {
@@ -650,15 +238,15 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                       : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
                 }`}
               >
-                <Filter size={16} />
-                Filtros
+                {/* <Filter size={16} /> */}
+                🗤️ Filtros
                 {hasActiveFilters && (
                   <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
                     showFilters
                       ? 'bg-black/20'
                       : theme === 'dark' ? 'bg-green-500 text-black' : 'bg-green-600 text-white'
                   }`}>
-                    {selectedBrands.length + (selectedRating > 0 ? 1 : 0) + (priceRange[1] < 2000000 ? 1 : 0)}
+                    {selectedBrands.length + (selectedRating > 0 ? 1 : 0) + (priceRange[1] < 5000000 ? 1 : 0)}
                   </span>
                 )}
               </button>
@@ -682,25 +270,27 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
               }`}>
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-1.5 transition-colors ${
+                  className={`px-2 py-1.5 text-xs transition-colors ${
                     viewMode === 'grid'
                       ? theme === 'dark' ? 'bg-green-500 text-black' : 'bg-green-600 text-white'
                       : theme === 'dark' ? 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700' : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                   title="Vista en cuadrícula"
                 >
-                  <Grid3X3 size={16} />
+                  {/* <Grid3X3 size={16} /> */}
+                  ▦
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-1.5 transition-colors ${
+                  className={`px-2 py-1.5 text-xs transition-colors ${
                     viewMode === 'list'
                       ? theme === 'dark' ? 'bg-green-500 text-black' : 'bg-green-600 text-white'
                       : theme === 'dark' ? 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700' : 'bg-white text-gray-600 hover:bg-gray-50'
                   }`}
                   title="Vista en lista"
                 >
-                  <List size={16} />
+                  {/* <List size={16} /> */}
+                  ≡
                 </button>
               </div>
 
@@ -1057,12 +647,11 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            // Lógica de agregar al carrito aquí
-                            console.log('Agregado al carrito:', product.name);
+                            handleAddToCart(product);
                           }}
-                          disabled={!product.inStock}
+                          disabled={!product.inStock || cartLoading}
                           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all whitespace-nowrap ${
-                            product.inStock
+                            product.inStock && !cartLoading
                               ? theme === 'dark'
                                 ? 'bg-green-500 hover:bg-green-400 text-black shadow-lg hover:shadow-green-500/50'
                                 : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-green-600/50'
@@ -1071,7 +660,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                           title={product.inStock ? 'Agregar al carrito' : 'Producto agotado'}
                         >
                           <ShoppingCart size={18} />
-                          {viewMode === 'list' && 'Agregar'}
+                          {viewMode === 'list' && (cartLoading ? 'Agregando...' : 'Agregar')}
                         </button>
                       </div>
                     </div>

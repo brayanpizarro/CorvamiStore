@@ -2,17 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Menu, Search, ShoppingCart, X } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import CategoriesDropdown from './CategoriesDropdown';
+import CartDrawer from './CartDrawer';
+import { useCart } from '../contexts/CartContext';
 
 interface HeaderProps {
-  cartItems: number;
+  cartItems?: number;
   onNavigateHome?: () => void;
   onNavigateToCategory?: (categorySlug: string) => void;
   currentPage?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ cartItems, onNavigateHome, onNavigateToCategory, currentPage }) => {
+const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, currentPage }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const { cart } = useCart();
+  
+  const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,11 +74,14 @@ const Header: React.FC<HeaderProps> = ({ cartItems, onNavigateHome, onNavigateTo
             <button className="text-white hover:text-green-400 transition-colors">
               <Search size={20} />
             </button>
-            <button className="relative text-white hover:text-green-400 transition-colors">
+            <button 
+              onClick={() => setIsCartOpen(true)}
+              className="relative text-white hover:text-green-400 transition-colors"
+            >
               <ShoppingCart size={20} />
-              {cartItems > 0 && (
+              {itemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-green-500 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold glow-green">
-                  {cartItems}
+                  {itemCount}
                 </span>
               )}
             </button>
@@ -100,6 +109,9 @@ const Header: React.FC<HeaderProps> = ({ cartItems, onNavigateHome, onNavigateTo
           </div>
         )}
       </div>
+
+      {/* Cart Drawer */}
+      <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
     </header>
   );
 };
