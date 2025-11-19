@@ -9,10 +9,11 @@ interface HeaderProps {
   cartItems?: number;
   onNavigateHome?: () => void;
   onNavigateToCategory?: (categorySlug: string) => void;
+  onNavigateToAllProducts?: () => void;
   currentPage?: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, currentPage }) => {
+const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, onNavigateToAllProducts, currentPage }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -62,7 +63,14 @@ const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, c
             >
               Inicio
             </button>
-            <button className="text-white hover:text-emerald-100 transition-colors font-medium">Productos</button>
+            <button 
+              onClick={onNavigateToAllProducts}
+              className={`hover:text-emerald-100 transition-colors font-medium ${
+                currentPage === 'all-products' ? 'text-green-400' : 'text-white'
+              }`}
+            >
+              Productos
+            </button>
             <CategoriesDropdown onCategorySelect={onNavigateToCategory} />
             <button className="text-white hover:text-emerald-100 transition-colors font-medium">Ofertas</button>
             <button className="text-white hover:text-emerald-100 transition-colors font-medium">Contacto</button>
@@ -101,7 +109,15 @@ const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, c
               >
                 Inicio
               </button>
-              <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Productos</button>
+              <button 
+                onClick={() => {
+                  onNavigateToAllProducts?.();
+                  setIsMenuOpen(false);
+                }}
+                className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md"
+              >
+                Productos
+              </button>
               <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Categorías</button>
               <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Ofertas</button>
               <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Contacto</button>
