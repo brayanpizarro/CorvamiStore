@@ -6,9 +6,12 @@ export interface Product {
   name: string;
   price: number;
   description?: string;
-  category: string;
+  category?: string;
+  brand?: string;
+  tags?: string[];
   stock: number;
   imageUrl?: string;
+  isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }

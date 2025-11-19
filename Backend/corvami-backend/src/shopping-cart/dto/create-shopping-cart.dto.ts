@@ -25,11 +25,16 @@ export class CartItemDto {
   @IsOptional()
   @IsString()
   name?: string; // Snapshot del nombre del producto
+
+  @IsOptional()
+  @IsString()
+  image?: string; // URL de la imagen del producto
 }
 
 export class CreateShoppingCartDto {
+  @IsOptional()
   @IsString()
-  userId: string; // Cambiado a string para UUID
+  userId?: string; // Opcional - UUID del usuario autenticado
 
   @IsOptional()
   @IsArray()

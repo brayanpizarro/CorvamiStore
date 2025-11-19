@@ -7,6 +7,7 @@ import {
   IsPositive,
   IsUrl,
   IsBoolean,
+  IsArray,
 } from 'class-validator';
 
 export class CreateProductoDto {
@@ -34,6 +35,14 @@ export class CreateProductoDto {
   @IsString()
   @MaxLength(100)
   category?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  brand?: string;
+
+  @IsOptional()
+  tags?: string[];
 
   @IsOptional()
   @IsString()

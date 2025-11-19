@@ -20,7 +20,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
     }).format(price);
   };
 
-  const total = cart?.items?.reduce((sum, item) => sum + item.price * item.quantity, 0) || 0;
+  const total = cart?.items?.reduce((sum, item) => sum + (item.unitPrice || 0) * item.quantity, 0) || 0;
   const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   const handleQuantityChange = async (productId: string, delta: number) => {
@@ -125,7 +125,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                     <p className={`text-lg font-bold mb-2 ${
                       theme === 'dark' ? 'text-green-400' : 'text-green-600'
                     }`}>
-                      {formatPrice(item.price)}
+                      {formatPrice(item.unitPrice || 0)}
                     </p>
 
                     {/* Quantity Controls */}

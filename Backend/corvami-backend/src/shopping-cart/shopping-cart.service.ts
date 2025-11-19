@@ -110,7 +110,13 @@ export class ShoppingCartService {
     if (idx >= 0) {
       cart.items[idx].quantity += dto.quantity;
     } else {
-      cart.items.push({ productId: dto.productId, quantity: dto.quantity });
+      cart.items.push({ 
+        productId: dto.productId, 
+        quantity: dto.quantity,
+        unitPrice: dto.unitPrice,
+        name: dto.name,
+        image: dto.image,
+      });
     }
     cart.totalItems = cart.items.reduce(
       (a: number, it: CartItemDto) => a + it.quantity,

@@ -2,8 +2,9 @@ import React, { createContext, useContext, useEffect, useCallback, useState } fr
 
 export interface CartItem {
   productId: string;
-  name: string;
-  price: number;
+  name?: string;
+  unitPrice?: number;
+  price?: number; // Mantener por compatibilidad
   quantity: number;
   image?: string;
 }
@@ -58,19 +59,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode; userId?: string
         setCart(data);
       } else {
         // crear carrito vacío si no existe
+        const payload = userId ? { userId } : { sessionId: baseId };
         const created = await fetchJSON(`${API_BASE}/cart`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userId: userId || undefined, sessionId: userId ? undefined : baseId }),
+          body: JSON.stringify(payload),
         });
         setCart(created);
       }
     } catch (e) {
       // intento de crear si falla get
+      const payload = userId ? { userId } : { sessionId: baseId };
       const created = await fetchJSON(`${API_BASE}/cart`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: userId || undefined, sessionId: userId ? undefined : baseId }),
+        body: JSON.stringify(payload),
       });
       setCart(created);
     }
@@ -92,7 +95,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode; userId?: string
       await fetchJSON(`${API_BASE}/cart/${cart.id}/items`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId: item.productId, quantity }),
+        body: JSON.stringify({ 
+          productId: item.productId, 
+          quantity,
+          unitPrice: item.price,
+          name: item.name,
+          image: item.image,
+        }),
       });
       await syncCart(cart.id);
     } finally {

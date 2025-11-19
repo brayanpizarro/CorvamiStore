@@ -21,6 +21,10 @@ export class ProductosService {
       price: dto.price,
       stock: dto.stock,
       imageUrl: dto.imageUrl,
+      category: dto.category,
+      brand: dto.brand,
+      tags: dto.tags,
+      isActive: dto.isActive !== undefined ? dto.isActive : true,
       createdAt: new Date(),
       updatedAt: new Date(),
     };

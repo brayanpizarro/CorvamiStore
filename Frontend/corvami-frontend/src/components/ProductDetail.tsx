@@ -4,7 +4,7 @@ import { useCart } from '../contexts/CartContext';
 import { Star, Heart, ShoppingCart, Truck, Shield, RotateCcw, Award, ChevronLeft, ChevronRight, Check, Minus, Plus } from 'lucide-react';
 
 interface Product {
-  id: number;
+  id: string | number;
   name: string;
   price: number;
   originalPrice?: number;
@@ -19,7 +19,7 @@ interface Product {
   inStock: boolean;
   discount?: number;
   description?: string;
-  specifications?: { [key: string]: string };
+  specifications?: Record<string, string>;
   warranty?: string;
   stockQuantity?: number;
 }
