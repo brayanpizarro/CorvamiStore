@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Star, Heart, ShoppingCart, Check, Minus, Plus } from 'lucide-react';
+import { AiFillStar, AiOutlineHeart, AiFillHeart, AiOutlineShoppingCart, AiOutlinePlus, AiOutlineMinus, AiOutlineCheck } from 'react-icons/ai';
 
 interface Product {
   id: number;
@@ -116,7 +116,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                       : 'bg-white text-gray-600 hover:bg-red-500 hover:text-white'
                 } shadow-lg`}
               >
-                <Heart size={20} className={isFavorite ? 'fill-current' : ''} />
+                {isFavorite ? <AiFillHeart size={20} /> : <AiOutlineHeart size={20} />}
               </button>
 
               {/* Navegación de imágenes */}
@@ -185,11 +185,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className="flex items-center gap-2">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
-                    <Star
+                    <AiFillStar
                       key={i}
                       size={20}
                       className={i < Math.floor(product.rating)
-                        ? 'text-yellow-400 fill-current'
+                        ? 'text-yellow-400'
                         : 'text-gray-300'
                       }
                     />
@@ -235,7 +235,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 ? theme === 'dark' ? 'bg-green-500/20 text-green-400' : 'bg-green-50 text-green-700'
                 : theme === 'dark' ? 'bg-red-500/20 text-red-400' : 'bg-red-50 text-red-700'
             }`}>
-              <Check size={16} />
+              <AiOutlineCheck size={16} />
               <span className="font-semibold">
                 {product.inStock ? 'En Stock' : 'Agotado'}
               </span>
@@ -255,7 +255,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                   <li key={index} className={`flex items-start gap-2 ${
                     theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                   }`}>
-                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <AiOutlineCheck size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{feature}</span>
                   </li>
                 ))}
@@ -285,7 +285,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                             : 'hover:bg-gray-100'
                       } transition-colors`}
                     >
-                      <Minus size={18} />
+                      <AiOutlineMinus size={18} />
                     </button>
                     <span className={`px-6 font-semibold ${
                       theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -303,7 +303,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                             : 'hover:bg-gray-100'
                       } transition-colors`}
                     >
-                      <Plus size={18} />
+                      <AiOutlinePlus size={18} />
                     </button>
                   </div>
                   <span className={`text-sm ${
@@ -328,7 +328,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                     : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                 }`}
               >
-                <ShoppingCart size={24} />
+                <AiOutlineShoppingCart size={24} />
                 Agregar al Carrito
               </button>
             </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star } from 'lucide-react';
+import { AiFillStar } from 'react-icons/ai';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface Product {
@@ -105,7 +105,7 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
                 <div className="flex items-center mb-2">
                   <div className="flex text-green-400">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} fill={i < Math.floor(product.rating) ? "currentColor" : "none"} />
+                      <AiFillStar key={i} size={16} className={i < Math.floor(product.rating) ? "text-yellow-400" : "text-gray-400"} />
                     ))}
                   </div>
                   <span className={`text-sm ml-2 ${

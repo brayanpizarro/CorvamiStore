@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { MdKeyboardArrowDown } from 'react-icons/md';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface Category {
@@ -67,7 +67,7 @@ const CategoriesDropdown: React.FC<CategoriesDropdownProps> = ({ onCategorySelec
         className="flex items-center gap-2 px-4 py-2 text-white hover:text-emerald-100 transition-colors font-medium"
       >
         <span>Categorías</span>
-        <ChevronDown 
+        <MdKeyboardArrowDown 
           size={16} 
           className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
         />
@@ -125,7 +125,7 @@ const CategoriesDropdown: React.FC<CategoriesDropdownProps> = ({ onCategorySelec
                             {category.subcategories?.length} subcategorías
                           </div>
                         </div>
-                        <ChevronDown 
+                        <MdKeyboardArrowDown 
                           size={14} 
                           className={`opacity-0 group-hover:opacity-100 transition-opacity ${
                             theme === 'dark' ? 'text-green-400' : 'text-green-600'

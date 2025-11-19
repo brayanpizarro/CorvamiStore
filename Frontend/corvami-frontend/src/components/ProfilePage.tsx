@@ -52,7 +52,7 @@ const ProfilePage: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const updateData: any = {};
+      const updateData: Record<string, string> = {};
       
       if (firstName !== user?.firstName) updateData.firstName = firstName;
       if (lastName !== user?.lastName) updateData.lastName = lastName;

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { ChevronDown, Star, Heart, ShoppingCart, Search, Filter, Grid3x3, List } from 'lucide-react';
+import { AiFillStar, AiOutlineHeart, AiOutlineShoppingCart, AiOutlineSearch } from 'react-icons/ai';
+import { MdKeyboardArrowDown } from 'react-icons/md';
 import ProductDetail from './ProductDetail';
 
 interface Product {
@@ -44,7 +45,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
   const [showFilters, setShowFilters] = useState(false);
 
   // Datos mock de productos (en una app real vendría de una API)
-  // @ts-ignore
+  // @ts-expect-error - Tipo Product se genera dinámicamente
   const allProducts: Product[] = useMemo(() => [
     {
       id: 1,
@@ -721,7 +722,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                   <option value="rating">Mejor calificación</option>
                   <option value="name">A-Z</option>
                 </select>
-                <ChevronDown className={`absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none ${
+                <MdKeyboardArrowDown className={`absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none ${
                   theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                 }`} size={16} />
               </div>
@@ -863,10 +864,10 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                       <div className="flex items-center gap-2 ml-2">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
-                            <Star
+                            <AiFillStar
                               key={i}
                               size={14}
-                              className={i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}
+                              className={i < rating ? 'text-yellow-400' : 'text-gray-300'}
                             />
                           ))}
                         </div>
@@ -894,7 +895,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                 theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
               }`}>
                 <div className={`flex justify-center mb-4`}>
-                  <Search size={64} className={theme === 'dark' ? 'text-gray-700' : 'text-gray-300'} />
+                  <AiOutlineSearch size={64} className={theme === 'dark' ? 'text-gray-700' : 'text-gray-300'} />
                 </div>
                 <p className={`text-xl font-semibold mb-2 ${
                   theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -975,7 +976,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                         } hover:bg-red-500 hover:text-white transition-all hover:scale-110 group/heart shadow-lg`}
                         title="Agregar a favoritos"
                       >
-                        <Heart size={18} className="group-hover/heart:fill-current" />
+                        <AiOutlineHeart size={18} />
                       </button>
                     </div>
 
@@ -998,11 +999,11 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                         <div className="flex items-center gap-2 mb-4">
                           <div className="flex items-center">
                             {[...Array(5)].map((_, i) => (
-                              <Star
+                              <AiFillStar
                                 key={i}
                                 size={16}
                                 className={i < Math.floor(product.rating) 
-                                  ? 'text-yellow-400 fill-current' 
+                                  ? 'text-yellow-400' 
                                   : 'text-gray-300'
                                 }
                               />
@@ -1068,7 +1069,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                           } ${viewMode === 'grid' ? 'hover:scale-105' : ''}`}
                           title={product.inStock ? 'Agregar al carrito' : 'Producto agotado'}
                         >
-                          <ShoppingCart size={18} />
+                          <AiOutlineShoppingCart size={18} />
                           {viewMode === 'list' && 'Agregar'}
                         </button>
                       </div>

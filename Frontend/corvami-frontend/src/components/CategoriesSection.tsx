@@ -11,17 +11,90 @@ interface CategoriesSectionProps {
 
 const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }) => {
   const { theme } = useTheme();
+
   const categories = [
-    { name: "Laptops", icon: HiOutlineDesktopComputer, count: 45, slug: "laptops" },
-    { name: "Gaming", icon: IoGameControllerOutline, count: 32, slug: "gaming" },
-    { name: "Periféricos", icon: MdOutlineKeyboard, count: 89, slug: "perifericos" },
-    { name: "Componentes", icon: BsCpu, count: 67, slug: "componentes" },
-    { name: "Audio", icon: MdHeadphones, count: 28, slug: "audifonos" },
-    { name: "Móviles", icon: IoPhonePortraitOutline, count: 54, slug: "smartphones" }
+    { 
+      name: "Laptops", 
+      icon: HiOutlineDesktopComputer, 
+      count: 45, 
+      slug: "laptops",
+      subcategories: [
+        { name: "Gaming", slug: "laptops-gaming" },
+        { name: "Ultrabooks", slug: "laptops-ultrabooks" },
+        { name: "Workstation", slug: "laptops-workstation" },
+        { name: "Económicas", slug: "laptops-economicas" }
+      ]
+    },
+    { 
+      name: "Gaming", 
+      icon: IoGameControllerOutline, 
+      count: 32, 
+      slug: "gaming",
+      subcategories: [
+        { name: "Consolas", slug: "gaming-consolas" },
+        { name: "Controles", slug: "gaming-controles" },
+        { name: "Juegos", slug: "gaming-juegos" },
+        { name: "Accesorios", slug: "gaming-accesorios" }
+      ]
+    },
+    { 
+      name: "Periféricos", 
+      icon: MdOutlineKeyboard, 
+      count: 89, 
+      slug: "perifericos",
+      subcategories: [
+        { name: "Teclados", slug: "perifericos-teclados" },
+        { name: "Ratones", slug: "perifericos-ratones" },
+        { name: "Webcams", slug: "perifericos-webcams" },
+        { name: "Micrófonos", slug: "perifericos-microfonos" }
+      ]
+    },
+    { 
+      name: "Componentes", 
+      icon: BsCpu, 
+      count: 67, 
+      slug: "componentes",
+      subcategories: [
+        { name: "Procesadores", slug: "componentes-procesadores" },
+        { name: "Tarjetas Gráficas", slug: "componentes-gpu" },
+        { name: "Memoria RAM", slug: "componentes-ram" },
+        { name: "Almacenamiento", slug: "componentes-storage" }
+      ]
+    },
+    { 
+      name: "Audio", 
+      icon: MdHeadphones, 
+      count: 28, 
+      slug: "audifonos",
+      subcategories: [
+        { name: "Audífonos Gaming", slug: "audio-gaming" },
+        { name: "Audífonos Inalámbricos", slug: "audio-wireless" },
+        { name: "Parlantes", slug: "audio-speakers" },
+        { name: "Barras de Sonido", slug: "audio-soundbars" }
+      ]
+    },
+    { 
+      name: "Móviles", 
+      icon: IoPhonePortraitOutline, 
+      count: 54, 
+      slug: "smartphones",
+      subcategories: [
+        { name: "Android", slug: "smartphones-android" },
+        { name: "iPhone", slug: "smartphones-iphone" },
+        { name: "Accesorios", slug: "smartphones-accesorios" },
+        { name: "Smartwatches", slug: "smartphones-smartwatches" }
+      ]
+    }
   ];
 
+  const handleCategoryClick = (categorySlug: string) => {
+    onCategoryClick?.(categorySlug);
+  };
+
   return (
-    <section className={`py-16 relative overflow-hidden transition-all duration-300 ${
+    <section 
+      id="categories-section"
+      className={`py-16 relative overflow-hidden transition-all duration-300 ${
       theme === 'dark' ? 'bg-gradient-to-b from-black to-gray-900' : 'bg-gradient-to-b from-gray-50 to-white'
     }`}>
       {/* Background Effects */}
@@ -50,25 +123,26 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
           {categories.map((category, index) => {
             const IconComponent = category.icon;
             return (
-              <div 
-                key={index} 
-                onClick={() => onCategoryClick?.(category.slug)}
-                className={`backdrop-blur-sm rounded-xl p-6 text-center border-2 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer group shadow-lg ${
-                theme === 'dark'
-                  ? 'bg-gray-800/50 border-green-500/30 hover:border-green-400/60 hover:bg-gray-700/70 hover:shadow-green-500/25'
-                  : 'bg-white/80 border-green-400/40 hover:border-green-500/60 hover:bg-white/90 hover:shadow-green-400/25'
-              }`}>
-                <div className="flex justify-center mb-3">
-                  <IconComponent className={`text-5xl transition-transform duration-300 group-hover:scale-110 ${
-                    theme === 'dark' ? 'text-green-400' : 'text-green-600'
-                  }`} />
+              <div key={index}>
+                <div 
+                  onClick={() => handleCategoryClick(category.slug)}
+                  className={`backdrop-blur-sm rounded-xl p-6 text-center border-2 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer group shadow-lg ${
+                  theme === 'dark'
+                    ? 'bg-gray-800/50 border-green-500/30 hover:border-green-400/60 hover:bg-gray-700/70 hover:shadow-green-500/25'
+                    : 'bg-white/80 border-green-400/40 hover:border-green-500/60 hover:bg-white/90 hover:shadow-green-400/25'
+                }`}>
+                  <div className="flex justify-center mb-3">
+                    <IconComponent className={`text-5xl transition-transform duration-300 group-hover:scale-110 ${
+                      theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                    }`} />
+                  </div>
+                  <h3 className={`font-bold mb-1 group-hover:text-green-300 transition-colors ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>{category.name}</h3>
+                  <p className={`text-sm group-hover:text-green-400 transition-colors ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>{category.count} productos</p>
                 </div>
-                <h3 className={`font-bold mb-1 group-hover:text-green-300 transition-colors ${
-                  theme === 'dark' ? 'text-white' : 'text-gray-900'
-                }`}>{category.name}</h3>
-                <p className={`text-sm group-hover:text-green-400 transition-colors ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>{category.count} productos</p>
               </div>
             );
           })}
