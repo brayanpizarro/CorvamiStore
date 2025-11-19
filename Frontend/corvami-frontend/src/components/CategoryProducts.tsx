@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { ChevronDown, Star, Heart, ShoppingCart } from 'lucide-react';
+import { ChevronDown, Star, Heart, ShoppingCart, Search, Filter, Grid3x3, List } from 'lucide-react';
 import ProductDetail from './ProductDetail';
 
 interface Product {
@@ -893,10 +893,8 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
               } rounded-xl border ${
                 theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
               }`}>
-                <div className={`text-6xl mb-4 ${
-                  theme === 'dark' ? 'text-gray-700' : 'text-gray-300'
-                }`}>
-                  🔍
+                <div className={`flex justify-center mb-4`}>
+                  <Search size={64} className={theme === 'dark' ? 'text-gray-700' : 'text-gray-300'} />
                 </div>
                 <p className={`text-xl font-semibold mb-2 ${
                   theme === 'dark' ? 'text-white' : 'text-gray-900'

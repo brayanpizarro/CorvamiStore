@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AiOutlineEye, AiOutlineEyeInvisible, AiOutlineEdit, AiOutlineSave, AiOutlineClose } from 'react-icons/ai';
+import { MdLogout } from 'react-icons/md';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -179,9 +181,9 @@ const ProfilePage: React.FC = () => {
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-4 py-2 rounded-lg bg-green-500/20 border border-green-500/50 text-green-400 font-bold transition-all duration-300 hover:bg-green-500/30 hover:border-green-400"
+                className="px-4 py-2 rounded-lg bg-green-500/20 border border-green-500/50 text-green-400 font-bold transition-all duration-300 hover:bg-green-500/30 hover:border-green-400 flex items-center gap-2"
               >
-                ✏️ Editar
+                <AiOutlineEdit size={18} /> Editar
               </button>
             )}
           </div>
@@ -298,7 +300,7 @@ const ProfilePage: React.FC = () => {
                       theme === 'dark' ? 'text-gray-400 hover:text-green-400' : 'text-gray-600 hover:text-green-400'
                     }`}
                   >
-                    {showPassword ? '👁️' : '👁️‍🗨️'}
+                    {showPassword ? <AiOutlineEye size={20} /> : <AiOutlineEyeInvisible size={20} />}
                   </button>
                 </div>
               </div>
@@ -324,21 +326,21 @@ const ProfilePage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                  className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
                 >
-                  {isSubmitting ? 'Guardando...' : '💾 Guardar Cambios'}
+                  {isSubmitting ? 'Guardando...' : <><AiOutlineSave size={20} /> Guardar Cambios</>}
                 </button>
                 <button
                   type="button"
                   onClick={handleCancel}
                   disabled={isSubmitting}
-                  className={`flex-1 py-3 rounded-lg border-2 font-bold transition-all duration-300 disabled:opacity-50 ${
+                  className={`flex-1 py-3 rounded-lg border-2 font-bold transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 ${
                     theme === 'dark'
                       ? 'border-gray-700 text-gray-300 hover:bg-gray-700/50'
                       : 'border-gray-300 text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  ❌ Cancelar
+                  <AiOutlineClose size={20} /> Cancelar
                 </button>
               </div>
             )}
@@ -371,9 +373,9 @@ const ProfilePage: React.FC = () => {
               logout();
               navigate('/');
             }}
-            className="w-full px-4 py-3 rounded-lg border-2 border-red-500/50 text-red-400 font-bold transition-all duration-300 hover:bg-red-500/10 hover:border-red-400"
+            className="w-full px-4 py-3 rounded-lg border-2 border-red-500/50 text-red-400 font-bold transition-all duration-300 hover:bg-red-500/10 hover:border-red-400 flex items-center justify-center gap-2"
           >
-            🚪 Cerrar Sesión
+            <MdLogout size={20} /> Cerrar Sesión
           </button>
         </div>
       </div>
