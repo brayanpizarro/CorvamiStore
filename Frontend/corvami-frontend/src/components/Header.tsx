@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Search, ShoppingCart, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Menu, Search, ShoppingCart, X, User as UserIcon } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
 import CategoriesDropdown from './CategoriesDropdown';
+import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 interface HeaderProps {
   cartItems: number;
@@ -13,6 +16,9 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ cartItems, onNavigateHome, onNavigateToCategory, currentPage }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const { user, logout } = useAuth();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -21,6 +27,11 @@ const Header: React.FC<HeaderProps> = ({ cartItems, onNavigateHome, onNavigateTo
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    setIsUserMenuOpen(false);
+  };
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -76,6 +87,73 @@ const Header: React.FC<HeaderProps> = ({ cartItems, onNavigateHome, onNavigateTo
                 </span>
               )}
             </button>
+
+            {/* User Menu */}
+            <div className="relative">
+              {user ? (
+                <>
+                  <button
+                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                    className="flex items-center space-x-2 px-3 py-2 rounded-lg bg-green-500/20 hover:bg-green-500/30 transition-colors text-green-400"
+                  >
+                    <UserIcon size={20} />
+                    <span className="text-sm font-medium hidden sm:inline">{user.firstName}</span>
+                  </button>
+
+                  {/* Dropdown Menu */}
+                  {isUserMenuOpen && (
+                    <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg border-2 transition-all duration-300 ${
+                      theme === 'dark'
+                        ? 'bg-gray-800/95 border-green-500/30'
+                        : 'bg-white/95 border-green-400/40'
+                    }`}>
+                      <div className="p-4 border-b border-green-500/30">
+                        <p className={`text-sm font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                          {user.firstName} {user.lastName}
+                        </p>
+                        <p className={`text-xs ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {user.email}
+                        </p>
+                      </div>
+
+                      <div className="p-2 space-y-2">
+                        <Link
+                          to="/profile"
+                          onClick={() => setIsUserMenuOpen(false)}
+                          className={`block w-full text-left px-4 py-2 rounded transition-colors ${
+                            theme === 'dark'
+                              ? 'text-white hover:bg-green-500/20'
+                              : 'text-gray-900 hover:bg-green-500/10'
+                          }`}
+                        >
+                          Mi Perfil
+                        </Link>
+                        <button className={`w-full text-left px-4 py-2 rounded transition-colors ${
+                          theme === 'dark'
+                            ? 'text-white hover:bg-green-500/20'
+                            : 'text-gray-900 hover:bg-green-500/10'
+                        }`}>
+                          Mis Órdenes
+                        </button>
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 rounded text-red-500 hover:bg-red-500/20 transition-colors flex items-center gap-2"
+                        >
+                          Cerrar Sesión
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <Link
+                  to="/login"
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold hover:from-green-400 hover:to-emerald-400 transition-all transform hover:scale-105"
+                >
+                  Iniciar Sesión
+                </Link>
+              )}
+            </div>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Star, Heart, ShoppingCart, Truck, Shield, RotateCcw, Award, ChevronLeft, ChevronRight, Check, Minus, Plus } from 'lucide-react';
+import { Star, Heart, ShoppingCart, Check, Minus, Plus } from 'lucide-react';
 
 interface Product {
   id: number;
@@ -128,7 +128,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                       theme === 'dark' ? 'bg-gray-800/90 hover:bg-gray-700' : 'bg-white/90 hover:bg-gray-100'
                     } shadow-lg transition-all`}
                   >
-                    <ChevronLeft size={20} />
+                    <span className="text-xl">‹</span>
                   </button>
                   <button
                     onClick={() => setSelectedImage((prev) => (prev + 1) % images.length)}
@@ -136,7 +136,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                       theme === 'dark' ? 'bg-gray-800/90 hover:bg-gray-700' : 'bg-white/90 hover:bg-gray-100'
                     } shadow-lg transition-all`}
                   >
-                    <ChevronRight size={20} />
+                    <span className="text-xl">›</span>
                   </button>
                 </>
               )}
@@ -338,7 +338,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <Truck className="text-green-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -355,7 +354,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <Shield className="text-blue-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -372,7 +370,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <RotateCcw className="text-purple-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -389,7 +386,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <Award className="text-yellow-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'

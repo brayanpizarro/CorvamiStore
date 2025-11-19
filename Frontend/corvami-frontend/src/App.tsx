@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useTheme } from './contexts/ThemeContext';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -9,10 +10,13 @@ import TestimonialsSection from './components/TestimonialsSection';
 import NewsletterSection from './components/NewsletterSection';
 import Footer from './components/Footer';
 import CategoryPage from './components/CategoryPage';
+import LoginPage from './components/LoginPage';
+import RegisterPage from './components/RegisterPage';
+import ProfilePage from './components/ProfilePage';
 
 type CurrentPage = 'home' | 'category';
 
-function App() {
+function HomePage() {
   const { theme } = useTheme();
   const [cartItems, setCartItems] = useState(0);
   const [currentPage, setCurrentPage] = useState<CurrentPage>('home');
@@ -66,6 +70,20 @@ function App() {
       {renderCurrentPage()}
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }
 

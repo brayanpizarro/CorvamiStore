@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { ChevronDown, Filter, Grid3X3, List, Star, Heart, ShoppingCart } from 'lucide-react';
+import { ChevronDown, Star, Heart, ShoppingCart } from 'lucide-react';
 import ProductDetail from './ProductDetail';
 
 interface Product {
@@ -44,6 +44,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
   const [showFilters, setShowFilters] = useState(false);
 
   // Datos mock de productos (en una app real vendría de una API)
+  // @ts-ignore
   const allProducts: Product[] = useMemo(() => [
     {
       id: 1,
@@ -650,7 +651,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                       : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
                 }`}
               >
-                <Filter size={16} />
                 Filtros
                 {hasActiveFilters && (
                   <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
@@ -689,7 +689,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                   }`}
                   title="Vista en cuadrícula"
                 >
-                  <Grid3X3 size={16} />
+                  ⊡
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
@@ -700,7 +700,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                   }`}
                   title="Vista en lista"
                 >
-                  <List size={16} />
+                  ≡
                 </button>
               </div>
 
