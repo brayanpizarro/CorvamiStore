@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    container_name: corvami-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - corvami-network
+
+  mongodb:
+    image: mongo:latest
+    container_name: corvami-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=corvami
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - corvami-network
+
+  backend:
+    build: .
+    container_name: corvami-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGO_URL=mongodb://mongodb:27017/corvami
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_DB=0
+      - CART_TTL_SECONDS=604800
+      - PORT=3000
+      - CLOUDINARY_CLOUD_NAME=def0eymwn
+      - CLOUDINARY_API_KEY=298765669195532
+      - CLOUDINARY_API_SECRET=7ybs0jIHP5eS2IO-XzcsWpTZPps
+    depends_on:
+      - redis
+      - mongodb
+    networks:
+      - corvami-network
+
+volumes:
+  redis-data:
+  mongo-data:
+
+networks:
+  corvami-network:
+    driver: bridge

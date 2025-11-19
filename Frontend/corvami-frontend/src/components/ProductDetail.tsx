@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import { useCart } from '../contexts/CartContext';
 import { Star, Heart, ShoppingCart, Truck, Shield, RotateCcw, Award, ChevronLeft, ChevronRight, Check, Minus, Plus } from 'lucide-react';
 
 interface Product {
@@ -31,6 +32,7 @@ interface ProductDetailProps {
 
 const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToCart }) => {
   const { theme } = useTheme();
+  const { addItem, loading: cartLoading } = useCart();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description');
@@ -53,17 +55,24 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
     }
   };
 
-  const handleAddToCart = () => {
-    if (onAddToCart) {
-      onAddToCart(quantity);
+  const handleAddToCart = async () => {
+    try {
+      await addItem({
+        productId: String(product.id),
+        name: product.name,
+        price: product.price,
+        image: product.image,
+      }, quantity);
+    } catch (e) {
+      console.error('Error agregando al carrito', e);
     }
+    if (onAddToCart) onAddToCart(quantity);
   };
 
   return (
     <div className={`min-h-screen transition-all duration-300 ${
       theme === 'dark' ? 'bg-black' : 'bg-gray-50'
     }`}>
-      {/* Botón de regreso */}
       <div className={`py-4 ${
         theme === 'dark' ? 'bg-gray-900' : 'bg-white'
       } border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} shadow-sm`}>
@@ -86,9 +95,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-          {/* Galería de Imágenes */}
           <div>
-            {/* Imagen Principal */}
             <div className={`relative rounded-2xl overflow-hidden mb-4 ${
               theme === 'dark' ? 'bg-gray-900' : 'bg-white'
             } border ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} p-8`}>
@@ -97,15 +104,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 alt={product.name}
                 className="w-full h-96 object-contain"
               />
-              
-              {/* Badge de Descuento */}
               {product.discount && (
                 <div className="absolute top-4 left-4 bg-red-500 text-white px-4 py-2 rounded-lg text-lg font-bold shadow-lg">
                   -{product.discount}%
                 </div>
               )}
-
-              {/* Botón de Favorito */}
               <button
                 onClick={() => setIsFavorite(!isFavorite)}
                 className={`absolute top-4 right-4 p-3 rounded-full transition-all ${
@@ -118,8 +121,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               >
                 <Heart size={20} className={isFavorite ? 'fill-current' : ''} />
               </button>
-
-              {/* Navegación de imágenes */}
               {images.length > 1 && (
                 <>
                   <button
@@ -141,8 +142,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 </>
               )}
             </div>
-
-            {/* Miniaturas */}
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-3">
                 {images.map((img, index) => (
@@ -163,10 +162,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               </div>
             )}
           </div>
-
-          {/* Información del Producto */}
           <div>
-            {/* Marca y Nombre */}
             <div className="mb-4">
               <p className={`text-sm font-medium mb-2 ${
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
@@ -179,8 +175,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 {product.name}
               </h1>
             </div>
-
-            {/* Rating y Reviews */}
             <div className="flex items-center gap-4 mb-6">
               <div className="flex items-center gap-2">
                 <div className="flex items-center">
@@ -207,8 +201,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 ({product.reviews} reseñas)
               </span>
             </div>
-
-            {/* Precio */}
             <div className="mb-6">
               <div className={`text-4xl font-bold mb-2 ${
                 theme === 'dark' ? 'text-green-400' : 'text-green-600'
@@ -228,8 +220,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 </div>
               )}
             </div>
-
-            {/* Estado de Stock */}
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg mb-6 ${
               product.inStock
                 ? theme === 'dark' ? 'bg-green-500/20 text-green-400' : 'bg-green-50 text-green-700'
@@ -240,8 +230,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 {product.inStock ? 'En Stock' : 'Agotado'}
               </span>
             </div>
-
-            {/* Características Principales */}
             <div className={`rounded-xl p-4 mb-6 ${
               theme === 'dark' ? 'bg-gray-900 border border-gray-800' : 'bg-gray-50 border border-gray-200'
             }`}>
@@ -261,8 +249,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 ))}
               </ul>
             </div>
-
-            {/* Selector de Cantidad */}
             {product.inStock && (
               <div className="mb-6">
                 <label className={`block text-sm font-semibold mb-3 ${
@@ -314,14 +300,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 </div>
               </div>
             )}
-
-            {/* Botones de Acción */}
             <div className="flex gap-3 mb-6">
               <button
                 onClick={handleAddToCart}
-                disabled={!product.inStock}
+                disabled={!product.inStock || cartLoading}
                 className={`flex-1 flex items-center justify-center gap-3 px-6 py-4 rounded-xl font-bold text-lg transition-all ${
-                  product.inStock
+                  product.inStock && !cartLoading
                     ? theme === 'dark'
                       ? 'bg-green-500 hover:bg-green-400 text-black shadow-lg hover:shadow-green-500/50'
                       : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-green-600/50'
@@ -329,11 +313,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 }`}
               >
                 <ShoppingCart size={24} />
-                Agregar al Carrito
+                {cartLoading ? 'Agregando...' : 'Agregar al Carrito'}
               </button>
             </div>
-
-            {/* Beneficios */}
             <div className="grid grid-cols-2 gap-3">
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
@@ -406,12 +388,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
             </div>
           </div>
         </div>
-
-        {/* Tabs de Información */}
         <div className={`rounded-2xl overflow-hidden ${
           theme === 'dark' ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200'
         }`}>
-          {/* Tab Headers */}
           <div className={`flex border-b ${
             theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
           }`}>
@@ -458,8 +437,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               Reseñas ({product.reviews})
             </button>
           </div>
-
-          {/* Tab Content */}
           <div className="p-6">
             {activeTab === 'description' && (
               <div className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>
@@ -470,7 +447,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 </p>
               </div>
             )}
-
             {activeTab === 'specs' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {product.specifications ? (
@@ -495,7 +471,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 )}
               </div>
             )}
-
             {activeTab === 'reviews' && (
               <div className={`text-center py-8 ${
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'

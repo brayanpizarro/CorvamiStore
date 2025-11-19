@@ -1,15 +1,17 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import * as fs from 'fs';
-import { join, extname, basename } from 'path';
 import { ProductosService } from './productos.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+// Eliminado almacenamiento local, ahora se sube a Cloudinary
 
 @Controller('productos')
 export class ProductosController {
-  constructor(private readonly productosService: ProductosService) {}
+  constructor(
+    private readonly productosService: ProductosService,
+    private readonly cloudinary: CloudinaryService,
+  ) {}
 
   @Post()
   create(@Body() createProductoDto: CreateProductoDto) {
@@ -36,23 +38,11 @@ export class ProductosController {
     return this.productosService.remove(id);
   }
 
-  // Subida de imagen del producto
+  // Subir imagen a Cloudinary
   @Post(':id/image')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: (req, file, cb) => {
-          const dest = join(process.cwd(), 'uploads', 'products');
-          fs.mkdirSync(dest, { recursive: true });
-          cb(null, dest);
-        },
-        filename: (req, file, cb) => {
-          const id = req.params.id;
-          const ts = Date.now();
-          const ext = extname(file.originalname) || '';
-          cb(null, `${id}-${ts}${ext}`);
-        },
-      }),
+      limits: { fileSize: 5 * 1024 * 1024 },
       fileFilter: (req, file, cb) => {
         const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!allowed.includes(file.mimetype)) {
@@ -60,26 +50,21 @@ export class ProductosController {
         }
         cb(null, true);
       },
-      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     }),
   )
   async uploadImage(@Param('id') id: string, @UploadedFile() file: any) {
-    if (!file) {
-      return { error: 'No file uploaded' };
-    }
-    const publicUrl = `/uploads/products/${file.filename}`;
+    if (!file) return { error: 'No file uploaded' };
+    const result: any = await this.cloudinary.uploadProductImage(id, file.buffer, file.originalname);
+    // result.secure_url -> URL pública
+    await this.productosService.setImage(id, result.secure_url);
+    return { productId: id, imageUrl: result.secure_url };
+  }
 
-    // Borrar imagen anterior si existía y era local
-    const existing = await this.productosService.findOne(id);
-    const oldUrl: string | undefined = (existing as any)?.imageUrl;
-    if (oldUrl && oldUrl.startsWith('/uploads/products/')) {
-      const filename = basename(oldUrl);
-      const absolutePath = join(process.cwd(), 'uploads', 'products', filename);
-      try {
-        if (fs.existsSync(absolutePath)) fs.unlinkSync(absolutePath);
-      } catch {}
-    }
-
-    return this.productosService.setImage(id, publicUrl);
+  // Borrar imagen del producto (Cloudinary + limpiar campo)
+  @Delete(':id/image')
+  async deleteImage(@Param('id') id: string) {
+    await this.cloudinary.deleteProductImage(id);
+    await this.productosService.setImage(id, undefined as any);
+    return { productId: id, imageDeleted: true };
   }
 }

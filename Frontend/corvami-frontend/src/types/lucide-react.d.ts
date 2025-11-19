@@ -21,7 +21,14 @@ declare module 'lucide-react' {
   export const ArrowRight: Icon;
   export const Plus: Icon;
   export const Minus: Icon;
-  
+  export const Truck: Icon;
+  export const Shield: Icon;
+  export const RotateCcw: Icon;
+  export const Award: Icon;
+  export const ChevronLeft: Icon;
+  export const ChevronRight: Icon;
+  export const Trash2: Icon;
+
   // Exportar otros iconos según se necesiten
   const icons: { [key: string]: Icon };
   export default icons;
