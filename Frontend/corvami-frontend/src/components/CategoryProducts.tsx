@@ -102,6 +102,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
   const filteredProducts = useMemo(() => {
     const filtered = allProducts.filter(product => {
       // Filtro por categoría (comparación exacta, ya viene normalizada desde CategoryPage)
+      // Si category es 'all', mostrar todos los productos
       if (category !== 'all' && product.category !== category) return false;
       
 

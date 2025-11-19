@@ -9,8 +9,9 @@ import TestimonialsSection from './components/TestimonialsSection';
 import NewsletterSection from './components/NewsletterSection';
 import Footer from './components/Footer';
 import CategoryPage from './components/CategoryPage';
+import AllProductsPage from './components/AllProductsPage';
 
-type CurrentPage = 'home' | 'category';
+type CurrentPage = 'home' | 'category' | 'all-products';
 
 function App() {
   const { theme } = useTheme();
@@ -32,10 +33,17 @@ function App() {
     setSelectedCategory('');
   };
 
+  const navigateToAllProducts = () => {
+    setCurrentPage('all-products');
+    setSelectedCategory('');
+  };
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case 'category':
         return <CategoryPage categorySlug={selectedCategory} onNavigateHome={navigateToHome} />;
+      case 'all-products':
+        return <AllProductsPage onNavigateHome={navigateToHome} />;
       case 'home':
       default:
         return (
@@ -61,6 +69,7 @@ function App() {
         cartItems={cartItems} 
         onNavigateHome={navigateToHome}
         onNavigateToCategory={navigateToCategory}
+        onNavigateToAllProducts={navigateToAllProducts}
         currentPage={currentPage}
       />
       {renderCurrentPage()}

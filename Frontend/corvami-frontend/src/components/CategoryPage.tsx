@@ -22,8 +22,8 @@ const categoryMap: Record<string, string> = {
 
 // Normalizar categoría para buscar en BD (quitar plurales y acentos)
 const normalizeCategoryForDB = (slug: string): string => {
-  const normalized = slug.toLowerCase()
-    .replace(/s$/, '') // quitar 's' final
+  // Primero, limpiar acentos
+  let normalized = slug.toLowerCase()
     .replace(/á/g, 'a')
     .replace(/é/g, 'e')
     .replace(/í/g, 'i')
@@ -33,13 +33,24 @@ const normalizeCategoryForDB = (slug: string): string => {
   // Mapeo específico slug -> categoría en BD
   const dbCategoryMap: Record<string, string> = {
     'teclado': 'Teclado',
+    'teclados': 'Teclado',
     'mouse': 'Mouse',
     'raton': 'Mouse',
-    'ratone': 'Mouse',
+    'ratones': 'Mouse',
     'audifono': 'Audífonos',
+    'audifonos': 'Audífonos',
     'webcam': 'Webcam',
+    'webcams': 'Webcam',
     'laptop': 'Laptop',
+    'laptops': 'Laptop',
     'monitor': 'Monitor',
+    'monitores': 'Monitor',
+    'smartphone': 'Smartphone',
+    'smartphones': 'Smartphone',
+    'tablet': 'Tablet',
+    'tablets': 'Tablet',
+    'componente': 'Componentes PC',
+    'componentes': 'Componentes PC',
   };
   
   return dbCategoryMap[normalized] || normalized;
