@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import ThemeToggle from './ThemeToggle';
 
 const ProfilePage: React.FC = () => {
   const { theme } = useTheme();
@@ -132,6 +133,21 @@ const ProfilePage: React.FC = () => {
       </div>
 
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Back button and Theme Toggle */}
+        <div className="flex justify-between items-center mb-6">
+          <Link
+            to="/"
+            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 ${
+              theme === 'dark'
+                ? 'text-green-400 hover:bg-green-500/10'
+                : 'text-green-600 hover:bg-green-500/10'
+            }`}
+          >
+            ← Volver
+          </Link>
+          <ThemeToggle />
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className={`text-4xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
@@ -179,9 +195,9 @@ const ProfilePage: React.FC = () => {
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="px-4 py-2 rounded-lg bg-green-500/20 border border-green-500/50 text-green-400 font-bold transition-all duration-300 hover:bg-green-500/30 hover:border-green-400"
+                className="px-6 py-2 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/50"
               >
-                ✏️ Editar
+                Editar
               </button>
             )}
           </div>
@@ -326,7 +342,7 @@ const ProfilePage: React.FC = () => {
                   disabled={isSubmitting}
                   className="flex-1 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-green-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  {isSubmitting ? 'Guardando...' : '💾 Guardar Cambios'}
+                  {isSubmitting ? 'Guardando...' : 'Guardar Cambios'}
                 </button>
                 <button
                   type="button"
@@ -338,7 +354,7 @@ const ProfilePage: React.FC = () => {
                       : 'border-gray-300 text-gray-700 hover:bg-gray-100'
                   }`}
                 >
-                  ❌ Cancelar
+                  Cancelar
                 </button>
               </div>
             )}
@@ -373,7 +389,7 @@ const ProfilePage: React.FC = () => {
             }}
             className="w-full px-4 py-3 rounded-lg border-2 border-red-500/50 text-red-400 font-bold transition-all duration-300 hover:bg-red-500/10 hover:border-red-400"
           >
-            🚪 Cerrar Sesión
+            Cerrar Sesión
           </button>
         </div>
       </div>

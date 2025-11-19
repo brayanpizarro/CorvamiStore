@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
+import ThemeToggle from './ThemeToggle';
 
 const LoginPage: React.FC = () => {
   const { theme } = useTheme();
@@ -53,6 +54,21 @@ const LoginPage: React.FC = () => {
       </div>
 
       <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Back button and Theme Toggle */}
+        <div className="flex justify-between items-center mb-6">
+          <Link
+            to="/"
+            className={`px-4 py-2 rounded-lg font-semibold transition-all duration-300 hover:scale-105 ${
+              theme === 'dark'
+                ? 'text-green-400 hover:bg-green-500/10'
+                : 'text-green-600 hover:bg-green-500/10'
+            }`}
+          >
+            ← Volver
+          </Link>
+          <ThemeToggle />
+        </div>
+
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className={`text-4xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
