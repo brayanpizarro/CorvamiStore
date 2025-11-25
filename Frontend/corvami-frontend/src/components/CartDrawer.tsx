@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
-import { X, ShoppingCart, Trash2, Plus, Minus } from 'lucide-react';
+import { AiOutlineClose, AiOutlineShoppingCart, AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
+import { FiTrash2 } from 'react-icons/fi';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -53,7 +54,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
         }`}>
           <div className="flex items-center gap-3">
-            <ShoppingCart size={24} className={theme === 'dark' ? 'text-green-400' : 'text-green-600'} />
+            <AiOutlineShoppingCart size={24} className={theme === 'dark' ? 'text-green-400' : 'text-green-600'} />
             <h2 className={`text-xl font-bold ${
               theme === 'dark' ? 'text-white' : 'text-gray-900'
             }`}>
@@ -75,7 +76,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                 : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
             }`}
           >
-            <X size={24} />
+            <AiOutlineClose size={24} />
           </button>
         </div>
 
@@ -83,7 +84,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         <div className="flex-1 overflow-y-auto p-4">
           {!cart || !cart.items || cart.items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <ShoppingCart size={64} className={`mb-4 ${
+              <AiOutlineShoppingCart size={64} className={`mb-4 ${
                 theme === 'dark' ? 'text-gray-700' : 'text-gray-300'
               }`} />
               <p className={`text-lg font-semibold mb-2 ${
@@ -144,7 +145,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                                 : 'hover:bg-gray-200'
                           } transition-colors`}
                         >
-                          <Minus size={14} />
+                          <AiOutlineMinus size={14} />
                         </button>
                         <span className={`px-3 text-sm font-semibold ${
                           theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -162,7 +163,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                                 : 'hover:bg-gray-200'
                           } transition-colors`}
                         >
-                          <Plus size={14} />
+                          <AiOutlinePlus size={14} />
                         </button>
                       </div>
 
@@ -177,7 +178,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                               : 'hover:bg-red-50 text-red-600'
                         }`}
                       >
-                        <Trash2 size={16} />
+                        <FiTrash2 size={16} />
                       </button>
                     </div>
                   </div>

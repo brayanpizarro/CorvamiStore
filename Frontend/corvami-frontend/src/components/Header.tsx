@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Search, ShoppingCart, X } from 'lucide-react';
+import { AiOutlineMenu, AiOutlineClose, AiOutlineSearch, AiOutlineShoppingCart, AiOutlineUser } from 'react-icons/ai';
 import ThemeToggle from './ThemeToggle';
 import CategoriesDropdown from './CategoriesDropdown';
 import CartDrawer from './CartDrawer';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface HeaderProps {
   cartItems?: number;
@@ -17,7 +18,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, o
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const { cart } = useCart();
+  const { user, isAuthenticated, isGuest, setShowAuthModal, logout } = useAuth();
   
   const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
@@ -40,7 +43,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, o
             className="md:hidden text-white hover:text-emerald-100 transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            {isMenuOpen ? <AiOutlineClose size={24} /> : <AiOutlineMenu size={24} />}
           </button>
 
           {/* Logo */}
@@ -80,19 +83,64 @@ const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, o
           <div className="flex items-center space-x-4">
             <ThemeToggle />
             <button className="text-white hover:text-green-400 transition-colors">
-              <Search size={20} />
+              <AiOutlineSearch size={20} />
             </button>
             <button 
               onClick={() => setIsCartOpen(true)}
               className="relative text-white hover:text-green-400 transition-colors"
             >
-              <ShoppingCart size={20} />
+              <AiOutlineShoppingCart size={20} />
               {itemCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-green-500 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold glow-green">
                   {itemCount}
                 </span>
               )}
             </button>
+            
+            {/* User Menu */}
+            <div className="relative">
+              <button 
+                onClick={() => {
+                  if (!isAuthenticated && !isGuest) {
+                    setShowAuthModal(true);
+                  } else {
+                    setShowUserMenu(!showUserMenu);
+                  }
+                }}
+                className="relative text-white hover:text-green-400 transition-colors"
+              >
+                <AiOutlineUser size={20} />
+                {(isAuthenticated || isGuest) && (
+                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full"></span>
+                )}
+              </button>
+
+              {/* User Dropdown */}
+              {showUserMenu && (isAuthenticated || isGuest) && (
+                <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-lg shadow-xl border border-gray-800 py-2">
+                  {isAuthenticated && user && (
+                    <div className="px-4 py-2 border-b border-gray-800">
+                      <p className="text-white font-medium text-sm">{user.name}</p>
+                      <p className="text-gray-400 text-xs">{user.email}</p>
+                    </div>
+                  )}
+                  {isGuest && (
+                    <div className="px-4 py-2 border-b border-gray-800">
+                      <p className="text-gray-400 text-xs">Modo invitado</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => {
+                      logout();
+                      setShowUserMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors text-sm"
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

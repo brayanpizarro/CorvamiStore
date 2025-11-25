@@ -10,6 +10,7 @@ import NewsletterSection from './components/NewsletterSection';
 import Footer from './components/Footer';
 import CategoryPage from './components/CategoryPage';
 import AllProductsPage from './components/AllProductsPage';
+import AuthModal from './components/AuthModal';
 
 type CurrentPage = 'home' | 'category' | 'all-products';
 
@@ -74,6 +75,7 @@ function App() {
       />
       {renderCurrentPage()}
       <Footer />
+      <AuthModal />
     </div>
   );
 }

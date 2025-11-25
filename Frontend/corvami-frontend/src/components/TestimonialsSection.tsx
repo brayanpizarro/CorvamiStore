@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star } from 'lucide-react';
+import { AiFillStar } from 'react-icons/ai';
 import { useTheme } from '../contexts/ThemeContext';
 
 const TestimonialsSection: React.FC = () => {
@@ -60,7 +60,7 @@ const TestimonialsSection: React.FC = () => {
             }`}>
               <div className="flex text-green-400 mb-4 group-hover:text-green-300 transition-colors">
                 {[...Array(testimonial.rating)].map((_, i) => (
-                  <Star key={i} size={16} fill="currentColor" />
+                  <AiFillStar key={i} size={16} />
                 ))}
               </div>
               <p className={`mb-6 italic group-hover:text-green-300 transition-colors ${
@@ -78,7 +78,7 @@ const TestimonialsSection: React.FC = () => {
                   }`}>{testimonial.name}</h4>
                   <p className={`text-sm group-hover:text-green-400 transition-colors ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                  }`}>Cliente verificado ✓</p>
+                  }`}>Cliente verificado</p>
                 </div>
               </div>
             </div>

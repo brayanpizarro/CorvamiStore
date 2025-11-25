@@ -1,5 +1,9 @@
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import { HiOutlineDesktopComputer } from 'react-icons/hi';
+import { IoGameControllerOutline, IoPhonePortraitOutline } from 'react-icons/io5';
+import { MdOutlineKeyboard, MdHeadphones } from 'react-icons/md';
+import { BsCpu } from 'react-icons/bs';
 
 interface CategoriesSectionProps {
   onCategoryClick?: (categorySlug: string) => void;
@@ -8,16 +12,16 @@ interface CategoriesSectionProps {
 const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }) => {
   const { theme } = useTheme();
   const categories = [
-    { name: "Laptops", icon: "💻", count: 45, slug: "laptops" },
-    { name: "Gaming", icon: "🎮", count: 32, slug: "gaming" },
-    { name: "Periféricos", icon: "⌨️", count: 89, slug: "perifericos" },
-    { name: "Componentes", icon: "🔧", count: 67, slug: "componentes" },
-    { name: "Audio", icon: "🎧", count: 28, slug: "audifonos" },
-    { name: "Móviles", icon: "📱", count: 54, slug: "smartphones" }
+    { name: "Laptops", icon: HiOutlineDesktopComputer, count: 45, slug: "laptops" },
+    { name: "Gaming", icon: IoGameControllerOutline, count: 32, slug: "gaming" },
+    { name: "Periféricos", icon: MdOutlineKeyboard, count: 89, slug: "perifericos" },
+    { name: "Componentes", icon: BsCpu, count: 67, slug: "componentes" },
+    { name: "Audio", icon: MdHeadphones, count: 28, slug: "audifonos" },
+    { name: "Móviles", icon: IoPhonePortraitOutline, count: 54, slug: "smartphones" }
   ];
 
   return (
-    <section className={`py-16 relative overflow-hidden transition-all duration-300 ${
+    <section id="categories-section" className={`py-16 relative overflow-hidden transition-all duration-300 ${
       theme === 'dark' ? 'bg-gradient-to-b from-black to-gray-900' : 'bg-gradient-to-b from-gray-50 to-white'
     }`}>
       {/* Background Effects */}
@@ -43,24 +47,29 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {categories.map((category, index) => (
-            <div 
-              key={index} 
-              onClick={() => onCategoryClick?.(category.slug)}
-              className={`backdrop-blur-sm rounded-xl p-6 text-center border-2 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer group shadow-lg ${
-              theme === 'dark'
-                ? 'bg-gray-800/50 border-green-500/30 hover:border-green-400/60 hover:bg-gray-700/70 hover:shadow-green-500/25'
-                : 'bg-white/80 border-green-400/40 hover:border-green-500/60 hover:bg-white/90 hover:shadow-green-400/25'
-            }`}>
-              <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{category.icon}</div>
+          {categories.map((category, index) => {
+            const IconComponent = category.icon;
+            return (
+              <div 
+                key={index} 
+                onClick={() => onCategoryClick?.(category.slug)}
+                className={`backdrop-blur-sm rounded-xl p-6 text-center border-2 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer group shadow-lg ${
+                theme === 'dark'
+                  ? 'bg-gray-800/50 border-green-500/30 hover:border-green-400/60 hover:bg-gray-700/70 hover:shadow-green-500/25'
+                  : 'bg-white/80 border-green-400/40 hover:border-green-500/60 hover:bg-white/90 hover:shadow-green-400/25'
+              }`}>
+                <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300 flex justify-center">
+                  <IconComponent className={theme === 'dark' ? 'text-green-400' : 'text-green-600'} size={48} />
+                </div>
               <h3 className={`font-bold mb-1 group-hover:text-green-300 transition-colors ${
                 theme === 'dark' ? 'text-white' : 'text-gray-900'
               }`}>{category.name}</h3>
               <p className={`text-sm group-hover:text-green-400 transition-colors ${
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
               }`}>{category.count} productos</p>
-            </div>
-          ))}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

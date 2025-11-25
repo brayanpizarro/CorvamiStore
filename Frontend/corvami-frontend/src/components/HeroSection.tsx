@@ -1,9 +1,16 @@
 import React from 'react';
-import { ArrowRight } from 'lucide-react';
+import { AiOutlineArrowRight } from 'react-icons/ai';
 import { useTheme } from '../contexts/ThemeContext';
 
 const HeroSection: React.FC = () => {
   const { theme } = useTheme();
+  
+  const handleExploreCategoriesClick = () => {
+    const categoriesSection = document.getElementById('categories-section');
+    if (categoriesSection) {
+      categoriesSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
   
   return (
     <section className={`relative pt-16 min-h-screen flex items-center overflow-hidden transition-all duration-300 ${
@@ -52,7 +59,9 @@ const HeroSection: React.FC = () => {
             Descubre los últimos productos tecnológicos con descuentos increíbles y{' '}
             <span className="text-green-400 font-semibold glow-text">calidad garantizada</span>
           </p>
-          <button className={`group px-10 py-5 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl border-2 ${
+          <button 
+            onClick={handleExploreCategoriesClick}
+            className={`group px-10 py-5 rounded-2xl text-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-2xl border-2 ${
             theme === 'dark' 
               ? 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black shadow-green-500/50 hover:shadow-green-400/70 border-green-400/50 hover:border-green-300 neon-button'
               : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-green-600/40 hover:shadow-green-700/50 border-green-500/60 hover:border-green-600'
@@ -64,7 +73,7 @@ const HeroSection: React.FC = () => {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <ArrowRight className={`rotate-90 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} size={24} />
+        <AiOutlineArrowRight className={`rotate-90 ${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} size={24} />
       </div>
     </section>
   );

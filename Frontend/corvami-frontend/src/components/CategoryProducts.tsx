@@ -1,7 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
-import { ChevronDown, Star, Heart, ShoppingCart } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { MdKeyboardArrowDown } from 'react-icons/md';
+import { AiFillStar, AiOutlineHeart, AiOutlineShoppingCart, AiOutlineSearch } from 'react-icons/ai';
 import ProductDetail from './ProductDetail';
 import { productApi, type Product as ApiProduct } from '../api/products';
 
@@ -35,6 +37,7 @@ interface CategoryProductsProps {
 const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryTitle, onNavigateHome }) => {
   const { theme } = useTheme();
   const { addItem, loading: cartLoading } = useCart();
+  const { isAuthenticated, isGuest, setShowAuthModal } = useAuth();
   
   // Estados para filtros y vista
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -51,6 +54,13 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
     loadProducts();
   }, []);
 
+  // Scroll al inicio cuando se selecciona un producto
+  useEffect(() => {
+    if (selectedProduct) {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+  }, [selectedProduct]);
+
   const loadProducts = async () => {
     try {
       const data = await productApi.getAll();
@@ -63,6 +73,12 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
   };
 
   const handleAddToCart = async (product: Product) => {
+    // Verificar si el usuario está autenticado o es invitado
+    if (!isAuthenticated && !isGuest) {
+      setShowAuthModal(true);
+      return;
+    }
+
     try {
       await addItem({
         productId: product.id,
@@ -98,14 +114,27 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
     return Array.from(new Set(allProducts.map(p => p.brand))).sort();
   }, [allProducts]);
 
+  // Función auxiliar para normalizar categorías (sin acentos, lowercase)
+  const normalizeCategory = (cat: string) => {
+    return cat.toLowerCase()
+      .replace(/á/g, 'a')
+      .replace(/é/g, 'e')
+      .replace(/í/g, 'i')
+      .replace(/ó/g, 'o')
+      .replace(/ú/g, 'u')
+      .trim();
+  };
+
   // Filtrar productos
   const filteredProducts = useMemo(() => {
     const filtered = allProducts.filter(product => {
-      // Filtro por categoría (comparación exacta, ya viene normalizada desde CategoryPage)
+      // Filtro por categoría (comparación normalizada, sin acentos ni case-sensitive)
       // Si category es 'all', mostrar todos los productos
-      if (category !== 'all' && product.category !== category) return false;
-      
-
+      if (category !== 'all') {
+        const normalizedProductCategory = normalizeCategory(product.category);
+        const normalizedFilterCategory = normalizeCategory(category);
+        if (normalizedProductCategory !== normalizedFilterCategory) return false;
+      }
       
       // Filtro por rango de precio
       if (product.price < priceRange[0] || product.price > priceRange[1]) return false;
@@ -239,8 +268,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                       : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
                 }`}
               >
-                {/* <Filter size={16} /> */}
-                🗤️ Filtros
+                Filtros
                 {hasActiveFilters && (
                   <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
                     showFilters
@@ -312,7 +340,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                   <option value="rating">Mejor calificación</option>
                   <option value="name">A-Z</option>
                 </select>
-                <ChevronDown className={`absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none ${
+                <MdKeyboardArrowDown className={`absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none ${
                   theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                 }`} size={16} />
               </div>
@@ -454,10 +482,10 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                       <div className="flex items-center gap-2 ml-2">
                         <div className="flex items-center">
                           {[...Array(5)].map((_, i) => (
-                            <Star
+                            <AiFillStar
                               key={i}
                               size={14}
-                              className={i < rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}
+                              className={i < rating ? 'text-yellow-400' : 'text-gray-300'}
                             />
                           ))}
                         </div>
@@ -484,10 +512,10 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
               } rounded-xl border ${
                 theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
               }`}>
-                <div className={`text-6xl mb-4 ${
+                <div className={`text-6xl mb-4 flex justify-center ${
                   theme === 'dark' ? 'text-gray-700' : 'text-gray-300'
                 }`}>
-                  🔍
+                  <AiOutlineSearch size={64} />
                 </div>
                 <p className={`text-xl font-semibold mb-2 ${
                   theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -568,7 +596,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                         } hover:bg-red-500 hover:text-white transition-all hover:scale-110 group/heart shadow-lg`}
                         title="Agregar a favoritos"
                       >
-                        <Heart size={18} className="group-hover/heart:fill-current" />
+                        <AiOutlineHeart size={18} />
                       </button>
                     </div>
 
@@ -591,11 +619,11 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                         <div className="flex items-center gap-2 mb-4">
                           <div className="flex items-center">
                             {[...Array(5)].map((_, i) => (
-                              <Star
+                              <AiFillStar
                                 key={i}
                                 size={16}
                                 className={i < Math.floor(product.rating) 
-                                  ? 'text-yellow-400 fill-current' 
+                                  ? 'text-yellow-400' 
                                   : 'text-gray-300'
                                 }
                               />
@@ -660,7 +688,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                           } ${viewMode === 'grid' ? 'hover:scale-105' : ''}`}
                           title={product.inStock ? 'Agregar al carrito' : 'Producto agotado'}
                         >
-                          <ShoppingCart size={18} />
+                          <AiOutlineShoppingCart size={18} />
                           {viewMode === 'list' && (cartLoading ? 'Agregando...' : 'Agregar')}
                         </button>
                       </div>

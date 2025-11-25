@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Star } from 'lucide-react';
+import { AiFillStar } from 'react-icons/ai';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import { productApi, type Product as ApiProduct } from '../api/products';
 
 interface ProductsSectionProps {
@@ -11,6 +12,7 @@ interface ProductsSectionProps {
 const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
   const { theme } = useTheme();
   const { addItem, loading: cartLoading } = useCart();
+  const { isAuthenticated, isGuest, setShowAuthModal } = useAuth();
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -30,6 +32,12 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
   };
 
   const handleAddToCart = async (product: ApiProduct) => {
+    // Verificar si el usuario está autenticado o es invitado
+    if (!isAuthenticated && !isGuest) {
+      setShowAuthModal(true);
+      return;
+    }
+
     try {
       await addItem({
         productId: product.productId,
@@ -110,7 +118,7 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
                 <div className="flex items-center mb-2">
                   <div className="flex text-green-400">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} size={16} fill={i < 4 ? "currentColor" : "none"} />
+                      <AiFillStar key={i} size={16} className={i < 4 ? "" : "opacity-30"} />
                     ))}
                   </div>
                   <span className={`text-sm ml-2 ${

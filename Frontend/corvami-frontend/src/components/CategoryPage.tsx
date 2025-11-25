@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import CategoryProducts from './CategoryProducts';
 
 // Mapeo de categorías (slug -> nombre para mostrar)
@@ -64,6 +64,10 @@ interface CategoryPageProps {
 const CategoryPage: React.FC<CategoryPageProps> = ({ categorySlug, onNavigateHome }) => {
   const categoryTitle = categoryMap[categorySlug] || 'Productos';
   const normalizedCategory = normalizeCategoryForDB(categorySlug);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [categorySlug]);
 
   return (
     <CategoryProducts 

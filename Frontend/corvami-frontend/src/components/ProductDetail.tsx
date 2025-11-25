@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
-import { Star, Heart, ShoppingCart, Truck, Shield, RotateCcw, Award, ChevronLeft, ChevronRight, Check, Minus, Plus } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { AiFillStar, AiOutlineHeart, AiFillHeart, AiOutlineShoppingCart, AiOutlinePlus, AiOutlineMinus, AiOutlineCheck } from 'react-icons/ai';
+import { MdOutlineLocalShipping, MdOutlineShield, MdOutlineLoop } from 'react-icons/md';
+import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
+import { RiAwardLine } from 'react-icons/ri';
 
 interface Product {
   id: string | number;
@@ -33,6 +37,7 @@ interface ProductDetailProps {
 const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToCart }) => {
   const { theme } = useTheme();
   const { addItem, loading: cartLoading } = useCart();
+  const { isAuthenticated, isGuest, setShowAuthModal } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description');
@@ -56,6 +61,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
   };
 
   const handleAddToCart = async () => {
+    // Verificar si el usuario está autenticado o es invitado
+    if (!isAuthenticated && !isGuest) {
+      setShowAuthModal(true);
+      return;
+    }
+
     try {
       await addItem({
         productId: String(product.id),
@@ -119,7 +130,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                       : 'bg-white text-gray-600 hover:bg-red-500 hover:text-white'
                 } shadow-lg`}
               >
-                <Heart size={20} className={isFavorite ? 'fill-current' : ''} />
+                {isFavorite ? <AiFillHeart size={20} /> : <AiOutlineHeart size={20} />}
               </button>
               {images.length > 1 && (
                 <>
@@ -129,7 +140,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                       theme === 'dark' ? 'bg-gray-800/90 hover:bg-gray-700' : 'bg-white/90 hover:bg-gray-100'
                     } shadow-lg transition-all`}
                   >
-                    <ChevronLeft size={20} />
+                    <IoChevronBack size={20} />
                   </button>
                   <button
                     onClick={() => setSelectedImage((prev) => (prev + 1) % images.length)}
@@ -137,7 +148,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                       theme === 'dark' ? 'bg-gray-800/90 hover:bg-gray-700' : 'bg-white/90 hover:bg-gray-100'
                     } shadow-lg transition-all`}
                   >
-                    <ChevronRight size={20} />
+                    <IoChevronForward size={20} />
                   </button>
                 </>
               )}
@@ -179,11 +190,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className="flex items-center gap-2">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
-                    <Star
+                    <AiFillStar
                       key={i}
                       size={20}
                       className={i < Math.floor(product.rating)
-                        ? 'text-yellow-400 fill-current'
+                        ? 'text-yellow-400'
                         : 'text-gray-300'
                       }
                     />
@@ -225,7 +236,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 ? theme === 'dark' ? 'bg-green-500/20 text-green-400' : 'bg-green-50 text-green-700'
                 : theme === 'dark' ? 'bg-red-500/20 text-red-400' : 'bg-red-50 text-red-700'
             }`}>
-              <Check size={16} />
+              <AiOutlineCheck size={16} />
               <span className="font-semibold">
                 {product.inStock ? 'En Stock' : 'Agotado'}
               </span>
@@ -243,7 +254,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                   <li key={index} className={`flex items-start gap-2 ${
                     theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                   }`}>
-                    <Check size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
+                    <AiOutlineCheck size={16} className="text-green-500 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{feature}</span>
                   </li>
                 ))}
@@ -271,7 +282,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                             : 'hover:bg-gray-100'
                       } transition-colors`}
                     >
-                      <Minus size={18} />
+                      <AiOutlineMinus size={18} />
                     </button>
                     <span className={`px-6 font-semibold ${
                       theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -289,7 +300,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                             : 'hover:bg-gray-100'
                       } transition-colors`}
                     >
-                      <Plus size={18} />
+                      <AiOutlinePlus size={18} />
                     </button>
                   </div>
                   <span className={`text-sm ${
@@ -312,7 +323,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                     : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                 }`}
               >
-                <ShoppingCart size={24} />
+                <AiOutlineShoppingCart size={24} />
                 {cartLoading ? 'Agregando...' : 'Agregar al Carrito'}
               </button>
             </div>
@@ -320,7 +331,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <Truck className="text-green-500" size={20} />
+                <MdOutlineLocalShipping className="text-green-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -337,7 +348,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <Shield className="text-blue-500" size={20} />
+                <MdOutlineShield className="text-blue-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -354,7 +365,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <RotateCcw className="text-purple-500" size={20} />
+                <MdOutlineLoop className="text-purple-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -371,7 +382,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <Award className="text-yellow-500" size={20} />
+                <RiAwardLine className="text-yellow-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
