@@ -1,11 +1,7 @@
 import React, { useEffect } from 'react';
 import CategoryProducts from './CategoryProducts';
 
-interface AllProductsPageProps {
-  onNavigateHome?: () => void;
-}
-
-const AllProductsPage: React.FC<AllProductsPageProps> = ({ onNavigateHome }) => {
+const AllProductsPage: React.FC = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, []);
@@ -14,7 +10,6 @@ const AllProductsPage: React.FC<AllProductsPageProps> = ({ onNavigateHome }) => 
     <CategoryProducts
       category="all"
       categoryTitle="Todos los Productos"
-      onNavigateHome={onNavigateHome}
     />
   );
 };

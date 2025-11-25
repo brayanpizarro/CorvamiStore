@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AiOutlineMenu, AiOutlineClose, AiOutlineSearch, AiOutlineShoppingCart, AiOutlineUser } from 'react-icons/ai';
 import ThemeToggle from './ThemeToggle';
 import CategoriesDropdown from './CategoriesDropdown';
@@ -6,21 +7,15 @@ import CartDrawer from './CartDrawer';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 
-interface HeaderProps {
-  cartItems?: number;
-  onNavigateHome?: () => void;
-  onNavigateToCategory?: (categorySlug: string) => void;
-  onNavigateToAllProducts?: () => void;
-  currentPage?: string;
-}
-
-const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, onNavigateToAllProducts, currentPage }) => {
+const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const { cart } = useCart();
   const { user, isAuthenticated, isGuest, setShowAuthModal, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
@@ -48,33 +43,33 @@ const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, o
 
           {/* Logo */}
           <div className="flex-shrink-0">
-            <h1 
-              className="text-xl md:text-2xl font-bold text-white cursor-pointer hover:text-green-400 transition-colors"
-              onClick={onNavigateHome}
+            <Link 
+              to="/"
+              className="text-xl md:text-2xl font-bold text-white hover:text-green-400 transition-colors"
             >
               Corvami Store
-            </h1>
+            </Link>
           </div>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8 items-center">
-            <button 
-              onClick={onNavigateHome}
+            <Link 
+              to="/"
               className={`hover:text-emerald-100 transition-colors font-medium ${
-                currentPage === 'home' ? 'text-green-400' : 'text-white'
+                location.pathname === '/' ? 'text-green-400' : 'text-white'
               }`}
             >
               Inicio
-            </button>
-            <button 
-              onClick={onNavigateToAllProducts}
+            </Link>
+            <Link 
+              to="/products"
               className={`hover:text-emerald-100 transition-colors font-medium ${
-                currentPage === 'all-products' ? 'text-green-400' : 'text-white'
+                location.pathname === '/products' ? 'text-green-400' : 'text-white'
               }`}
             >
               Productos
-            </button>
-            <CategoriesDropdown onCategorySelect={onNavigateToCategory} />
+            </Link>
+            <CategoriesDropdown />
             <button className="text-white hover:text-emerald-100 transition-colors font-medium">Ofertas</button>
             <button className="text-white hover:text-emerald-100 transition-colors font-medium">Contacto</button>
           </nav>
@@ -99,46 +94,50 @@ const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, o
             
             {/* User Menu */}
             <div className="relative">
-              <button 
-                onClick={() => {
-                  if (!isAuthenticated && !isGuest) {
-                    setShowAuthModal(true);
-                  } else {
-                    setShowUserMenu(!showUserMenu);
-                  }
-                }}
-                className="relative text-white hover:text-green-400 transition-colors"
-              >
-                <AiOutlineUser size={20} />
-                {(isAuthenticated || isGuest) && (
-                  <span className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full"></span>
-                )}
-              </button>
-
-              {/* User Dropdown */}
-              {showUserMenu && (isAuthenticated || isGuest) && (
-                <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-lg shadow-xl border border-gray-800 py-2">
-                  {isAuthenticated && user && (
-                    <div className="px-4 py-2 border-b border-gray-800">
-                      <p className="text-white font-medium text-sm">{user.name}</p>
-                      <p className="text-gray-400 text-xs">{user.email}</p>
-                    </div>
-                  )}
-                  {isGuest && (
-                    <div className="px-4 py-2 border-b border-gray-800">
-                      <p className="text-gray-400 text-xs">Modo invitado</p>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => {
-                      logout();
-                      setShowUserMenu(false);
-                    }}
-                    className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors text-sm"
+              {isAuthenticated || isGuest ? (
+                <>
+                  <button 
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="relative text-white hover:text-green-400 transition-colors"
                   >
-                    Cerrar sesión
+                    <AiOutlineUser size={20} />
+                    <span className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full"></span>
                   </button>
-                </div>
+
+                  {/* User Dropdown */}
+                  {showUserMenu && (
+                    <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-lg shadow-xl border border-gray-800 py-2">
+                      {isAuthenticated && user && (
+                        <div className="px-4 py-2 border-b border-gray-800">
+                          <p className="text-white font-medium text-sm">{user.firstName || user.name}</p>
+                          <p className="text-gray-400 text-xs">{user.email}</p>
+                        </div>
+                      )}
+                      {isGuest && (
+                        <div className="px-4 py-2 border-b border-gray-800">
+                          <p className="text-gray-400 text-xs">Modo invitado</p>
+                        </div>
+                      )}
+                      <button
+                        onClick={() => {
+                          logout();
+                          setShowUserMenu(false);
+                          navigate('/');
+                        }}
+                        className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors text-sm"
+                      >
+                        Cerrar sesión
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <button
+                  onClick={() => setShowAuthModal(true)}
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold hover:from-green-400 hover:to-emerald-400 transition-all transform hover:scale-105"
+                >
+                  Iniciar Sesión
+                </button>
               )}
             </div>
           </div>
@@ -148,24 +147,20 @@ const Header: React.FC<HeaderProps> = ({ onNavigateHome, onNavigateToCategory, o
         {isMenuOpen && (
           <div className="md:hidden bg-emerald-600 border-t border-emerald-400">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <button 
-                onClick={() => {
-                  onNavigateHome?.();
-                  setIsMenuOpen(false);
-                }}
+              <Link 
+                to="/"
+                onClick={() => setIsMenuOpen(false)}
                 className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md"
               >
                 Inicio
-              </button>
-              <button 
-                onClick={() => {
-                  onNavigateToAllProducts?.();
-                  setIsMenuOpen(false);
-                }}
+              </Link>
+              <Link 
+                to="/products"
+                onClick={() => setIsMenuOpen(false)}
                 className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md"
               >
                 Productos
-              </button>
+              </Link>
               <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Categorías</button>
               <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Ofertas</button>
               <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Contacto</button>

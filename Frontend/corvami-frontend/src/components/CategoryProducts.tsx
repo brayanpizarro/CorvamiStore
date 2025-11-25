@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -31,10 +32,9 @@ interface Product {
 interface CategoryProductsProps {
   category: string;
   categoryTitle: string;
-  onNavigateHome?: () => void;
 }
 
-const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryTitle, onNavigateHome }) => {
+const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryTitle }) => {
   const { theme } = useTheme();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated, isGuest, setShowAuthModal } = useAuth();
@@ -223,19 +223,17 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
       } border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} shadow-sm`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Botón de regreso */}
-          {onNavigateHome && (
-            <button
-              onClick={onNavigateHome}
-              className={`flex items-center gap-1.5 px-3 py-1.5 mb-3 rounded-lg text-sm font-medium transition-all hover:gap-2 ${
-                theme === 'dark'
-                  ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
-                  : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900'
-              }`}
-            >
-              <span>←</span>
-              Volver
-            </button>
-          )}
+          <Link
+            to="/"
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 mb-3 rounded-lg text-sm font-medium transition-all hover:gap-2 ${
+              theme === 'dark'
+                ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900'
+            }`}
+          >
+            <span>←</span>
+            Volver
+          </Link>
           
           {/* Título y controles en la misma línea */}
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">

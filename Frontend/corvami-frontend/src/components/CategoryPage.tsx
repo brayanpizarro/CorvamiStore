@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import CategoryProducts from './CategoryProducts';
 
 // Mapeo de categorías (slug -> nombre para mostrar)
@@ -56,12 +57,13 @@ const normalizeCategoryForDB = (slug: string): string => {
   return dbCategoryMap[normalized] || normalized;
 };
 
-interface CategoryPageProps {
-  categorySlug: string;
-  onNavigateHome?: () => void;
-}
+const CategoryPage: React.FC = () => {
+  const { categorySlug } = useParams<{ categorySlug: string }>();
+  
+  if (!categorySlug) {
+    return <div>Categoría no encontrada</div>;
+  }
 
-const CategoryPage: React.FC<CategoryPageProps> = ({ categorySlug, onNavigateHome }) => {
   const categoryTitle = categoryMap[categorySlug] || 'Productos';
   const normalizedCategory = normalizeCategoryForDB(categorySlug);
 
@@ -73,7 +75,6 @@ const CategoryPage: React.FC<CategoryPageProps> = ({ categorySlug, onNavigateHom
     <CategoryProducts 
       category={normalizedCategory} 
       categoryTitle={categoryTitle}
-      onNavigateHome={onNavigateHome}
     />
   );
 };

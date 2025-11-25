@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { AiOutlineClose, AiOutlineShoppingCart, AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
@@ -12,6 +13,18 @@ interface CartDrawerProps {
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const { theme } = useTheme();
   const { cart, updateItem, removeItem, clear, loading } = useCart();
+
+  // Deshabilitar scroll del body cuando el drawer está abierto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -45,9 +58,9 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
       {/* Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-96 z-50 transform transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-screen w-full sm:w-96 z-50 transform transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
-        } ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} shadow-2xl flex flex-col`}
+        } ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} shadow-2xl flex flex-col overflow-hidden`}
       >
         {/* Header */}
         <div className={`flex items-center justify-between p-4 border-b ${
@@ -209,18 +222,17 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
             {/* Buttons */}
             <div className="space-y-2">
-              <button
-                disabled={loading}
-                className={`w-full py-3 rounded-xl font-bold text-lg transition-all ${
-                  loading
-                    ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
-                    : theme === 'dark'
-                      ? 'bg-green-500 hover:bg-green-400 text-black shadow-lg'
-                      : 'bg-green-600 hover:bg-green-700 text-white shadow-lg'
+              <Link
+                to="/cart"
+                onClick={onClose}
+                className={`block w-full py-3 rounded-xl font-bold text-lg text-center transition-all ${
+                  theme === 'dark'
+                    ? 'bg-green-500 hover:bg-green-400 text-black shadow-lg'
+                    : 'bg-green-600 hover:bg-green-700 text-white shadow-lg'
                 }`}
               >
-                Proceder al Pago
-              </button>
+                Ver Carrito Completo
+              </Link>
               <button
                 onClick={() => clear()}
                 disabled={loading}

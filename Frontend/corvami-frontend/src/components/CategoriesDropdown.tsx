@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { MdKeyboardArrowDown } from 'react-icons/md';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -8,24 +9,30 @@ interface Category {
   subcategories?: string[];
 }
 
-interface CategoriesDropdownProps {
-  onCategorySelect?: (categorySlug: string) => void;
-}
-
-const CategoriesDropdown: React.FC<CategoriesDropdownProps> = ({ onCategorySelect }) => {
+const CategoriesDropdown: React.FC = () => {
   const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
   const categories: Category[] = [
     {
-      id: 'teclados',
+      id: 'laptop',
+      name: 'Laptops',
+      subcategories: ['Gaming', 'Workstation', 'Económicas']
+    },
+    {
+      id: 'teclado',
       name: 'Teclados',
       subcategories: ['Mecánicos', 'Gaming', 'Inalámbricos', 'Compactos']
     },
     {
-      id: 'ratones',
+      id: 'mouse',
       name: 'Ratones',
       subcategories: ['Gaming', 'Inalámbricos', 'Ergonómicos', 'Profesionales']
+    },
+    {
+      id: 'monitor',
+      name: 'Monitores',
+      subcategories: ['Gaming', '4K', 'Ultrawide', 'Profesionales']
     },
     {
       id: 'audifonos',
@@ -33,29 +40,9 @@ const CategoriesDropdown: React.FC<CategoriesDropdownProps> = ({ onCategorySelec
       subcategories: ['Gaming', 'Inalámbricos', 'Con Micrófono', 'Profesionales']
     },
     {
-      id: 'laptops',
-      name: 'Laptops',
-      subcategories: ['Gaming', 'Workstation', 'Económicas']
-    },
-    {
-      id: 'monitores',
-      name: 'Monitores',
-      subcategories: ['Gaming', '4K', 'Ultrawide', 'Profesionales']
-    },
-    {
-      id: 'smartphones',
-      name: 'Smartphones',
-      subcategories: ['iPhone', 'Samsung', 'Android', 'Accesorios']
-    },
-    {
-      id: 'tablets',
-      name: 'Tablets',
-      subcategories: ['iPad', 'Android', 'Accesorios']
-    },
-    {
-      id: 'componentes',
-      name: 'Componentes PC',
-      subcategories: ['Procesadores', 'Tarjetas Gráficas', 'Memoria RAM', 'Almacenamiento']
+      id: 'webcam',
+      name: 'Webcams',
+      subcategories: ['HD', 'Full HD', '4K', 'Con Micrófono']
     }
   ];
 
@@ -95,11 +82,9 @@ const CategoriesDropdown: React.FC<CategoriesDropdownProps> = ({ onCategorySelec
                   return (
                     <div key={category.id} className="group">
                       {/* Categoría Principal */}
-                      <button 
-                        onClick={() => {
-                          onCategorySelect?.(category.id);
-                          setIsOpen(false);
-                        }}
+                      <Link 
+                        to={`/category/${category.id}`}
+                        onClick={() => setIsOpen(false)}
                         className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-300 text-left ${
                         theme === 'dark'
                           ? 'hover:bg-gray-800/70 hover:border-green-400/50 border border-transparent'
@@ -131,7 +116,7 @@ const CategoriesDropdown: React.FC<CategoriesDropdownProps> = ({ onCategorySelec
                             theme === 'dark' ? 'text-green-400' : 'text-green-600'
                           }`}
                         />
-                      </button>
+                      </Link>
                       
                       {/* Subcategorías (se mostrarían en hover o click) */}
                       <div className="hidden group-hover:block pl-11 pb-2">

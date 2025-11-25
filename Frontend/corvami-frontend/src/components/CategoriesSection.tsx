@@ -1,24 +1,57 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { HiOutlineDesktopComputer } from 'react-icons/hi';
-import { IoGameControllerOutline, IoPhonePortraitOutline } from 'react-icons/io5';
-import { MdOutlineKeyboard, MdHeadphones } from 'react-icons/md';
-import { BsCpu } from 'react-icons/bs';
+import { MdOutlineKeyboard, MdHeadphones, MdOutlineVideocam } from 'react-icons/md';
+import { BsMouse } from 'react-icons/bs';
+import { productApi } from '../api/products';
 
-interface CategoriesSectionProps {
-  onCategoryClick?: (categorySlug: string) => void;
-}
-
-const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }) => {
+const CategoriesSection: React.FC = () => {
   const { theme } = useTheme();
+  const [categoryCounts, setCategoryCounts] = useState<Record<string, number>>({});
+
   const categories = [
-    { name: "Laptops", icon: HiOutlineDesktopComputer, count: 45, slug: "laptops" },
-    { name: "Gaming", icon: IoGameControllerOutline, count: 32, slug: "gaming" },
-    { name: "Periféricos", icon: MdOutlineKeyboard, count: 89, slug: "perifericos" },
-    { name: "Componentes", icon: BsCpu, count: 67, slug: "componentes" },
-    { name: "Audio", icon: MdHeadphones, count: 28, slug: "audifonos" },
-    { name: "Móviles", icon: IoPhonePortraitOutline, count: 54, slug: "smartphones" }
+    { name: "Laptops", icon: HiOutlineDesktopComputer, slug: "laptop" },
+    { name: "Teclados", icon: MdOutlineKeyboard, slug: "teclado" },
+    { name: "Ratones", icon: BsMouse, slug: "mouse" },
+    { name: "Monitores", icon: HiOutlineDesktopComputer, slug: "monitor" },
+    { name: "Audífonos", icon: MdHeadphones, slug: "audifonos" },
+    { name: "Webcams", icon: MdOutlineVideocam, slug: "webcam" }
   ];
+
+  useEffect(() => {
+    loadCategoryCounts();
+  }, []);
+
+  const loadCategoryCounts = async () => {
+    try {
+      const products = await productApi.getAll();
+      const counts: Record<string, number> = {};
+      
+      // Normalizar categorías para comparación
+      const normalizeCategory = (cat: string) => {
+        return cat.toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim();
+      };
+
+      // Contar productos por categoría
+      products.forEach(product => {
+        const normalized = normalizeCategory(product.category);
+        counts[normalized] = (counts[normalized] || 0) + 1;
+      });
+
+      setCategoryCounts(counts);
+    } catch (error) {
+      console.error('Error cargando conteos de categorías:', error);
+    }
+  };
+
+  const getCategoryCount = (slug: string) => {
+    const normalized = slug.toLowerCase();
+    return categoryCounts[normalized] || 0;
+  };
 
   return (
     <section id="categories-section" className={`py-16 relative overflow-hidden transition-all duration-300 ${
@@ -50,9 +83,9 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
           {categories.map((category, index) => {
             const IconComponent = category.icon;
             return (
-              <div 
-                key={index} 
-                onClick={() => onCategoryClick?.(category.slug)}
+              <Link 
+                key={index}
+                to={`/category/${category.slug}`}
                 className={`backdrop-blur-sm rounded-xl p-6 text-center border-2 transition-all duration-300 transform hover:-translate-y-2 hover:scale-105 cursor-pointer group shadow-lg ${
                 theme === 'dark'
                   ? 'bg-gray-800/50 border-green-500/30 hover:border-green-400/60 hover:bg-gray-700/70 hover:shadow-green-500/25'
@@ -66,8 +99,8 @@ const CategoriesSection: React.FC<CategoriesSectionProps> = ({ onCategoryClick }
               }`}>{category.name}</h3>
               <p className={`text-sm group-hover:text-green-400 transition-colors ${
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-              }`}>{category.count} productos</p>
-              </div>
+              }`}>{getCategoryCount(category.slug)} {getCategoryCount(category.slug) === 1 ? 'producto' : 'productos'}</p>
+              </Link>
             );
           })}
         </div>

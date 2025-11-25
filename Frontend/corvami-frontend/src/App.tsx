@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { useTheme } from './contexts/ThemeContext';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
@@ -10,55 +11,24 @@ import NewsletterSection from './components/NewsletterSection';
 import Footer from './components/Footer';
 import CategoryPage from './components/CategoryPage';
 import AllProductsPage from './components/AllProductsPage';
+import CartPage from './components/CartPage';
 import AuthModal from './components/AuthModal';
 
-type CurrentPage = 'home' | 'category' | 'all-products';
+function HomePage() {
+  return (
+    <>
+      <HeroSection />
+      <FeaturesSection />
+      <CategoriesSection />
+      <ProductsSection />
+      <TestimonialsSection />
+      <NewsletterSection />
+    </>
+  );
+}
 
 function App() {
   const { theme } = useTheme();
-  const [cartItems, setCartItems] = useState(0);
-  const [currentPage, setCurrentPage] = useState<CurrentPage>('home');
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-
-  const addToCart = () => {
-    setCartItems(prev => prev + 1);
-  };
-
-  const navigateToCategory = (categorySlug: string) => {
-    setSelectedCategory(categorySlug);
-    setCurrentPage('category');
-  };
-
-  const navigateToHome = () => {
-    setCurrentPage('home');
-    setSelectedCategory('');
-  };
-
-  const navigateToAllProducts = () => {
-    setCurrentPage('all-products');
-    setSelectedCategory('');
-  };
-
-  const renderCurrentPage = () => {
-    switch (currentPage) {
-      case 'category':
-        return <CategoryPage categorySlug={selectedCategory} onNavigateHome={navigateToHome} />;
-      case 'all-products':
-        return <AllProductsPage onNavigateHome={navigateToHome} />;
-      case 'home':
-      default:
-        return (
-          <>
-            <HeroSection />
-            <FeaturesSection />
-            <CategoriesSection onCategoryClick={navigateToCategory} />
-            <ProductsSection onAddToCart={addToCart} />
-            <TestimonialsSection />
-            <NewsletterSection />
-          </>
-        );
-    }
-  };
 
   return (
     <div className={`min-h-screen transition-all duration-300 ${
@@ -66,16 +36,46 @@ function App() {
         ? 'bg-gradient-to-b from-black via-gray-900 to-black' 
         : 'bg-gradient-to-b from-white via-gray-50 to-gray-100'
     }`}>
-      <Header 
-        cartItems={cartItems} 
-        onNavigateHome={navigateToHome}
-        onNavigateToCategory={navigateToCategory}
-        onNavigateToAllProducts={navigateToAllProducts}
-        currentPage={currentPage}
-      />
-      {renderCurrentPage()}
-      <Footer />
-      <AuthModal />
+      <Routes>
+        {/* Rutas con Header y Footer */}
+        <Route path="/" element={
+          <>
+            <Header />
+            <HomePage />
+            <Footer />
+            <AuthModal />
+          </>
+        } />
+        
+        <Route path="/products" element={
+          <>
+            <Header />
+            <AllProductsPage />
+            <Footer />
+            <AuthModal />
+          </>
+        } />
+        
+        <Route path="/category/:categorySlug" element={
+          <>
+            <Header />
+            <CategoryPage />
+            <Footer />
+            <AuthModal />
+          </>
+        } />
+
+        <Route path="/cart" element={
+          <>
+            <Header />
+            <CartPage />
+            <Footer />
+          </>
+        } />
+
+        {/* Ruta 404 - redireccionar a home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </div>
   );
 }
