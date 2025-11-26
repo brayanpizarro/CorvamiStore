@@ -252,11 +252,12 @@ const CartPage: React.FC = () => {
                 </div>
               </div>
 
-              <button
-                className="w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold rounded-lg hover:from-green-400 hover:to-emerald-400 transition-all transform hover:scale-105 shadow-lg mb-4"
+              <Link
+                to="/checkout"
+                className="block w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold rounded-lg hover:from-green-400 hover:to-emerald-400 transition-all transform hover:scale-105 shadow-lg mb-4 text-center"
               >
                 Proceder al Pago
-              </button>
+              </Link>
 
               <Link
                 to="/products"

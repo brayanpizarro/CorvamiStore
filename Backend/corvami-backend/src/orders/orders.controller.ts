@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { ProcessPaymentDto } from './dto/process-payment.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -16,9 +17,12 @@ export class OrdersController {
     return this.ordersService.create(createOrderDto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Public()
   @Get()
-  findAll() {
+  findAll(@Query('email') email?: string) {
+    if (email) {
+      return this.ordersService.findByEmail(email);
+    }
     return this.ordersService.findAll();
   }
 
@@ -50,5 +54,11 @@ export class OrdersController {
   @Delete(':orderId')
   remove(@Param('orderId') orderId: string) {
     return this.ordersService.remove(orderId);
+  }
+
+  @Public()
+  @Post(':orderId/payment')
+  processPayment(@Param('orderId') orderId: string, @Body() paymentDto: ProcessPaymentDto) {
+    return this.ordersService.processCardPayment(orderId, paymentDto);
   }
 }

@@ -4,9 +4,9 @@ import { ObjectId } from 'mongodb';
 export interface OrderItem {
   productId: string;
   name: string;
-  price: number;
   quantity: number;
-  imageUrl?: string;
+  unitPrice: number;
+  totalPrice: number;
 }
 
 export interface ShippingInfo {
@@ -15,7 +15,8 @@ export interface ShippingInfo {
   phone: string;
   address: string;
   city: string;
-  country: string;
+  department: string;
+  zipCode?: string;
 }
 
 @Entity('orders')
@@ -33,22 +34,31 @@ export class Order {
   items: OrderItem[]; // Productos de la orden
 
   @Column()
+  subtotal: number; // Subtotal de productos
+
+  @Column()
+  shippingCost: number; // Costo de envío
+
+  @Column()
   total: number; // Total de la orden
 
   @Column()
   shippingInfo: ShippingInfo; // Información de envío
 
   @Column({ default: 'pending' })
-  status: string; // pending, paid, shipped, delivered, cancelled
+  status: string; // pending, paid, processing, shipped, delivered, cancelled
 
-  @Column({ default: 'balance' })
-  paymentMethod: string; // balance, credit_card, etc.
+  @Column({ default: 'pending' })
+  paymentMethod: string; // pending, credit_card, etc.
 
   @Column({ default: false })
   isPaid: boolean;
 
   @Column({ nullable: true })
   paidAt?: Date;
+
+  @Column({ nullable: true })
+  notes?: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;

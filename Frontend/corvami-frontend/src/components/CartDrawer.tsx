@@ -4,7 +4,6 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { AiOutlineClose, AiOutlineShoppingCart, AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
 import { FiTrash2 } from 'react-icons/fi';
-import CheckoutForm from './CheckoutForm';
 
 interface CartDrawerProps {
   isOpen: boolean;
@@ -14,7 +13,6 @@ interface CartDrawerProps {
 const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
   const { theme } = useTheme();
   const { cart, updateItem, removeItem, clear, loading } = useCart();
-  const [showCheckout, setShowCheckout] = useState(false);
 
   // Deshabilitar scroll del body cuando el drawer está abierto
   useEffect(() => {
@@ -224,16 +222,17 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
 
             {/* Buttons */}
             <div className="space-y-2">
-              <button
-                onClick={() => setShowCheckout(true)}
-                className={`w-full py-3 rounded-xl font-bold text-lg text-center transition-all ${
+              <Link
+                to="/cart"
+                onClick={onClose}
+                className={`block w-full py-3 rounded-xl font-bold text-lg text-center transition-all ${
                   theme === 'dark'
                     ? 'bg-green-500 hover:bg-green-400 text-black shadow-lg hover:shadow-green-500/50'
                     : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-green-600/50'
                 }`}
               >
-                Proceder al Pago
-              </button>
+                Ver Carrito Completo
+              </Link>
               <button
                 onClick={() => clear()}
                 disabled={loading}
@@ -251,18 +250,6 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           </div>
         )}
       </div>
-
-      {/* Checkout Form */}
-      {showCheckout && (
-        <CheckoutForm
-          onClose={() => setShowCheckout(false)}
-          onSuccess={(orderId) => {
-            setShowCheckout(false);
-            onClose();
-            alert(`¡Compra exitosa! ID de orden: ${orderId}`);
-          }}
-        />
-      )}
     </>
   );
 };

@@ -12,6 +12,9 @@ import Footer from './components/Footer';
 import CategoryPage from './components/CategoryPage';
 import AllProductsPage from './components/AllProductsPage';
 import CartPage from './components/CartPage';
+import CheckoutPage from './components/CheckoutPage';
+import OrderConfirmationPage from './components/OrderConfirmationPage';
+import ProfilePage from './components/ProfilePage';
 import AuthModal from './components/AuthModal';
 
 function HomePage() {
@@ -69,6 +72,30 @@ function App() {
           <>
             <Header />
             <CartPage />
+            <Footer />
+          </>
+        } />
+
+        <Route path="/checkout" element={
+          <>
+            <Header />
+            <CheckoutPage />
+            <Footer />
+          </>
+        } />
+
+        <Route path="/order-confirmation/:orderId" element={
+          <>
+            <Header />
+            <OrderConfirmationPage />
+            <Footer />
+          </>
+        } />
+
+        <Route path="/profile" element={
+          <>
+            <Header />
+            <ProfilePage />
             <Footer />
           </>
         } />

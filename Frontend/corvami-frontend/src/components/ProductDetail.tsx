@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
+import ProductReviews from './ProductReviews';
 import { AiFillStar, AiOutlineHeart, AiFillHeart, AiOutlineShoppingCart, AiOutlinePlus, AiOutlineMinus, AiOutlineCheck } from 'react-icons/ai';
 import { MdOutlineLocalShipping, MdOutlineShield, MdOutlineLoop } from 'react-icons/md';
 import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
@@ -483,10 +484,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               </div>
             )}
             {activeTab === 'reviews' && (
-              <div className={`text-center py-8 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-              }`}>
-                <p>Las reseñas estarán disponibles próximamente</p>
+              <div>
+                <ProductReviews productId={product.id.toString()} />
               </div>
             )}
           </div>

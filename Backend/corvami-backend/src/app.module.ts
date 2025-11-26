@@ -10,6 +10,7 @@ import { SeedModule } from './seed/seed.module';
 import { UsersModule } from './users/users.module';
 import { OrdersModule } from './orders/orders.module';
 import { AuthModule } from './auth/auth.module';
+import { EmailModule } from './email/email.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
@@ -27,6 +28,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     UsersModule,
     OrdersModule,
     AuthModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [

@@ -31,51 +31,33 @@ export class OrdersService {
       }
     }
 
-    let user: any = null;
-    
-    // Si es usuario registrado, validar y deducir saldo
-    if (createOrderDto.userId) {
-      user = await this.usersService.findOne(createOrderDto.userId);
-      
-      if (user.balance < createOrderDto.total) {
-        throw new BadRequestException('Saldo insuficiente');
-      }
-
-      // Deducir saldo
-      await this.usersService.deductBalance(user.userId, createOrderDto.total);
-    } else if (createOrderDto.isGuestCheckout) {
-      // Para invitados, crear un usuario temporal
-      user = await this.usersService.create({
-        email: createOrderDto.shippingInfo.email,
-        name: createOrderDto.shippingInfo.name,
-        phone: createOrderDto.shippingInfo.phone,
-        address: createOrderDto.shippingInfo.address,
-        city: createOrderDto.shippingInfo.city,
-        country: createOrderDto.shippingInfo.country,
-        balance: createOrderDto.total, // El invitado carga solo el monto de la compra
-        isRegistered: false,
-      });
-
-      // Deducir el saldo (dejará el balance en 0)
-      await this.usersService.deductBalance(user.userId, createOrderDto.total);
-    }
-
-    // Reducir stock de productos
-    for (const item of createOrderDto.items) {
-      await this.productosService.reduceStock(item.productId, item.quantity);
-    }
-
-    // Crear la orden
+    // Crear orden
     const order = this.ordersRepo.create({
       orderId: randomUUID(),
-      userId: user?.userId || null,
-      items: createOrderDto.items,
+      userId: createOrderDto.customer.userId || null,
+      items: createOrderDto.items.map(item => ({
+        productId: item.productId,
+        name: item.name,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        totalPrice: item.totalPrice,
+      })),
+      shippingInfo: {
+        name: createOrderDto.customer.name,
+        email: createOrderDto.customer.email,
+        phone: createOrderDto.customer.phone,
+        address: createOrderDto.customer.address,
+        city: createOrderDto.customer.city,
+        department: createOrderDto.customer.department,
+        zipCode: createOrderDto.customer.zipCode,
+      },
       total: createOrderDto.total,
-      shippingInfo: createOrderDto.shippingInfo,
-      paymentMethod: createOrderDto.paymentMethod || 'balance',
-      status: 'paid',
-      isPaid: true,
-      paidAt: new Date(),
+      subtotal: createOrderDto.subtotal,
+      shippingCost: createOrderDto.shipping,
+      status: 'pending',
+      isPaid: false,
+      paymentMethod: 'pending',
+      notes: createOrderDto.notes,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -83,7 +65,7 @@ export class OrdersService {
     return await this.ordersRepo.save(order);
   }
 
-  async findAll(): Promise<Order[]> {
+  async findAll(): Promise<Order[]> {  async findAll(): Promise<Order[]> {
     return await this.ordersRepo.find();
   }
 
@@ -105,6 +87,12 @@ export class OrdersService {
     });
   }
 
+  async findByEmail(email: string): Promise<Order[]> {
+    return await this.ordersRepo.find({
+      where: { 'shippingInfo.email': email },
+    });
+  }
+
   async update(orderId: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
     const order = await this.findOne(orderId);
 
@@ -119,5 +107,44 @@ export class OrdersService {
   async remove(orderId: string): Promise<void> {
     const order = await this.findOne(orderId);
     await this.ordersRepo.delete({ orderId: order.orderId });
+  }
+
+  async processCardPayment(orderId: string, paymentData: any): Promise<Order> {
+    const order = await this.findOne(orderId);
+
+    if (order.isPaid) {
+      throw new BadRequestException('Esta orden ya ha sido pagada');
+    }
+
+    // Validar tarjeta (simulación)
+    const validCards = [
+      '4111111111111111', // Visa
+      '5555555555554444', // Mastercard
+      '378282246310005',  // Amex
+      '6011111111111117', // Discover
+    ];
+
+    const cleanedCard = paymentData.cardNumber.replace(/\s/g, '');
+    
+    if (!validCards.includes(cleanedCard)) {
+      throw new BadRequestException('Tarjeta inválida. Usa: 4111 1111 1111 1111 para pruebas');
+    }
+
+    // Simular procesamiento de pago exitoso
+    const transactionId = `TXN-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
+
+    // Actualizar orden
+    order.isPaid = true;
+    order.paidAt = new Date();
+    order.status = 'paid';
+    order.paymentMethod = 'credit_card';
+    order.updatedAt = new Date();
+
+    // Guardar información del pago en notas (opcional)
+    if (!order.notes) {
+      order.notes = `Pago procesado con tarjeta **** **** **** ${cleanedCard.slice(-4)}. ID: ${transactionId}`;
+    }
+
+    return await this.ordersRepo.save(order);
   }
 }

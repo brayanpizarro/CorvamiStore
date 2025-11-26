@@ -9,17 +9,20 @@ export class OrderItemDto {
   name: string;
 
   @IsNumber()
-  price: number;
+  quantity: number;
 
   @IsNumber()
-  quantity: number;
+  unitPrice: number;
+
+  @IsNumber()
+  totalPrice: number;
 
   @IsString()
   @IsOptional()
-  imageUrl?: string;
+  image?: string;
 }
 
-export class ShippingInfoDto {
+export class CustomerInfoDto {
   @IsString()
   name: string;
 
@@ -36,13 +39,24 @@ export class ShippingInfoDto {
   city: string;
 
   @IsString()
-  country: string;
+  department: string;
+
+  @IsString()
+  @IsOptional()
+  zipCode?: string;
+
+  @IsBoolean()
+  isGuest: boolean;
+
+  @IsString()
+  @IsOptional()
+  userId?: string;
 }
 
 export class CreateOrderDto {
-  @IsString()
-  @IsOptional()
-  userId?: string; // Opcional para usuarios invitados
+  @ValidateNested()
+  @Type(() => CustomerInfoDto)
+  customer: CustomerInfoDto;
 
   @IsArray()
   @ValidateNested({ each: true })
@@ -50,17 +64,15 @@ export class CreateOrderDto {
   items: OrderItemDto[];
 
   @IsNumber()
-  total: number;
+  subtotal: number;
 
-  @ValidateNested()
-  @Type(() => ShippingInfoDto)
-  shippingInfo: ShippingInfoDto;
+  @IsNumber()
+  shipping: number;
+
+  @IsNumber()
+  total: number;
 
   @IsString()
   @IsOptional()
-  paymentMethod?: string;
-
-  @IsBoolean()
-  @IsOptional()
-  isGuestCheckout?: boolean; // true si es una compra sin registro
+  notes?: string;
 }
