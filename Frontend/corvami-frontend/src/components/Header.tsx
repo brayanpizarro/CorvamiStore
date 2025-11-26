@@ -6,6 +6,7 @@ import CategoriesDropdown from './CategoriesDropdown';
 import CartDrawer from './CartDrawer';
 import AuthModal from './AuthModal';
 import AddBalanceModal from './AddBalanceModal';
+import OrdersModal from './OrdersModal';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -15,6 +16,7 @@ const Header: React.FC = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAddBalance, setShowAddBalance] = useState(false);
+  const [showOrders, setShowOrders] = useState(false);
   const { cart } = useCart();
   const { user, isAuthenticated, isGuest, setShowAuthModal, logout } = useAuth();
   const navigate = useNavigate();
@@ -143,6 +145,15 @@ const Header: React.FC = () => {
                               Agregar Saldo
                             </button>
                           </div>
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              setShowOrders(true);
+                            }}
+                            className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors text-sm"
+                          >
+                            📦 Mis Órdenes
+                          </button>
                         </>
                       )}
                       {isGuest && (
@@ -224,6 +235,12 @@ const Header: React.FC = () => {
       <AddBalanceModal 
         isOpen={showAddBalance} 
         onClose={() => setShowAddBalance(false)} 
+      />
+
+      {/* Orders Modal */}
+      <OrdersModal 
+        isOpen={showOrders} 
+        onClose={() => setShowOrders(false)} 
       />
     </header>
   );
