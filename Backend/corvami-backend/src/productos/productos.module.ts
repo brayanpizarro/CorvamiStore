@@ -9,5 +9,6 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
   imports: [TypeOrmModule.forFeature([Producto])],
   controllers: [ProductosController],
   providers: [ProductosService, CloudinaryService],
+  exports: [ProductosService],
 })
 export class ProductosModule {}

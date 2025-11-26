@@ -60,4 +60,19 @@ export class ProductosService {
     );
     return { matched: result.matchedCount, modified: result.modifiedCount, imageUrl };
   }
+
+  async reduceStock(productId: string, quantity: number) {
+    const product = await this.findOne(productId);
+    if (!product) {
+      throw new Error(`Producto ${productId} no encontrado`);
+    }
+    if (product.stock < quantity) {
+      throw new Error(`Stock insuficiente para ${product.name}`);
+    }
+    const result = await this.repo.updateOne(
+      { productId },
+      { $set: { stock: product.stock - quantity, updatedAt: new Date() } },
+    );
+    return { matched: result.matchedCount, modified: result.modifiedCount };
+  }
 }
