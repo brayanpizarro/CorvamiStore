@@ -30,6 +30,7 @@ interface CartContextValue {
   updateItem: (productId: string, quantity: number) => Promise<void>;
   removeItem: (productId: string) => Promise<void>;
   clear: () => Promise<void>;
+  clearCart: () => Promise<void>;
   loading: boolean;
 }
 
@@ -154,7 +155,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode; userId?: string
   }, [cart]);
 
   return (
-    <CartContext.Provider value={{ cart, addItem, updateItem, removeItem, clear, loading }}>
+    <CartContext.Provider value={{ cart, addItem, updateItem, removeItem, clear, clearCart: clear, loading }}>
       {children}
     </CartContext.Provider>
   );

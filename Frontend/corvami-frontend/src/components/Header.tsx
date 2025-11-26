@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { AiOutlineMenu, AiOutlineClose, AiOutlineSearch, AiOutlineShoppingCart, AiOutlineUser } from 'react-icons/ai';
-import { Wallet } from 'lucide-react';
+import { AiOutlineMenu, AiOutlineClose, AiOutlineSearch, AiOutlineShoppingCart, AiOutlineUser, AiOutlineWallet } from 'react-icons/ai';
 import ThemeToggle from './ThemeToggle';
 import CategoriesDropdown from './CategoriesDropdown';
 import CartDrawer from './CartDrawer';
 import AuthModal from './AuthModal';
+import AddBalanceModal from './AddBalanceModal';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -14,6 +14,7 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showAddBalance, setShowAddBalance] = useState(false);
   const { cart } = useCart();
   const { user, isAuthenticated, isGuest, setShowAuthModal, logout } = useAuth();
   const navigate = useNavigate();
@@ -105,7 +106,7 @@ const Header: React.FC = () => {
                     <AiOutlineUser size={20} />
                     {isAuthenticated && user && (
                       <div className="hidden md:flex items-center gap-1 px-2 py-1 bg-green-500/20 rounded-lg">
-                        <Wallet size={14} className="text-green-400" />
+                        <AiOutlineWallet size={14} className="text-green-400" />
                         <span className="text-xs font-semibold text-green-400">
                           {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(user.balance)}
                         </span>
@@ -124,13 +125,23 @@ const Header: React.FC = () => {
                             <p className="text-gray-400 text-xs">{user.email}</p>
                           </div>
                           <div className="px-4 py-3 border-b border-gray-800 bg-green-500/10">
-                            <div className="flex items-center justify-between">
+                            <div className="flex items-center justify-between mb-2">
                               <span className="text-gray-400 text-xs">Saldo disponible</span>
-                              <Wallet size={14} className="text-green-400" />
+                              <AiOutlineWallet size={14} className="text-green-400" />
                             </div>
-                            <p className="text-green-400 font-bold text-lg">
+                            <p className="text-green-400 font-bold text-lg mb-3">
                               {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(user.balance)}
                             </p>
+                            <button
+                              onClick={() => {
+                                setShowUserMenu(false);
+                                setShowAddBalance(true);
+                              }}
+                              className="w-full px-3 py-2 bg-green-500 hover:bg-green-600 text-black font-semibold rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
+                            >
+                              <AiOutlineWallet size={16} />
+                              Agregar Saldo
+                            </button>
                           </div>
                         </>
                       )}
@@ -208,6 +219,12 @@ const Header: React.FC = () => {
           <AuthModal />
         </div>
       )}
+
+      {/* Add Balance Modal */}
+      <AddBalanceModal 
+        isOpen={showAddBalance} 
+        onClose={() => setShowAddBalance(false)} 
+      />
     </header>
   );
 };
