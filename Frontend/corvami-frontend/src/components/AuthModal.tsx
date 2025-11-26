@@ -1,26 +1,35 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
-import { AiOutlineClose, AiOutlineMail, AiOutlineLock, AiOutlineUser } from 'react-icons/ai';
+import { AiOutlineClose, AiOutlineMail, AiOutlineLock, AiOutlineUser, AiOutlinePhone } from 'react-icons/ai';
 
 const AuthModal: React.FC = () => {
   const { theme } = useTheme();
-  const { showAuthModal, setShowAuthModal, login, continueAsGuest } = useAuth();
+  const { showAuthModal, setShowAuthModal, login, register, continueAsGuest } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    name: '',
+    phone: '',
+  });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   if (!showAuthModal) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     try {
-      await login(email, password);
-    } catch (error) {
-      console.error('Error al iniciar sesión:', error);
+      if (isLogin) {
+        await login(formData.email, formData.password);
+      } else {
+        await register(formData.email, formData.password, formData.name, formData.phone);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error en la operación');
     } finally {
       setLoading(false);
     }
@@ -28,6 +37,14 @@ const AuthModal: React.FC = () => {
 
   const handleGuestClick = () => {
     continueAsGuest();
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+    setError('');
   };
 
   return (
@@ -68,37 +85,65 @@ const AuthModal: React.FC = () => {
           {/* Formulario */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
-              <div>
-                <label className={`block text-sm font-medium mb-2 ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                }`}>
-                  Nombre
-                </label>
-                <div className="relative">
-                  <AiOutlineUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                    theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
-                  }`} size={18} />
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Tu nombre"
-                    required={!isLogin}
-                    className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors ${
-                      theme === 'dark'
-                        ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-green-500'
-                        : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500'
-                    } focus:outline-none focus:ring-2 focus:ring-green-500/20`}
-                  />
+              <>
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    Nombre *
+                  </label>
+                  <div className="relative">
+                    <AiOutlineUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+                      theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                    }`} size={18} />
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="Tu nombre completo"
+                      required
+                      className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors ${
+                        theme === 'dark'
+                          ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-green-500'
+                          : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500'
+                      } focus:outline-none focus:ring-2 focus:ring-green-500/20`}
+                    />
+                  </div>
                 </div>
-              </div>
+
+                <div>
+                  <label className={`block text-sm font-medium mb-2 ${
+                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                  }`}>
+                    Teléfono
+                  </label>
+                  <div className="relative">
+                    <AiOutlinePhone className={`absolute left-3 top-1/2 -translate-y-1/2 ${
+                      theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                    }`} size={18} />
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder="3001234567"
+                      className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors ${
+                        theme === 'dark'
+                          ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-green-500'
+                          : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500'
+                      } focus:outline-none focus:ring-2 focus:ring-green-500/20`}
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             <div>
               <label className={`block text-sm font-medium mb-2 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
               }`}>
-                Email
+                Email *
               </label>
               <div className="relative">
                 <AiOutlineMail className={`absolute left-3 top-1/2 -translate-y-1/2 ${
@@ -106,8 +151,9 @@ const AuthModal: React.FC = () => {
                 }`} size={18} />
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
                   placeholder="tu@email.com"
                   required
                   className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors ${
@@ -123,7 +169,7 @@ const AuthModal: React.FC = () => {
               <label className={`block text-sm font-medium mb-2 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
               }`}>
-                Contraseña
+                Contraseña *
               </label>
               <div className="relative">
                 <AiOutlineLock className={`absolute left-3 top-1/2 -translate-y-1/2 ${
@@ -131,10 +177,12 @@ const AuthModal: React.FC = () => {
                 }`} size={18} />
                 <input
                   type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  placeholder="Mínimo 6 caracteres"
                   required
+                  minLength={6}
                   className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors ${
                     theme === 'dark'
                       ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-green-500'
@@ -143,6 +191,12 @@ const AuthModal: React.FC = () => {
                 />
               </div>
             </div>
+
+            {error && (
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500 text-red-500 text-sm">
+                {error}
+              </div>
+            )}
 
             {/* Botón submit */}
             <button

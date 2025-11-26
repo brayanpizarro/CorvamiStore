@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { AiOutlineMenu, AiOutlineClose, AiOutlineSearch, AiOutlineShoppingCart, AiOutlineUser } from 'react-icons/ai';
+import { AiOutlineMenu, AiOutlineClose, AiOutlineSearch, AiOutlineShoppingCart, AiOutlineUser, AiOutlineWallet } from 'react-icons/ai';
 import ThemeToggle from './ThemeToggle';
 import CategoriesDropdown from './CategoriesDropdown';
 import CartDrawer from './CartDrawer';
+import AuthModal from './AuthModal';
+import AddBalanceModal from './AddBalanceModal';
+import OrdersModal from './OrdersModal';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -12,6 +15,8 @@ const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showAddBalance, setShowAddBalance] = useState(false);
+  const [showOrders, setShowOrders] = useState(false);
   const { cart } = useCart();
   const { user, isAuthenticated, isGuest, setShowAuthModal, logout } = useAuth();
   const navigate = useNavigate();
@@ -98,24 +103,71 @@ const Header: React.FC = () => {
                 <>
                   <button 
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="relative text-white hover:text-green-400 transition-colors"
+                    className="relative text-white hover:text-green-400 transition-colors flex items-center gap-2"
                   >
                     <AiOutlineUser size={20} />
+                    {isAuthenticated && user && (
+                      <div className="hidden md:flex items-center gap-1 px-2 py-1 bg-green-500/20 rounded-lg">
+                        <AiOutlineWallet size={14} className="text-green-400" />
+                        <span className="text-xs font-semibold text-green-400">
+                          {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(user.balance)}
+                        </span>
+                      </div>
+                    )}
                     <span className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full"></span>
                   </button>
 
                   {/* User Dropdown */}
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-48 bg-gray-900 rounded-lg shadow-xl border border-gray-800 py-2">
+                    <div className="absolute right-0 mt-2 w-56 bg-gray-900 rounded-lg shadow-xl border border-gray-800 py-2">
                       {isAuthenticated && user && (
-                        <div className="px-4 py-2 border-b border-gray-800">
-                          <p className="text-white font-medium text-sm">{user.firstName || user.name}</p>
-                          <p className="text-gray-400 text-xs">{user.email}</p>
-                        </div>
+                        <>
+                          <div className="px-4 py-3 border-b border-gray-800">
+                            <p className="text-white font-medium text-sm">{user.name}</p>
+                            <p className="text-gray-400 text-xs">{user.email}</p>
+                          </div>
+                          <div className="px-4 py-3 border-b border-gray-800 bg-green-500/10">
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-gray-400 text-xs">Saldo disponible</span>
+                              <AiOutlineWallet size={14} className="text-green-400" />
+                            </div>
+                            <p className="text-green-400 font-bold text-lg mb-3">
+                              {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(user.balance)}
+                            </p>
+                            <button
+                              onClick={() => {
+                                setShowUserMenu(false);
+                                setShowAddBalance(true);
+                              }}
+                              className="w-full px-3 py-2 bg-green-500 hover:bg-green-600 text-black font-semibold rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
+                            >
+                              <AiOutlineWallet size={16} />
+                              Agregar Saldo
+                            </button>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              setShowOrders(true);
+                            }}
+                            className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors text-sm"
+                          >
+                            📦 Mis Órdenes
+                          </button>
+                        </>
                       )}
                       {isGuest && (
                         <div className="px-4 py-2 border-b border-gray-800">
                           <p className="text-gray-400 text-xs">Modo invitado</p>
+                          <button
+                            onClick={() => {
+                              setShowUserMenu(false);
+                              setShowAuthModal(true);
+                            }}
+                            className="mt-2 text-green-400 text-xs hover:text-green-300"
+                          >
+                            Crear cuenta para guardar tu info
+                          </button>
                         </div>
                       )}
                       <button
@@ -171,6 +223,25 @@ const Header: React.FC = () => {
 
       {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      
+      {/* Auth Modal */}
+      {!isAuthenticated && !isGuest && (
+        <div onClick={() => setShowAuthModal(false)}>
+          <AuthModal />
+        </div>
+      )}
+
+      {/* Add Balance Modal */}
+      <AddBalanceModal 
+        isOpen={showAddBalance} 
+        onClose={() => setShowAddBalance(false)} 
+      />
+
+      {/* Orders Modal */}
+      <OrdersModal 
+        isOpen={showOrders} 
+        onClose={() => setShowOrders(false)} 
+      />
     </header>
   );
 };

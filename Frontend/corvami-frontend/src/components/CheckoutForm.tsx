@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import { User, CreditCard, Truck, CheckCircle } from 'lucide-react';
 
 interface CheckoutFormProps {
@@ -11,20 +12,41 @@ interface CheckoutFormProps {
 const CheckoutForm: React.FC<CheckoutFormProps> = ({ onClose, onSuccess }) => {
   const { theme } = useTheme();
   const { cart, clearCart } = useCart();
+  const { user, isAuthenticated } = useAuth();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState<'info' | 'payment' | 'success'>('info');
-  const [isRegistered, setIsRegistered] = useState(false);
 
-  // Formulario de datos
+  // Calcular total del carrito
+  const cartTotal = cart?.items.reduce((sum, item) => {
+    const price = item.unitPrice || item.price || 0;
+    return sum + (price * item.quantity);
+  }, 0) || 0;
+
+  // Formulario de datos - prellenar si el usuario está autenticado
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    country: 'Colombia',
-    balance: cart?.total || 0,
+    name: user?.name || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    address: user?.address || '',
+    city: user?.city || '',
+    country: user?.country || 'Colombia',
+    balance: cartTotal,
   });
+
+  // Actualizar datos si el usuario inicia sesión o cambia
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        address: user.address || '',
+        city: user.city || '',
+        country: user.country || 'Colombia',
+        balance: cartTotal,
+      });
+    }
+  }, [user, isAuthenticated, cartTotal]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -43,15 +65,19 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onClose, onSuccess }) => {
     setLoading(true);
 
     try {
+      // Si el usuario está registrado, usar su userId
+      const userId = isAuthenticated && user ? user.userId : undefined;
+
       const orderData = {
+        userId, // Solo se incluye si es usuario registrado
         items: cart?.items.map(item => ({
           productId: item.productId,
           name: item.name,
-          price: item.price,
+          price: item.unitPrice || item.price,
           quantity: item.quantity,
           imageUrl: item.image,
         })) || [],
-        total: cart?.total || 0,
+        total: cartTotal,
         shippingInfo: {
           name: formData.name,
           email: formData.email,
@@ -61,7 +87,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onClose, onSuccess }) => {
           country: formData.country,
         },
         paymentMethod: 'balance',
-        isGuestCheckout: !isRegistered,
+        isGuestCheckout: !isAuthenticated,
       };
 
       const response = await fetch('http://localhost:3000/orders', {
@@ -335,21 +361,24 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onClose, onSuccess }) => {
                 Resumen del Pedido
               </h3>
               <div className="space-y-2">
-                {cart?.items.map((item) => (
-                  <div key={item.productId} className="flex justify-between">
-                    <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>
-                      {item.name} x {item.quantity}
-                    </span>
-                    <span className="font-semibold text-green-500">
-                      {formatPrice(item.price * item.quantity)}
-                    </span>
-                  </div>
-                ))}
+                {cart?.items.map((item) => {
+                  const price = item.unitPrice || item.price || 0;
+                  return (
+                    <div key={item.productId} className="flex justify-between">
+                      <span className={theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}>
+                        {item.name} x {item.quantity}
+                      </span>
+                      <span className="font-semibold text-green-500">
+                        {formatPrice(price * item.quantity)}
+                      </span>
+                    </div>
+                  );
+                })}
                 <div className={`pt-4 border-t-2 flex justify-between text-xl font-bold ${
                   theme === 'dark' ? 'border-gray-700 text-white' : 'border-gray-300 text-gray-900'
                 }`}>
                   <span>Total:</span>
-                  <span className="text-green-500">{formatPrice(cart?.total || 0)}</span>
+                  <span className="text-green-500">{formatPrice(cartTotal)}</span>
                 </div>
               </div>
             </div>
@@ -368,14 +397,37 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onClose, onSuccess }) => {
               <p className={`text-sm mb-4 ${
                 theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
               }`}>
-                {isRegistered 
+                {isAuthenticated 
                   ? 'Se deducirá de tu saldo registrado'
                   : 'Como invitado, se cargará el monto exacto de tu compra'}
               </p>
+              {isAuthenticated && user && (
+                <div className={`mb-3 p-3 rounded-lg ${
+                  theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+                }`}>
+                  <p className={`text-xs ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    Saldo disponible
+                  </p>
+                  <p className={`text-lg font-bold ${
+                    user.balance >= cartTotal 
+                      ? 'text-green-500' 
+                      : 'text-red-500'
+                  }`}>
+                    {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(user.balance)}
+                  </p>
+                  {user.balance < cartTotal && (
+                    <p className="text-xs text-red-500 mt-1">
+                      Saldo insuficiente. Agrega más saldo para continuar.
+                    </p>
+                  )}
+                </div>
+              )}
               <div className={`text-2xl font-bold ${
                 theme === 'dark' ? 'text-green-400' : 'text-green-600'
               }`}>
-                Saldo a cargar: {formatPrice(cart?.total || 0)}
+                Saldo a cargar: {formatPrice(cartTotal)}
               </div>
             </div>
 
@@ -400,7 +452,7 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onClose, onSuccess }) => {
                     : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 hover:shadow-green-500/50'
                 } text-black`}
               >
-                {loading ? 'Procesando...' : `Pagar ${formatPrice(cart?.total || 0)}`}
+                {loading ? 'Procesando...' : `Pagar ${formatPrice(cartTotal)}`}
               </button>
             </div>
           </form>
