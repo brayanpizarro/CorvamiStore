@@ -65,7 +65,7 @@ export class OrdersService {
     return await this.ordersRepo.save(order);
   }
 
-  async findAll(): Promise<Order[]> {  async findAll(): Promise<Order[]> {
+  async findAll(): Promise<Order[]> {
     return await this.ordersRepo.find();
   }
 
