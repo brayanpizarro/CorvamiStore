@@ -43,7 +43,15 @@ const CheckoutForm: React.FC<CheckoutFormProps> = ({ onClose, onSuccess }) => {
     setLoading(true);
 
     try {
+      // Si el usuario está registrado, usar su userId
+      let userId = undefined;
+      if (isRegistered) {
+        // TODO: Obtener userId del contexto de autenticación
+        // userId = user.userId;
+      }
+
       const orderData = {
+        userId, // Solo se incluye si es usuario registrado
         items: cart?.items.map(item => ({
           productId: item.productId,
           name: item.name,
