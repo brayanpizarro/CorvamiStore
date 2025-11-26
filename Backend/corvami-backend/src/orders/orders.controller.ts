@@ -1,37 +1,52 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { Public } from '../auth/decorators/public.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
+  @Public()
   @Post()
   create(@Body() createOrderDto: CreateOrderDto) {
     return this.ordersService.create(createOrderDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   findAll() {
     return this.ordersService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('my-orders')
+  findMyOrders(@CurrentUser() user: any) {
+    return this.ordersService.findByUser(user.userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':orderId')
-  findOne(@Param('orderId') orderId: string) {
+  findOne(@Param('orderId') orderId: string, @CurrentUser() user: any) {
     return this.ordersService.findOne(orderId);
   }
 
+  @Public()
   @Get('user/:userId')
   findByUser(@Param('userId') userId: string) {
     return this.ordersService.findByUser(userId);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':orderId')
   update(@Param('orderId') orderId: string, @Body() updateOrderDto: UpdateOrderDto) {
     return this.ordersService.update(orderId, updateOrderDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':orderId')
   remove(@Param('orderId') orderId: string) {
     return this.ordersService.remove(orderId);

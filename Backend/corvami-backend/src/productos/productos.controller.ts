@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, BadRequestException, UseGuards } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductosService } from './productos.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { Public } from '../auth/decorators/public.decorator';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 // Eliminado almacenamiento local, ahora se sube a Cloudinary
 
 @Controller('productos')
@@ -13,32 +15,38 @@ export class ProductosController {
     private readonly cloudinary: CloudinaryService,
   ) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createProductoDto: CreateProductoDto) {
     return this.productosService.create(createProductoDto);
   }
 
+  @Public()
   @Get()
   findAll() {
     return this.productosService.findAll();
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.productosService.findOne(id);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateProductoDto: UpdateProductoDto) {
     return this.productosService.update(id, updateProductoDto);
   }
 
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productosService.remove(id);
   }
 
   // Subir imagen a Cloudinary
+  @UseGuards(JwtAuthGuard)
   @Post(':id/image')
   @UseInterceptors(
     FileInterceptor('file', {
@@ -61,6 +69,7 @@ export class ProductosController {
   }
 
   // Borrar imagen del producto (Cloudinary + limpiar campo)
+  @UseGuards(JwtAuthGuard)
   @Delete(':id/image')
   async deleteImage(@Param('id') id: string) {
     await this.cloudinary.deleteProductImage(id);
