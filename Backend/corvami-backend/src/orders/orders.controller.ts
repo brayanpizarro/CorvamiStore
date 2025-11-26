@@ -29,6 +29,12 @@ export class OrdersController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('can-review/:productId')
+  canReviewProduct(@Param('productId') productId: string, @CurrentUser() user: any) {
+    return this.ordersService.hasUserPurchasedProduct(user.userId, productId);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Get(':orderId')
   findOne(@Param('orderId') orderId: string, @CurrentUser() user: any) {
     return this.ordersService.findOne(orderId);
