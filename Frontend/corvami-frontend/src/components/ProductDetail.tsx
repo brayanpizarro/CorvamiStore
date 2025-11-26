@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,6 +6,8 @@ import { AiFillStar, AiOutlineHeart, AiFillHeart, AiOutlineShoppingCart, AiOutli
 import { MdOutlineLocalShipping, MdOutlineShield, MdOutlineLoop } from 'react-icons/md';
 import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
 import { RiAwardLine } from 'react-icons/ri';
+import ReviewModal from './ReviewModal';
+import { canReviewProduct, getProductComments, type Comment } from '../api/comments';
 
 interface Product {
   id: string | number;
@@ -37,13 +39,50 @@ interface ProductDetailProps {
 const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToCart }) => {
   const { theme } = useTheme();
   const { addItem, loading: cartLoading } = useCart();
-  const { isAuthenticated, isGuest, setShowAuthModal } = useAuth();
+  const { isAuthenticated, isGuest, setShowAuthModal, user } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description');
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [canReview, setCanReview] = useState(false);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loadingComments, setLoadingComments] = useState(false);
 
   const images = product.images || [product.image];
+
+  // Cargar comentarios
+  useEffect(() => {
+    loadComments();
+  }, [product.id]);
+
+  // Verificar si puede dejar reseña
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      checkCanReview();
+    }
+  }, [isAuthenticated, user, product.id]);
+
+  const loadComments = async () => {
+    setLoadingComments(true);
+    try {
+      const data = await getProductComments(String(product.id));
+      setComments(data);
+    } catch (error) {
+      console.error('Error cargando comentarios:', error);
+    } finally {
+      setLoadingComments(false);
+    }
+  };
+
+  const checkCanReview = async () => {
+    try {
+      const can = await canReviewProduct(String(product.id));
+      setCanReview(can);
+    } catch (error) {
+      console.error('Error verificando permiso de reseña:', error);
+    }
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -483,15 +522,110 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               </div>
             )}
             {activeTab === 'reviews' && (
-              <div className={`text-center py-8 ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-              }`}>
-                <p>Las reseñas estarán disponibles próximamente</p>
+              <div className="space-y-4">
+                {/* Botón para dejar reseña */}
+                {isAuthenticated && canReview && (
+                  <div className="mb-6">
+                    <button
+                      onClick={() => setShowReviewModal(true)}
+                      className="w-full py-3 px-4 bg-green-500 text-black font-semibold rounded-lg hover:bg-green-600 transition-colors"
+                    >
+                      Escribir Reseña
+                    </button>
+                  </div>
+                )}
+
+                {/* Mensaje si no puede dejar reseña */}
+                {isAuthenticated && !canReview && (
+                  <div className={`p-4 rounded-lg ${
+                    theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+                  }`}>
+                    <p className={`text-sm ${
+                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                    }`}>
+                      Solo los usuarios que han comprado este producto pueden dejar reseñas
+                    </p>
+                  </div>
+                )}
+
+                {/* Lista de comentarios */}
+                {loadingComments ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mx-auto"></div>
+                  </div>
+                ) : comments.length === 0 ? (
+                  <div className={`text-center py-8 ${
+                    theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  }`}>
+                    <p>Aún no hay reseñas para este producto</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {comments.map((comment) => (
+                      <div
+                        key={comment.commentId}
+                        className={`p-4 rounded-lg ${
+                          theme === 'dark' ? 'bg-gray-800' : 'bg-gray-50'
+                        }`}
+                      >
+                        {/* Rating */}
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="flex">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <span
+                                key={star}
+                                className={`text-lg ${
+                                  star <= comment.rating
+                                    ? 'text-yellow-400'
+                                    : theme === 'dark'
+                                    ? 'text-gray-600'
+                                    : 'text-gray-300'
+                                }`}
+                              >
+                                ★
+                              </span>
+                            ))}
+                          </div>
+                          <span className={`text-xs ${
+                            theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                          }`}>
+                            {new Date(comment.createdAt).toLocaleDateString('es-CO')}
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        {comment.title && (
+                          <h4 className={`font-semibold mb-1 ${
+                            theme === 'dark' ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            {comment.title}
+                          </h4>
+                        )}
+
+                        {/* Content */}
+                        <p className={`text-sm ${
+                          theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                        }`}>
+                          {comment.content}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        productId={String(product.id)}
+        productName={product.name}
+        onReviewSubmitted={loadComments}
+      />
     </div>
   );
 };

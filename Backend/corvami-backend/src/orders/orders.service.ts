@@ -120,4 +120,21 @@ export class OrdersService {
     const order = await this.findOne(orderId);
     await this.ordersRepo.delete({ orderId: order.orderId });
   }
+
+  async hasUserPurchasedProduct(userId: string, productId: string): Promise<boolean> {
+    // Buscar órdenes del usuario que estén pagadas
+    const orders = await this.ordersRepo.find({
+      where: {
+        userId,
+        isPaid: true,
+      },
+    });
+
+    // Verificar si alguna orden contiene el producto
+    const hasPurchased = orders.some(order => 
+      order.items.some(item => item.productId === productId)
+    );
+
+    return hasPurchased;
+  }
 }
