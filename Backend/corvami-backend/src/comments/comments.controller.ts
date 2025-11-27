@@ -23,10 +23,14 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  @Public()
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Param('productId') productId: string, @Body() dto: CreateCommentDto) {
-    return this.commentsService.create({ ...dto, productId });
+  create(
+    @Param('productId') productId: string,
+    @Body() dto: CreateCommentDto,
+    @CurrentUser() user: any,
+  ) {
+    return this.commentsService.create({ ...dto, productId, userId: user.userId });
   }
 
   @Public()

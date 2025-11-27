@@ -11,7 +11,7 @@ interface ProductReviewsProps {
 
 export default function ProductReviews({ productId }: ProductReviewsProps) {
   const { theme } = useTheme();
-  const { user } = useAuth();
+  const { user, isAuthenticated, isGuest } = useAuth();
   const isDark = theme === 'dark';
   const [reviews, setReviews] = useState<Review[]>([]);
   const [summary, setSummary] = useState<ReviewsSummary | null>(null);
@@ -25,6 +25,8 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   const [replies, setReplies] = useState<Record<string, Review[]>>({});
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [canReview, setCanReview] = useState(false);
+  const [checkingPurchase, setCheckingPurchase] = useState(false);
   
   const [formData, setFormData] = useState({
     rating: 5,
@@ -35,7 +37,28 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   useEffect(() => {
     loadReviews();
     loadSummary();
-  }, [productId, page, sort]);
+    if (isAuthenticated && !isGuest) {
+      checkCanReview();
+    }
+  }, [productId, page, sort, isAuthenticated, isGuest]);
+
+  const checkCanReview = async () => {
+    if (!isAuthenticated || isGuest) {
+      setCanReview(false);
+      return;
+    }
+
+    try {
+      setCheckingPurchase(true);
+      const result = await reviewsApi.canReviewProduct(productId);
+      setCanReview(result);
+    } catch (error) {
+      console.error('Error checking review permission:', error);
+      setCanReview(false);
+    } finally {
+      setCheckingPurchase(false);
+    }
+  };
 
   const loadReviews = async () => {
     try {
@@ -159,8 +182,18 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
   const handleSubmitReview = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!user) {
+    if (!isAuthenticated) {
       alert('Debes iniciar sesión para dejar una reseña');
+      return;
+    }
+
+    if (isGuest) {
+      alert('Los usuarios invitados no pueden dejar reseñas. Por favor registra una cuenta.');
+      return;
+    }
+
+    if (!canReview && !editingReview) {
+      alert('Solo puedes dejar una reseña si has comprado este producto');
       return;
     }
 
@@ -277,13 +310,38 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
             </div>
           </div>
 
-          {user && (
+          {!isGuest && canReview && (
             <button
               onClick={() => setShowReviewForm(!showReviewForm)}
-              className="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-colors font-semibold"
+              disabled={checkingPurchase}
+              className="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-colors font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {showReviewForm ? 'Cancelar' : 'Escribir una reseña'}
+              {checkingPurchase ? 'Verificando...' : showReviewForm ? 'Cancelar' : 'Escribir una reseña'}
             </button>
+          )}
+          
+          {isGuest && (
+            <div className={`p-4 rounded-lg ${isDark ? 'bg-yellow-900/30 border border-yellow-700' : 'bg-yellow-50 border border-yellow-200'}`}>
+              <p className={`text-sm ${isDark ? 'text-yellow-300' : 'text-yellow-800'}`}>
+                Los usuarios invitados no pueden dejar reseñas. Por favor registra una cuenta.
+              </p>
+            </div>
+          )}
+          
+          {isAuthenticated && !isGuest && !canReview && !checkingPurchase && (
+            <div className={`p-4 rounded-lg ${isDark ? 'bg-blue-900/30 border border-blue-700' : 'bg-blue-50 border border-blue-200'}`}>
+              <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-800'}`}>
+                Solo puedes dejar una reseña si has comprado este producto.
+              </p>
+            </div>
+          )}
+          
+          {!isAuthenticated && (
+            <div className={`p-4 rounded-lg ${isDark ? 'bg-gray-700 border border-gray-600' : 'bg-gray-100 border border-gray-300'}`}>
+              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                Debes iniciar sesión para dejar una reseña.
+              </p>
+            </div>
           )}
         </div>
       )}

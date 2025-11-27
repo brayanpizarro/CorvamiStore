@@ -172,5 +172,31 @@ export const reviewsApi = {
 
     return response.json();
   },
+
+  canReviewProduct: async (productId: string): Promise<boolean> => {
+    const token = getAuthToken();
+    if (!token) {
+      return false;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/orders/can-review/${productId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        return false;
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error verificando permiso de reseña:', error);
+      return false;
+    }
+  },
 };
 

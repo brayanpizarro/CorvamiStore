@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MongoRepository } from 'typeorm';
 import { randomUUID } from 'crypto';
@@ -8,15 +8,31 @@ import {
   UpdateCommentDto,
   UpdateCommentStatusDto,
 } from './dto/update-comment.dto';
+import { OrdersService } from '../orders/orders.service';
 
 @Injectable()
 export class CommentsService {
   constructor(
     @InjectRepository(Comment)
     private readonly repo: MongoRepository<Comment>,
+    private readonly ordersService: OrdersService,
   ) {}
 
   async create(dto: CreateCommentDto) {
+    // Solo permitir reseñas principales (rating > 0) si el usuario compró el producto
+    if (dto.rating > 0) {
+      const hasPurchased = await this.ordersService.hasUserPurchasedProduct(
+        dto.userId,
+        dto.productId,
+      );
+
+      if (!hasPurchased) {
+        throw new ForbiddenException(
+          'Solo puedes dejar una reseña si has comprado este producto',
+        );
+      }
+    }
+
     const entity: Partial<Comment> = {
       commentId: randomUUID(),
       productId: dto.productId,
