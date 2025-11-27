@@ -39,6 +39,9 @@ export class OrdersService {
       }
     }
 
+    // Determinar si es invitado
+    const isGuest = createOrderDto.customer.isGuest || !createOrderDto.customer.userId;
+
     // Crear orden
     const order = this.ordersRepo.create({
       orderId: randomUUID(),
@@ -62,15 +65,39 @@ export class OrdersService {
       total: createOrderDto.total,
       subtotal: createOrderDto.subtotal,
       shippingCost: createOrderDto.shipping,
-      status: 'pending',
-      isPaid: false,
-      paymentMethod: 'pending',
-      notes: createOrderDto.notes,
+      status: isGuest ? 'paid' : 'pending',
+      isPaid: isGuest,
+      paidAt: isGuest ? new Date() : undefined,
+      paymentMethod: isGuest ? 'guest_checkout' : 'pending',
+      notes: isGuest 
+        ? `Compra como invitado. Total: $${createOrderDto.total.toLocaleString()}`
+        : createOrderDto.notes,
       createdAt: new Date(),
       updatedAt: new Date(),
     });
 
-    return await this.ordersRepo.save(order);
+    const savedOrder = await this.ordersRepo.save(order);
+
+    // Si es invitado, reducir stock inmediatamente
+    if (isGuest) {
+      for (const item of savedOrder.items) {
+        const product = await this.productosService.findOne(item.productId);
+        if (product) {
+          await this.productosService.update(item.productId, {
+            stock: product.stock - item.quantity,
+          });
+        }
+      }
+
+      // Enviar correo de confirmación
+      try {
+        await this.emailService.sendOrderConfirmationEmail(savedOrder);
+      } catch (error) {
+        console.error('Error enviando correo de confirmación:', error);
+      }
+    }
+
+    return savedOrder;
   }
 
   async findAll(): Promise<Order[]> {
