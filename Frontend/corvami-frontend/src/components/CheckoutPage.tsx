@@ -102,8 +102,8 @@ export default function CheckoutPage() {
     if (!formData.city.trim()) newErrors.city = 'La ciudad es requerida';
     if (!formData.department.trim()) newErrors.department = 'El departamento es requerido';
 
-    // Solo validar tarjeta si el método de pago es tarjeta
-    if (paymentMethod === 'card') {
+    // Solo validar tarjeta si el usuario está autenticado y el método de pago es tarjeta
+    if (isAuthenticated && paymentMethod === 'card') {
       if (!formData.cardNumber.trim()) newErrors.cardNumber = 'Número de tarjeta requerido';
       else if (formData.cardNumber.replace(/\s/g, '').length !== 16) {
         newErrors.cardNumber = 'Número de tarjeta inválido';
@@ -117,11 +117,9 @@ export default function CheckoutPage() {
       else if (formData.cvv.length < 3) {
         newErrors.cvv = 'CVV inválido';
       }
-    } else if (paymentMethod === 'balance') {
-      // Validar que el usuario esté autenticado y tenga saldo suficiente
-      if (!isAuthenticated || !user) {
-        newErrors.payment = 'Debes iniciar sesión para pagar con saldo';
-      } else if (user.balance < total) {
+    } else if (isAuthenticated && paymentMethod === 'balance') {
+      // Validar que el usuario tenga saldo suficiente
+      if (user && user.balance < total) {
         newErrors.payment = `Saldo insuficiente. Tienes ${formatPrice(user.balance)} y necesitas ${formatPrice(total)}`;
       }
     }
@@ -170,7 +168,16 @@ export default function CheckoutPage() {
       // Crear orden
       const order = await ordersApi.createOrder(orderData);
 
-      // Procesar pago según el método seleccionado
+      // Si es invitado, la orden ya está pagada automáticamente
+      if (!user) {
+        // Limpiar carrito
+        clear();
+        // Redirigir a confirmación
+        navigate(`/order-confirmation/${order.id}`);
+        return;
+      }
+
+      // Procesar pago para usuarios registrados según el método seleccionado
       let paidOrder;
       if (paymentMethod === 'balance') {
         paidOrder = await ordersApi.processBalancePayment(order.id);
@@ -405,7 +412,7 @@ export default function CheckoutPage() {
                   </h2>
                 </div>
 
-                {/* Selector de Método de Pago */}
+                {/* Selector de Método de Pago - Solo para usuarios registrados */}
                 {isAuthenticated && user && (
                   <div className="mb-6">
                     <label className={`block text-sm font-medium mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
@@ -461,7 +468,16 @@ export default function CheckoutPage() {
                   </div>
                 )}
 
-                {paymentMethod === 'card' && (
+                {/* Información para invitados */}
+                {!isAuthenticated && (
+                  <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-blue-900/30 border border-blue-700' : 'bg-blue-50 border border-blue-200'}`}>
+                    <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                      ✓ Como invitado, tu pedido se procesará automáticamente. Recibirás un correo de confirmación.
+                    </p>
+                  </div>
+                )}
+
+                {isAuthenticated && paymentMethod === 'card' && (
                   <>
                     <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
                       <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>

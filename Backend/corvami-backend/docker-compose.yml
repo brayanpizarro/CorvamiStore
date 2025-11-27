@@ -38,6 +38,8 @@ services:
       - CLOUDINARY_CLOUD_NAME=def0eymwn
       - CLOUDINARY_API_KEY=298765669195532
       - CLOUDINARY_API_SECRET=7ybs0jIHP5eS2IO-XzcsWpTZPps
+      - EMAIL_USER=soporteucenin@gmail.com
+      - EMAIL_PASSWORD=xsdkpcsxftgnnfcn
     depends_on:
       - redis
       - mongodb

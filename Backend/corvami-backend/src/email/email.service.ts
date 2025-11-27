@@ -227,6 +227,8 @@ export class EmailService {
     const paymentMethodText =
       order.paymentMethod === 'balance'
         ? 'Saldo de Cuenta'
+        : order.paymentMethod === 'guest_checkout'
+        ? 'Compra como Invitado'
         : 'Tarjeta de Crédito';
 
     const mailOptions = {
@@ -346,7 +348,7 @@ export class EmailService {
                           ${order.shippingInfo.address}
                         </p>
                         <p style="margin: 0 0 8px 0; color: #6b7280; line-height: 1.6;">
-                          ${order.shippingInfo.city}, ${order.shippingInfo.postalCode}
+                          ${order.shippingInfo.city}, ${order.shippingInfo.department}
                         </p>
                         <p style="margin: 0; color: #6b7280; line-height: 1.6;">
                           Tel: ${order.shippingInfo.phone}

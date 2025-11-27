@@ -51,9 +51,9 @@ export class OrdersController {
     return this.ordersService.hasUserPurchasedProduct(user.userId, productId);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Public()
   @Get(':orderId')
-  findOne(@Param('orderId') orderId: string, @CurrentUser() user: any) {
+  findOne(@Param('orderId') orderId: string) {
     return this.ordersService.findOne(orderId);
   }
 
@@ -73,9 +73,12 @@ export class OrdersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':orderId')
-  remove(@Param('orderId') orderId: string) {
-    return this.ordersService.remove(orderId);
+  @Post(':orderId/payment/balance')
+  processBalancePayment(
+    @Param('orderId') orderId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.ordersService.processBalancePayment(orderId, user.userId);
   }
 
   @Public()
@@ -88,11 +91,8 @@ export class OrdersController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post(':orderId/payment/balance')
-  processBalancePayment(
-    @Param('orderId') orderId: string,
-    @CurrentUser() user: any,
-  ) {
-    return this.ordersService.processBalancePayment(orderId, user.userId);
+  @Delete(':orderId')
+  remove(@Param('orderId') orderId: string) {
+    return this.ordersService.remove(orderId);
   }
 }
