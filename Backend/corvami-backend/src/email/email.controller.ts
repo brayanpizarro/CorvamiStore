@@ -18,7 +18,7 @@ export class EmailController {
     try {
       // Enviar email a la tienda
       await this.emailService.sendContactEmail(data);
-      
+
       // Enviar email de confirmación al usuario
       await this.emailService.sendConfirmationEmail(data.email, data.name);
 
@@ -28,7 +28,9 @@ export class EmailController {
       };
     } catch (error) {
       console.error('Error sending email:', error);
-      throw new Error('Error al enviar el mensaje. Por favor intenta de nuevo.');
+      throw new Error(
+        'Error al enviar el mensaje. Por favor intenta de nuevo.',
+      );
     }
   }
 }

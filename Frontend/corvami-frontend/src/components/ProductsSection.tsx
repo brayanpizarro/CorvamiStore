@@ -95,27 +95,28 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
           }`}>Los más vendidos con ofertas especiales</p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
           {products.map((product) => (
             <div key={product.productId} className={`backdrop-blur-sm rounded-xl border-2 shadow-lg transition-all duration-300 overflow-hidden group hover:scale-105 ${
               theme === 'dark' 
                 ? 'bg-gray-800/50 border-green-500/30 hover:border-green-400/60 hover:bg-gray-700/70 hover:shadow-green-500/25'
                 : 'bg-white/80 border-green-400/40 hover:border-green-500/70 hover:bg-white/90 hover:shadow-green-400/30'
             }`}>
-              <div className="relative overflow-hidden">
+              <div className="relative overflow-hidden aspect-video sm:aspect-square">
                 <img 
                   src={product.imageUrl || 'https://via.placeholder.com/400'} 
                   alt={product.name}
-                  className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
                 {product.stock > 0 && (
-                  <div className="absolute top-4 left-4 bg-gradient-to-r from-green-500 to-emerald-500 text-black px-3 py-1 rounded-full text-sm font-bold shadow-lg">
+                  <div className="absolute top-3 left-3 bg-gradient-to-r from-green-500 to-emerald-500 text-black px-3 py-1 rounded-full text-xs sm:text-sm font-bold shadow-lg">
                     Stock: {product.stock}
                   </div>
                 )}
               </div>
-              <div className="p-6">
-                <div className="flex items-center mb-2">
+              <div className="p-4 sm:p-6">
+                {/* Rating - Oculto hasta que haya sistema de reseñas */}
+                {/* <div className="flex items-center mb-2">
                   <div className="flex text-green-400">
                     {[...Array(5)].map((_, i) => (
                       <AiFillStar key={i} size={16} className={i < 4 ? "" : "opacity-30"} />
@@ -124,20 +125,20 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
                   <span className={`text-sm ml-2 ${
                     theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
                   }`}>(4.5)</span>
-                </div>
-                <h3 className={`font-bold mb-2 group-hover:text-green-300 transition-colors ${
+                </div> */}
+                <h3 className={`font-bold text-sm sm:text-base mb-2 line-clamp-2 group-hover:text-green-300 transition-colors ${
                   theme === 'dark' ? 'text-white' : 'text-gray-900'
                 }`}>{product.name}</h3>
-                <p className={`text-sm mb-3 line-clamp-2 ${
+                <p className={`text-xs sm:text-sm mb-3 line-clamp-2 ${
                   theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                 }`}>{product.description}</p>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-2xl font-bold text-green-400">{formatPrice(product.price)}</span>
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
+                  <span className="text-xl sm:text-2xl font-bold text-green-400">{formatPrice(product.price)}</span>
                 </div>
                 <button 
                   onClick={() => handleAddToCart(product)}
                   disabled={cartLoading || product.stock === 0}
-                  className={`w-full py-3 rounded-lg font-bold transition-all duration-300 transform hover:scale-105 shadow-lg ${
+                  className={`w-full py-2.5 sm:py-3 rounded-lg text-sm sm:text-base font-bold transition-all duration-300 transform hover:scale-105 shadow-lg ${
                     cartLoading || product.stock === 0
                       ? 'bg-gray-400 cursor-not-allowed'
                       : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-black hover:shadow-green-500/50'

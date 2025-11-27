@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
-import { AiOutlineDelete, AiOutlinePlus, AiOutlineMinus, AiFillStar } from 'react-icons/ai';
+import { AiOutlineDelete, AiOutlinePlus, AiOutlineMinus, AiFillStar, AiOutlineShoppingCart } from 'react-icons/ai';
 import { MdArrowBack } from 'react-icons/md';
 import { productApi, type Product as ApiProduct } from '../api/products';
 
@@ -55,7 +55,7 @@ const CartPage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-20">
             <div className={`text-6xl mb-6 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>
-              🛒
+              <AiOutlineShoppingCart className="mx-auto" size={96} />
             </div>
             <h2 className={`text-3xl font-bold mb-4 ${
               theme === 'dark' ? 'text-white' : 'text-gray-900'

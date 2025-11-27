@@ -1,4 +1,11 @@
-import { Entity, ObjectIdColumn, Column, Index, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  ObjectIdColumn,
+  Column,
+  Index,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { ObjectId } from 'mongodb';
 
 @Entity()
@@ -27,6 +34,15 @@ export class Comment {
 
   @Column({ type: 'simple-array', nullable: true })
   mediaUrls?: string[]; // opcional
+
+  @Column({ type: 'simple-array', default: [] })
+  helpfulVotes: string[]; // Array de userIds que marcaron como útil
+
+  @Column({ type: 'simple-array', default: [] })
+  unhelpfulVotes: string[]; // Array de userIds que marcaron como no útil
+
+  @Column({ nullable: true })
+  parentCommentId?: string; // Para respuestas a reseñas
 
   @Column({
     type: 'enum',

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MongoRepository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -19,7 +23,7 @@ export class UsersService {
       const existingUser = await this.usersRepo.findOne({
         where: { email: createUserDto.email },
       });
-      
+
       if (existingUser) {
         throw new BadRequestException('El email ya está registrado');
       }
@@ -80,7 +84,7 @@ export class UsersService {
 
   async deductBalance(userId: string, amount: number): Promise<User> {
     const user = await this.findOne(userId);
-    
+
     if (user.balance < amount) {
       throw new BadRequestException('Saldo insuficiente');
     }

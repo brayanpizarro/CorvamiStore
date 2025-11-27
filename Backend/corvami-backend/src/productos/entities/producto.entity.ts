@@ -1,4 +1,11 @@
-import { Column, Entity, Index, CreateDateColumn, UpdateDateColumn, ObjectIdColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ObjectIdColumn,
+} from 'typeorm';
 import { ObjectId } from 'mongodb';
 
 @Entity()
@@ -29,6 +36,9 @@ export class Producto {
 
   @Column({ nullable: true, length: 50 })
   category?: string; // Ejemplo: "Teclado", "Mouse", "Laptop", "Monitor"
+
+  @Column({ nullable: true, length: 50 })
+  subcategory?: string; // Ejemplo: "Gaming", "Oficina", "Profesional"
 
   @Column({ nullable: true, length: 50 })
   brand?: string; // Ejemplo: "Corsair", "Logitech", "Razer", "ASUS"

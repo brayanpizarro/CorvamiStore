@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,7 +11,8 @@ import { FaBox, FaShoppingCart, FaUser, FaHistory, FaCheckCircle, FaClock, FaTru
 type TabType = 'orders' | 'cart' | 'account';
 
 export default function ProfilePage() {
-  const { isDark } = useTheme();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const { user } = useAuth();
   const { cart } = useCart();
   const [activeTab, setActiveTab] = useState<TabType>('orders');
@@ -19,20 +20,14 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [reviewModal, setReviewModal] = useState<{ productId: string; productName: string } | null>(null);
 
-  useEffect(() => {
-    if (user?.email) {
-      loadOrders();
-    }
-  }, [user]);
-
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     if (!user?.email) return;
     
     try {
       setLoading(true);
       const userOrders = await ordersApi.getOrdersByEmail(user.email);
       // Ordenar por fecha descendente (más reciente primero)
-      const sorted = userOrders.sort((a, b) => 
+      const sorted = userOrders.sort((a: Order, b: Order) => 
         new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
       );
       setOrders(sorted);
@@ -41,7 +36,13 @@ export default function ProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.email]);
+
+  useEffect(() => {
+    if (user?.email) {
+      loadOrders();
+    }
+  }, [user?.email, loadOrders]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; bgColor: string; textColor: string; icon: any }> = {
@@ -88,9 +89,10 @@ export default function ProfilePage() {
     );
   };
 
-  const formatDate = (dateString?: string) => {
+  const formatDate = (dateString?: string | Date) => {
     if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('es-ES', {
+    const date = typeof dateString === 'string' ? new Date(dateString) : dateString;
+    return date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -437,7 +439,7 @@ export default function ProfilePage() {
         <ReviewModal
           productId={reviewModal.productId}
           productName={reviewModal.productName}
-          userId={user.id}
+          userId={user.userId}
           onClose={() => setReviewModal(null)}
           onSuccess={() => {
             // Opcional: recargar órdenes si quieres actualizar algo

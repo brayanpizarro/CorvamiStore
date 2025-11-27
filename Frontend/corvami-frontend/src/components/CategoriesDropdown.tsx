@@ -122,8 +122,10 @@ const CategoriesDropdown: React.FC = () => {
                       <div className="hidden group-hover:block pl-11 pb-2">
                         <div className="grid gap-1">
                           {category.subcategories?.map((sub) => (
-                            <button
+                            <Link
                               key={sub}
+                              to={`/category/${category.id}?subcategory=${encodeURIComponent(sub)}`}
+                              onClick={() => setIsOpen(false)}
                               className={`text-left px-3 py-1 rounded text-sm transition-colors ${
                                 theme === 'dark'
                                   ? 'text-gray-400 hover:text-green-400'
@@ -131,7 +133,7 @@ const CategoriesDropdown: React.FC = () => {
                               }`}
                             >
                               {sub}
-                            </button>
+                            </Link>
                           ))}
                         </div>
                       </div>

@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, BadRequestException, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  BadRequestException,
+  UseGuards,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ProductosService } from './productos.service';
 import { CreateProductoDto } from './dto/create-producto.dto';
@@ -35,7 +47,10 @@ export class ProductosController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductoDto: UpdateProductoDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateProductoDto: UpdateProductoDto,
+  ) {
     return this.productosService.update(id, updateProductoDto);
   }
 
@@ -54,7 +69,12 @@ export class ProductosController {
       fileFilter: (req, file, cb) => {
         const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         if (!allowed.includes(file.mimetype)) {
-          return cb(new BadRequestException('Solo se permiten imágenes (jpeg, png, webp, gif)'), false);
+          return cb(
+            new BadRequestException(
+              'Solo se permiten imágenes (jpeg, png, webp, gif)',
+            ),
+            false,
+          );
         }
         cb(null, true);
       },
@@ -62,7 +82,11 @@ export class ProductosController {
   )
   async uploadImage(@Param('id') id: string, @UploadedFile() file: any) {
     if (!file) return { error: 'No file uploaded' };
-    const result: any = await this.cloudinary.uploadProductImage(id, file.buffer, file.originalname);
+    const result: any = await this.cloudinary.uploadProductImage(
+      id,
+      file.buffer,
+      file.originalname,
+    );
     // result.secure_url -> URL pública
     await this.productosService.setImage(id, result.secure_url);
     return { productId: id, imageUrl: result.secure_url };

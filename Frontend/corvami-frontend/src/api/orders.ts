@@ -1,3 +1,5 @@
+import { getAuthToken } from './auth';
+
 const API_URL = 'http://localhost:3000';
 
 export interface OrderItem {
@@ -124,7 +126,31 @@ export const ordersApi = {
     });
 
     if (!response.ok) {
-      throw new Error('Error al procesar el pago');
+      const error = await response.json();
+      throw new Error(error.message || 'Error al procesar el pago');
+    }
+
+    const order = await response.json();
+    return normalizeOrder(order);
+  },
+
+  processBalancePayment: async (orderId: string): Promise<Order> => {
+    const token = getAuthToken();
+    if (!token) {
+      throw new Error('No hay token de autenticación');
+    }
+
+    const response = await fetch(`${API_URL}/orders/${orderId}/payment/balance`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Error al procesar el pago con saldo');
     }
 
     const order = await response.json();
@@ -132,7 +158,13 @@ export const ordersApi = {
   },
 
   getOrder: async (orderId: string): Promise<Order> => {
-    const response = await fetch(`${API_URL}/orders/${orderId}`);
+    const token = getAuthToken();
+    const response = await fetch(`${API_URL}/orders/${orderId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
     if (!response.ok) {
       throw new Error('Error al obtener la orden');
@@ -152,6 +184,30 @@ export const ordersApi = {
     const orders = await response.json();
     return orders.map(normalizeOrder);
   },
+};
+
+// Función para obtener las órdenes del usuario autenticado
+export const getMyOrders = async (): Promise<Order[]> => {
+  const token = getAuthToken();
+  if (!token) {
+    throw new Error('No hay token de autenticación');
+  }
+
+  const response = await fetch(`${API_URL}/orders/my-orders`, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Error al obtener órdenes');
+  }
+
+  const orders = await response.json();
+  return orders.map(normalizeOrder);
 };
 
 // Cache bust: 638997739330754016

@@ -110,8 +110,8 @@ export class ShoppingCartService {
     if (idx >= 0) {
       cart.items[idx].quantity += dto.quantity;
     } else {
-      cart.items.push({ 
-        productId: dto.productId, 
+      cart.items.push({
+        productId: dto.productId,
         quantity: dto.quantity,
         unitPrice: dto.unitPrice,
         name: dto.name,

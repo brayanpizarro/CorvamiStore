@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import CategoryProducts from './CategoryProducts';
 
 // Mapeo de categorías (slug -> nombre para mostrar)
@@ -59,6 +59,8 @@ const normalizeCategoryForDB = (slug: string): string => {
 
 const CategoryPage: React.FC = () => {
   const { categorySlug } = useParams<{ categorySlug: string }>();
+  const [searchParams] = useSearchParams();
+  const subcategory = searchParams.get('subcategory');
   
   if (!categorySlug) {
     return <div>Categoría no encontrada</div>;
@@ -69,12 +71,13 @@ const CategoryPage: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-  }, [categorySlug]);
+  }, [categorySlug, subcategory]);
 
   return (
     <CategoryProducts 
       category={normalizedCategory} 
       categoryTitle={categoryTitle}
+      subcategory={subcategory || undefined}
     />
   );
 };

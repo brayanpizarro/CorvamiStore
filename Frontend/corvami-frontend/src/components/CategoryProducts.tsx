@@ -32,9 +32,10 @@ interface Product {
 interface CategoryProductsProps {
   category: string;
   categoryTitle: string;
+  subcategory?: string;
 }
 
-const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryTitle }) => {
+const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryTitle, subcategory }) => {
   const { theme } = useTheme();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated, isGuest, setShowAuthModal } = useAuth();
@@ -98,11 +99,11 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
     price: p.price,
     image: p.imageUrl || 'https://via.placeholder.com/400',
     images: [p.imageUrl || 'https://via.placeholder.com/400'],
-    rating: 4.5,
-    reviews: 50,
+    rating: 0,
+    reviews: 0,
     brand: p.brand || 'Sin marca',
     category: p.category || 'Sin categoría',
-    subcategory: p.category || 'Sin categoría',
+    subcategory: p.subcategory || '',
     features: [p.description || 'Sin descripción'],
     inStock: p.stock > 0,
     description: p.description,
@@ -136,6 +137,13 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
         if (normalizedProductCategory !== normalizedFilterCategory) return false;
       }
       
+      // Filtro por subcategoría si está presente
+      if (subcategory) {
+        const normalizedProductSubcategory = normalizeCategory(product.subcategory || '');
+        const normalizedFilterSubcategory = normalizeCategory(subcategory);
+        if (normalizedProductSubcategory !== normalizedFilterSubcategory) return false;
+      }
+      
       // Filtro por rango de precio
       if (product.price < priceRange[0] || product.price > priceRange[1]) return false;
       
@@ -161,7 +169,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
       default: // relevance
         return filtered;
     }
-  }, [allProducts, category, priceRange, selectedBrands, selectedRating, sortBy]);
+  }, [allProducts, category, subcategory, priceRange, selectedBrands, selectedRating, sortBy]);
 
   const toggleBrand = (brand: string) => {
     setSelectedBrands(prev => 
@@ -243,6 +251,13 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                 theme === 'dark' ? 'text-white' : 'text-gray-900'
               }`}>
                 {categoryTitle}
+                {subcategory && (
+                  <span className={`ml-2 text-lg font-normal ${
+                    theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                  }`}>
+                    / {subcategory}
+                  </span>
+                )}
               </h1>
               <p className={`text-sm ${
                 theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
@@ -613,26 +628,28 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                           {product.brand}
                         </p>
 
-                        {/* Rating */}
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className="flex items-center">
-                            {[...Array(5)].map((_, i) => (
-                              <AiFillStar
-                                key={i}
-                                size={16}
-                                className={i < Math.floor(product.rating) 
-                                  ? 'text-yellow-400' 
-                                  : 'text-gray-300'
-                                }
-                              />
-                            ))}
+                        {/* Rating - Solo mostrar si hay reseñas */}
+                        {product.rating > 0 && product.reviews > 0 && (
+                          <div className="flex items-center gap-2 mb-4">
+                            <div className="flex items-center">
+                              {[...Array(5)].map((_, i) => (
+                                <AiFillStar
+                                  key={i}
+                                  size={16}
+                                  className={i < Math.floor(product.rating) 
+                                    ? 'text-yellow-400' 
+                                    : 'text-gray-300'
+                                  }
+                                />
+                              ))}
+                            </div>
+                            <span className={`text-sm font-medium ${
+                              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                            }`}>
+                              {product.rating} ({product.reviews})
+                            </span>
                           </div>
-                          <span className={`text-sm font-medium ${
-                            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                          }`}>
-                            {product.rating} ({product.reviews})
-                          </span>
-                        </div>
+                        )}
 
                         {/* Características */}
                         {viewMode === 'list' && (

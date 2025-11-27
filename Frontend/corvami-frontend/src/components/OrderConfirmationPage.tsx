@@ -7,7 +7,8 @@ import { FaCheckCircle, FaBox, FaTruck, FaEnvelope } from 'react-icons/fa';
 
 export default function OrderConfirmationPage() {
   const { orderId } = useParams<{ orderId: string }>();
-  const { isDark } = useTheme();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -86,8 +87,12 @@ export default function OrderConfirmationPage() {
               <h3 className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'} mb-1`}>
                 Estado del Pago
               </h3>
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                {order.payment?.status === 'approved' ? 'Pagado' : 'Pendiente'}
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                order.isPaid 
+                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+              }`}>
+                {order.isPaid ? 'Pagado' : 'Pendiente'}
               </span>
             </div>
           </div>

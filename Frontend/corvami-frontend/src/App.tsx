@@ -15,6 +15,8 @@ import CartPage from './components/CartPage';
 import CheckoutPage from './components/CheckoutPage';
 import OrderConfirmationPage from './components/OrderConfirmationPage';
 import ProfilePage from './components/ProfilePage';
+import OffersPage from './components/OffersPage';
+import ContactPage from './components/ContactPage';
 import AuthModal from './components/AuthModal';
 
 function HomePage() {
@@ -96,6 +98,23 @@ function App() {
           <>
             <Header />
             <ProfilePage />
+            <Footer />
+          </>
+        } />
+
+        <Route path="/offers" element={
+          <>
+            <Header />
+            <OffersPage />
+            <Footer />
+            <AuthModal />
+          </>
+        } />
+
+        <Route path="/contact" element={
+          <>
+            <Header />
+            <ContactPage />
             <Footer />
           </>
         } />

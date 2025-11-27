@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AiOutlineMenu, AiOutlineClose, AiOutlineSearch, AiOutlineShoppingCart, AiOutlineUser, AiOutlineWallet } from 'react-icons/ai';
+import { FaBox } from 'react-icons/fa';
 import ThemeToggle from './ThemeToggle';
 import CategoriesDropdown from './CategoriesDropdown';
 import CartDrawer from './CartDrawer';
@@ -40,7 +41,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between h-16">
           {/* Mobile menu button */}
           <button
-            className="md:hidden text-white hover:text-emerald-100 transition-colors"
+            className="lg:hidden text-white hover:text-emerald-100 transition-colors p-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <AiOutlineClose size={24} /> : <AiOutlineMenu size={24} />}
@@ -50,17 +51,17 @@ const Header: React.FC = () => {
           <div className="flex-shrink-0">
             <Link 
               to="/"
-              className="text-xl md:text-2xl font-bold text-white hover:text-green-400 transition-colors"
+              className="text-lg sm:text-xl md:text-2xl font-bold text-white hover:text-green-400 transition-colors"
             >
               Corvami Store
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8 items-center">
+          <nav className="hidden lg:flex space-x-6 xl:space-x-8 items-center">
             <Link 
               to="/"
-              className={`hover:text-emerald-100 transition-colors font-medium ${
+              className={`hover:text-emerald-100 transition-colors font-medium text-sm xl:text-base ${
                 location.pathname === '/' ? 'text-green-400' : 'text-white'
               }`}
             >
@@ -68,21 +69,35 @@ const Header: React.FC = () => {
             </Link>
             <Link 
               to="/products"
-              className={`hover:text-emerald-100 transition-colors font-medium ${
+              className={`hover:text-emerald-100 transition-colors font-medium text-sm xl:text-base ${
                 location.pathname === '/products' ? 'text-green-400' : 'text-white'
               }`}
             >
               Productos
             </Link>
             <CategoriesDropdown />
-            <button className="text-white hover:text-emerald-100 transition-colors font-medium">Ofertas</button>
-            <button className="text-white hover:text-emerald-100 transition-colors font-medium">Contacto</button>
+            <Link 
+              to="/offers"
+              className={`hover:text-emerald-100 transition-colors font-medium text-sm xl:text-base ${
+                location.pathname === '/offers' ? 'text-green-400' : 'text-white'
+              }`}
+            >
+              Ofertas
+            </Link>
+            <Link 
+              to="/contact"
+              className={`hover:text-emerald-100 transition-colors font-medium text-sm xl:text-base ${
+                location.pathname === '/contact' ? 'text-green-400' : 'text-white'
+              }`}
+            >
+              Contacto
+            </Link>
           </nav>
 
           {/* Right Icons */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <ThemeToggle />
-            <button className="text-white hover:text-green-400 transition-colors">
+            <button className="text-white hover:text-green-400 transition-colors hidden sm:block">
               <AiOutlineSearch size={20} />
             </button>
             <button 
@@ -150,9 +165,10 @@ const Header: React.FC = () => {
                               setShowUserMenu(false);
                               setShowOrders(true);
                             }}
-                            className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors text-sm"
+                            className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors text-sm flex items-center gap-2"
                           >
-                            📦 Mis Órdenes
+                            <FaBox size={14} />
+                            <span>Mis Órdenes</span>
                           </button>
                         </>
                       )}
@@ -212,7 +228,7 @@ const Header: React.FC = () => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden bg-emerald-600 border-t border-emerald-400">
+          <div className="lg:hidden bg-emerald-600 border-t border-emerald-400">
             <div className="px-2 pt-2 pb-3 space-y-1">
               <Link 
                 to="/"
@@ -229,8 +245,20 @@ const Header: React.FC = () => {
                 Productos
               </Link>
               <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Categorías</button>
-              <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Ofertas</button>
-              <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Contacto</button>
+              <Link 
+                to="/offers"
+                onClick={() => setIsMenuOpen(false)}
+                className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md"
+              >
+                Ofertas
+              </Link>
+              <Link 
+                to="/contact"
+                onClick={() => setIsMenuOpen(false)}
+                className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md"
+              >
+                Contacto
+              </Link>
             </div>
           </div>
         )}

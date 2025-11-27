@@ -1,9 +1,23 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
-import { UpdateCommentDto, UpdateCommentStatusDto } from './dto/update-comment.dto';
+import {
+  UpdateCommentDto,
+  UpdateCommentStatusDto,
+} from './dto/update-comment.dto';
 import { Public } from '../auth/decorators/public.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
 @Controller('productos/:productId/comments')
 export class CommentsController {
@@ -23,7 +37,12 @@ export class CommentsController {
     @Query('limit') limit = '10',
     @Query('sort') sort: 'new' | 'top' = 'new',
   ) {
-    return this.commentsService.listByProduct(productId, Number(page), Number(limit), sort);
+    return this.commentsService.listByProduct(
+      productId,
+      Number(page),
+      Number(limit),
+      sort,
+    );
   }
 
   @Public()
@@ -55,7 +74,31 @@ export class CommentsController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':commentId')
-  remove(@Param('productId') productId: string, @Param('commentId') commentId: string) {
+  remove(
+    @Param('productId') productId: string,
+    @Param('commentId') commentId: string,
+  ) {
     return this.commentsService.remove(commentId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':commentId/helpful')
+  markHelpful(@Param('commentId') commentId: string, @CurrentUser() user: any) {
+    return this.commentsService.toggleHelpful(commentId, user.userId, true);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':commentId/unhelpful')
+  markUnhelpful(
+    @Param('commentId') commentId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.commentsService.toggleHelpful(commentId, user.userId, false);
+  }
+
+  @Public()
+  @Get(':commentId/replies')
+  getReplies(@Param('commentId') commentId: string) {
+    return this.commentsService.getReplies(commentId);
   }
 }

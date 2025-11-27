@@ -29,7 +29,10 @@ export class ProductosService {
       updatedAt: new Date(),
     };
     const result = await this.repo.insert(entity as Producto);
-    return { productId: entity.productId, insertedId: result.identifiers[0]?._id };
+    return {
+      productId: entity.productId,
+      insertedId: result.identifiers[0]?._id,
+    };
   }
 
   findAll() {
@@ -58,7 +61,11 @@ export class ProductosService {
       { productId },
       { $set: { imageUrl, updatedAt: new Date() } },
     );
-    return { matched: result.matchedCount, modified: result.modifiedCount, imageUrl };
+    return {
+      matched: result.matchedCount,
+      modified: result.modifiedCount,
+      imageUrl,
+    };
   }
 
   async reduceStock(productId: string, quantity: number) {

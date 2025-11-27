@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import ProductReviews from './ProductReviews';
+import { reviewsApi } from '../api/reviews';
 import { AiFillStar, AiOutlineHeart, AiFillHeart, AiOutlineShoppingCart, AiOutlinePlus, AiOutlineMinus, AiOutlineCheck } from 'react-icons/ai';
 import { MdOutlineLocalShipping, MdOutlineShield, MdOutlineLoop } from 'react-icons/md';
 import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
@@ -43,8 +44,21 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description');
   const [isFavorite, setIsFavorite] = useState(false);
+  const [reviewsSummary, setReviewsSummary] = useState<{ averageRating: number; totalReviews: number } | null>(null);
 
   const images = product.images || [product.image];
+
+  useEffect(() => {
+    const loadReviewsSummary = async () => {
+      try {
+        const summary = await reviewsApi.getReviewsSummary(String(product.id));
+        setReviewsSummary(summary);
+      } catch (error) {
+        console.error('Error loading reviews summary:', error);
+      }
+    };
+    loadReviewsSummary();
+  }, [product.id]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -194,24 +208,28 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                     <AiFillStar
                       key={i}
                       size={20}
-                      className={i < Math.floor(product.rating)
+                      className={i < Math.floor(reviewsSummary?.averageRating || 0)
                         ? 'text-yellow-400'
                         : 'text-gray-300'
                       }
                     />
                   ))}
                 </div>
-                <span className={`font-semibold ${
-                  theme === 'dark' ? 'text-white' : 'text-gray-900'
-                }`}>
-                  {product.rating}
-                </span>
+                {reviewsSummary && reviewsSummary.averageRating > 0 && (
+                  <span className={`font-semibold ${
+                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                  }`}>
+                    {reviewsSummary.averageRating.toFixed(1)}
+                  </span>
+                )}
               </div>
-              <span className={`text-sm ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-              }`}>
-                ({product.reviews} reseñas)
-              </span>
+              {reviewsSummary && reviewsSummary.totalReviews > 0 && (
+                <span className={`text-sm ${
+                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                }`}>
+                  ({reviewsSummary.totalReviews} {reviewsSummary.totalReviews === 1 ? 'reseña' : 'reseñas'})
+                </span>
+              )}
             </div>
             <div className="mb-6">
               <div className={`text-4xl font-bold mb-2 ${

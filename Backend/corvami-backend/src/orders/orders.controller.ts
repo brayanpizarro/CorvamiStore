@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
@@ -34,7 +44,10 @@ export class OrdersController {
 
   @UseGuards(JwtAuthGuard)
   @Get('can-review/:productId')
-  canReviewProduct(@Param('productId') productId: string, @CurrentUser() user: any) {
+  canReviewProduct(
+    @Param('productId') productId: string,
+    @CurrentUser() user: any,
+  ) {
     return this.ordersService.hasUserPurchasedProduct(user.userId, productId);
   }
 
@@ -52,7 +65,10 @@ export class OrdersController {
 
   @UseGuards(JwtAuthGuard)
   @Patch(':orderId')
-  update(@Param('orderId') orderId: string, @Body() updateOrderDto: UpdateOrderDto) {
+  update(
+    @Param('orderId') orderId: string,
+    @Body() updateOrderDto: UpdateOrderDto,
+  ) {
     return this.ordersService.update(orderId, updateOrderDto);
   }
 
@@ -64,7 +80,19 @@ export class OrdersController {
 
   @Public()
   @Post(':orderId/payment')
-  processPayment(@Param('orderId') orderId: string, @Body() paymentDto: ProcessPaymentDto) {
+  processPayment(
+    @Param('orderId') orderId: string,
+    @Body() paymentDto: ProcessPaymentDto,
+  ) {
     return this.ordersService.processCardPayment(orderId, paymentDto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':orderId/payment/balance')
+  processBalancePayment(
+    @Param('orderId') orderId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.ordersService.processBalancePayment(orderId, user.userId);
   }
 }

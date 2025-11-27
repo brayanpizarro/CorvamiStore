@@ -5,14 +5,16 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ordersApi } from '../api/orders';
 import type { CreateOrderData, ProcessPaymentData } from '../api/orders';
-import { FaCreditCard, FaLock, FaShippingFast } from 'react-icons/fa';
+import { FaCreditCard, FaLock, FaShippingFast, FaWallet, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, clear } = useCart();
-  const { user } = useAuth();
-  const { isDark } = useTheme();
+  const { user, isAuthenticated, refreshProfile } = useAuth();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'balance'>('card');
   const [formData, setFormData] = useState({
     // Customer info
     name: user?.name || '',
@@ -100,18 +102,28 @@ export default function CheckoutPage() {
     if (!formData.city.trim()) newErrors.city = 'La ciudad es requerida';
     if (!formData.department.trim()) newErrors.department = 'El departamento es requerido';
 
-    if (!formData.cardNumber.trim()) newErrors.cardNumber = 'Número de tarjeta requerido';
-    else if (formData.cardNumber.replace(/\s/g, '').length !== 16) {
-      newErrors.cardNumber = 'Número de tarjeta inválido';
-    }
-    if (!formData.cardHolder.trim()) newErrors.cardHolder = 'Titular requerido';
-    if (!formData.expiryDate.trim()) newErrors.expiryDate = 'Fecha de vencimiento requerida';
-    else if (!/^\d{2}\/\d{2}$/.test(formData.expiryDate)) {
-      newErrors.expiryDate = 'Formato inválido (MM/AA)';
-    }
-    if (!formData.cvv.trim()) newErrors.cvv = 'CVV requerido';
-    else if (formData.cvv.length < 3) {
-      newErrors.cvv = 'CVV inválido';
+    // Solo validar tarjeta si el método de pago es tarjeta
+    if (paymentMethod === 'card') {
+      if (!formData.cardNumber.trim()) newErrors.cardNumber = 'Número de tarjeta requerido';
+      else if (formData.cardNumber.replace(/\s/g, '').length !== 16) {
+        newErrors.cardNumber = 'Número de tarjeta inválido';
+      }
+      if (!formData.cardHolder.trim()) newErrors.cardHolder = 'Titular requerido';
+      if (!formData.expiryDate.trim()) newErrors.expiryDate = 'Fecha de vencimiento requerida';
+      else if (!/^\d{2}\/\d{2}$/.test(formData.expiryDate)) {
+        newErrors.expiryDate = 'Formato inválido (MM/AA)';
+      }
+      if (!formData.cvv.trim()) newErrors.cvv = 'CVV requerido';
+      else if (formData.cvv.length < 3) {
+        newErrors.cvv = 'CVV inválido';
+      }
+    } else if (paymentMethod === 'balance') {
+      // Validar que el usuario esté autenticado y tenga saldo suficiente
+      if (!isAuthenticated || !user) {
+        newErrors.payment = 'Debes iniciar sesión para pagar con saldo';
+      } else if (user.balance < total) {
+        newErrors.payment = `Saldo insuficiente. Tienes ${formatPrice(user.balance)} y necesitas ${formatPrice(total)}`;
+      }
     }
 
     setErrors(newErrors);
@@ -139,36 +151,42 @@ export default function CheckoutPage() {
           department: formData.department,
           zipCode: formData.zipCode,
           isGuest: !user,
-          userId: user?.id,
+          userId: user?.userId,
         },
         items: (cart?.items || []).map((item) => ({
-          productId: item.id,
-          name: item.name,
+          productId: item.productId,
+          name: item.name || '',
           quantity: item.quantity,
-          unitPrice: item.price,
-          totalPrice: item.price * item.quantity,
+          unitPrice: item.unitPrice || item.price || 0,
+          totalPrice: (item.unitPrice || item.price || 0) * item.quantity,
           image: item.image,
         })),
-        subtotal: cart.totalPrice,
-        shipping: cart.totalPrice > 200000 ? 0 : 15000,
-        total: cart.totalPrice + (cart.totalPrice > 200000 ? 0 : 15000),
+        subtotal: cart?.totalPrice || 0,
+        shipping: (cart?.totalPrice || 0) > 200000 ? 0 : 15000,
+        total: (cart?.totalPrice || 0) + ((cart?.totalPrice || 0) > 200000 ? 0 : 15000),
         notes: formData.notes,
       };
 
       // Crear orden
       const order = await ordersApi.createOrder(orderData);
 
-      // Procesar pago
-      const paymentData: ProcessPaymentData = {
-        cardNumber: formData.cardNumber,
-        cardHolder: formData.cardHolder,
-        expiryDate: formData.expiryDate,
-        cvv: formData.cvv,
-        email: formData.email,
-        paymentMethod: 'credit_card',
-      };
-
-      const paidOrder = await ordersApi.processPayment(order.id, paymentData);
+      // Procesar pago según el método seleccionado
+      let paidOrder;
+      if (paymentMethod === 'balance') {
+        paidOrder = await ordersApi.processBalancePayment(order.id);
+        // Refrescar el perfil del usuario para actualizar el saldo
+        await refreshProfile();
+      } else {
+        const paymentData: ProcessPaymentData = {
+          cardNumber: formData.cardNumber,
+          cardHolder: formData.cardHolder,
+          expiryDate: formData.expiryDate,
+          cvv: formData.cvv,
+          email: formData.email,
+          paymentMethod: 'credit_card',
+        };
+        paidOrder = await ordersApi.processPayment(order.id, paymentData);
+      }
 
       // Limpiar carrito
       clear();
@@ -190,6 +208,14 @@ export default function CheckoutPage() {
   const subtotal = cart.totalPrice;
   const shipping = subtotal > 200000 ? 0 : 15000;
   const total = subtotal + shipping;
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+    }).format(price);
+  };
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'} py-12`}>
@@ -379,14 +405,72 @@ export default function CheckoutPage() {
                   </h2>
                 </div>
 
-                <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
-                  <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
-                    <FaLock className="inline mr-2" />
-                    Usa la tarjeta de prueba: <strong>4111 1111 1111 1111</strong>
-                  </p>
-                </div>
+                {/* Selector de Método de Pago */}
+                {isAuthenticated && user && (
+                  <div className="mb-6">
+                    <label className={`block text-sm font-medium mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                      Método de Pago
+                    </label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('card')}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          paymentMethod === 'card'
+                            ? 'border-emerald-500 bg-emerald-500/10'
+                            : isDark
+                            ? 'border-gray-700 hover:border-gray-600'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <FaCreditCard className={`text-2xl mb-2 mx-auto ${
+                          paymentMethod === 'card' ? 'text-emerald-500' : isDark ? 'text-gray-400' : 'text-gray-600'
+                        }`} />
+                        <p className={`text-sm font-medium ${
+                          paymentMethod === 'card' ? 'text-emerald-500' : isDark ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          Tarjeta de Crédito
+                        </p>
+                      </button>
 
-                <div className="space-y-4">
+                      <button
+                        type="button"
+                        onClick={() => setPaymentMethod('balance')}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          paymentMethod === 'balance'
+                            ? 'border-emerald-500 bg-emerald-500/10'
+                            : isDark
+                            ? 'border-gray-700 hover:border-gray-600'
+                            : 'border-gray-300 hover:border-gray-400'
+                        }`}
+                      >
+                        <FaWallet className={`text-2xl mb-2 mx-auto ${
+                          paymentMethod === 'balance' ? 'text-emerald-500' : isDark ? 'text-gray-400' : 'text-gray-600'
+                        }`} />
+                        <p className={`text-sm font-medium ${
+                          paymentMethod === 'balance' ? 'text-emerald-500' : isDark ? 'text-white' : 'text-gray-900'
+                        }`}>
+                          Saldo Disponible
+                        </p>
+                        <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                          {formatPrice(user.balance)}
+                        </p>
+                      </button>
+                    </div>
+                    {errors.payment && <p className="text-red-500 text-sm mt-2">{errors.payment}</p>}
+                  </div>
+                )}
+
+                {paymentMethod === 'card' && (
+                  <>
+                    <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
+                      <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                        <FaLock className="inline mr-2" />
+                        Usa la tarjeta de prueba: <strong>4111 1111 1111 1111</strong>
+                      </p>
+                    </div>
+
+                    <div className="space-y-4">
                   <div>
                     <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                       Número de Tarjeta *
@@ -470,6 +554,52 @@ export default function CheckoutPage() {
                     </div>
                   </div>
                 </div>
+                  </>
+                )}
+
+                {paymentMethod === 'balance' && (
+                  <div className={`p-6 rounded-lg ${isDark ? 'bg-emerald-900/20' : 'bg-emerald-50'} border-2 ${
+                    user && user.balance >= total ? 'border-emerald-500' : 'border-yellow-500'
+                  }`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <div>
+                        <p className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                          Tu Saldo Actual
+                        </p>
+                        <p className={`text-3xl font-bold ${
+                          user && user.balance >= total ? 'text-emerald-500' : 'text-yellow-500'
+                        }`}>
+                          {user && formatPrice(user.balance)}
+                        </p>
+                      </div>
+                      <FaWallet className="text-4xl text-emerald-500" />
+                    </div>
+                    
+                    <div className={`pt-4 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+                      <div className="flex justify-between mb-2">
+                        <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>Total a pagar:</span>
+                        <span className="font-bold">{formatPrice(total)}</span>
+                      </div>
+                      {user && user.balance >= total ? (
+                        <>
+                          <div className="flex justify-between mb-2">
+                            <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>Saldo restante:</span>
+                            <span className="font-bold text-emerald-500">{formatPrice(user.balance - total)}</span>
+                          </div>
+                          <p className={`text-sm mt-3 flex items-center gap-2 ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
+                            <FaCheckCircle className="flex-shrink-0" />
+                            <span>Tienes saldo suficiente para completar esta compra</span>
+                          </p>
+                        </>
+                      ) : (
+                        <p className={`text-sm mt-3 flex items-center gap-2 ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>
+                          <FaExclamationTriangle className="flex-shrink-0" />
+                          <span>Saldo insuficiente. Necesitas agregar {user && formatPrice(total - user.balance)} más</span>
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Botón de envío */}

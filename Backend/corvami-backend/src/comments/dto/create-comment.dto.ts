@@ -1,4 +1,15 @@
-import { IsString, IsUUID, IsInt, Min, Max, MaxLength, IsOptional, IsUrl, IsArray, ArrayMaxSize } from 'class-validator';
+import {
+  IsString,
+  IsUUID,
+  IsInt,
+  Min,
+  Max,
+  MaxLength,
+  IsOptional,
+  IsUrl,
+  IsArray,
+  ArrayMaxSize,
+} from 'class-validator';
 
 export class CreateCommentDto {
   @IsString()
@@ -26,4 +37,8 @@ export class CreateCommentDto {
   @ArrayMaxSize(6)
   @IsUrl({ require_protocol: true }, { each: true })
   mediaUrls?: string[];
+
+  @IsOptional()
+  @IsString()
+  parentCommentId?: string; // Para respuestas a reseñas
 }
