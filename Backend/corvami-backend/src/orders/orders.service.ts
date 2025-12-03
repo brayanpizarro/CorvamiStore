@@ -40,7 +40,8 @@ export class OrdersService {
     }
 
     // Determinar si es invitado
-    const isGuest = createOrderDto.customer.isGuest || !createOrderDto.customer.userId;
+    const isGuest =
+      createOrderDto.customer.isGuest || !createOrderDto.customer.userId;
 
     // Crear orden
     const order = this.ordersRepo.create({
@@ -69,7 +70,7 @@ export class OrdersService {
       isPaid: isGuest,
       paidAt: isGuest ? new Date() : undefined,
       paymentMethod: isGuest ? 'guest_checkout' : 'pending',
-      notes: isGuest 
+      notes: isGuest
         ? `Compra como invitado. Total: $${createOrderDto.total.toLocaleString()}`
         : createOrderDto.notes,
       createdAt: new Date(),
@@ -147,7 +148,15 @@ export class OrdersService {
     await this.ordersRepo.delete({ orderId: order.orderId });
   }
 
-  async processCardPayment(orderId: string, paymentData: any): Promise<Order> {
+  async processCardPayment(
+    orderId: string,
+    paymentData: {
+      cardNumber: string;
+      cardName: string;
+      expiryDate: string;
+      cvv: string;
+    },
+  ): Promise<Order> {
     const order = await this.findOne(orderId);
 
     if (order.isPaid) {
@@ -162,7 +171,7 @@ export class OrdersService {
       '6011111111111117', // Discover
     ];
 
-    const cleanedCard = paymentData.cardNumber.replace(/\s/g, '');
+    const cleanedCard: string = paymentData.cardNumber.replace(/\s/g, '');
 
     if (!validCards.includes(cleanedCard)) {
       throw new BadRequestException(
@@ -283,10 +292,8 @@ export class OrdersService {
     });
 
     // Verificar si alguna orden contiene el producto
-    const hasPurchased = orders.some((order) =>
+    return orders.some((order) =>
       order.items.some((item) => item.productId === productId),
     );
-
-    return hasPurchased;
   }
 }

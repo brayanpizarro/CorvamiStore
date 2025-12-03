@@ -16,24 +16,77 @@ const CartPage: React.FC = () => {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
-    loadRecommendations();
-  }, []);
+    
+    const loadRecommendations = async () => {
+      const cartItems = cart?.items || [];
+      try {
+        const products = await productApi.getAll();
+        const cartProductIds = cartItems.map(item => item.productId);
+      
+        // Obtener categorías de productos en el carrito
+        const cartCategories = new Set<string>();
+        cartItems.forEach(item => {
+          const product = products.find(p => p.productId === item.productId);
+          if (product?.category) {
+            cartCategories.add(product.category);
+          }
+        });
 
-  const loadRecommendations = async () => {
-    try {
-      const products = await productApi.getAll();
-      // Filtrar productos que no están en el carrito
-      const cartProductIds = items.map(item => item.productId);
-      const filtered = products.filter(p => !cartProductIds.includes(p.productId));
-      // Tomar 4 productos aleatorios
-      const shuffled = filtered.sort(() => 0.5 - Math.random());
-      setRecommendedProducts(shuffled.slice(0, 4));
-    } catch (error) {
-      console.error('Error cargando recomendaciones:', error);
-    } finally {
-      setLoadingRecommendations(false);
-    }
-  };
+        // Definir productos complementarios por categoría
+        const complementaryMap: Record<string, string[]> = {
+          'laptops': ['teclados', 'mouse', 'monitores', 'audifonos'],
+          'teclados': ['mouse', 'audifonos', 'webcams'],
+          'mouse': ['teclados', 'audifonos', 'webcams'],
+          'monitores': ['laptops', 'webcams', 'audifonos'],
+          'audifonos': ['laptops', 'teclados', 'mouse'],
+          'webcams': ['monitores', 'audifonos', 'laptops'],
+        };
+
+        // Filtrar productos que no están en el carrito
+        const filtered = products.filter(p => !cartProductIds.includes(p.productId));
+
+        // Priorizar productos complementarios y de mismas categorías
+        const recommendations: ApiProduct[] = [];
+        const complementaryProducts: ApiProduct[] = [];
+        const sameCategoryProducts: ApiProduct[] = [];
+        const otherProducts: ApiProduct[] = [];
+
+        filtered.forEach(product => {
+          const isComplementary = Array.from(cartCategories).some(category => 
+            complementaryMap[category]?.includes(product.category || '')
+          );
+          const isSameCategory = cartCategories.has(product.category || '');
+
+          if (isComplementary) {
+            complementaryProducts.push(product);
+          } else if (isSameCategory) {
+            sameCategoryProducts.push(product);
+          } else {
+            otherProducts.push(product);
+          }
+        });
+
+        // Mezclar y tomar 4 productos (prioridad: complementarios > misma categoría > otros)
+        const shuffleArray = (array: ApiProduct[]) => array.sort(() => 0.5 - Math.random());
+        
+        recommendations.push(...shuffleArray(complementaryProducts).slice(0, 2));
+        if (recommendations.length < 4) {
+          recommendations.push(...shuffleArray(sameCategoryProducts).slice(0, 4 - recommendations.length));
+        }
+        if (recommendations.length < 4) {
+          recommendations.push(...shuffleArray(otherProducts).slice(0, 4 - recommendations.length));
+        }
+
+        setRecommendedProducts(recommendations.slice(0, 4));
+      } catch (error) {
+        console.error('Error cargando recomendaciones:', error);
+      } finally {
+        setLoadingRecommendations(false);
+      }
+    };
+
+    loadRecommendations();
+  }, [cart]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CO', {

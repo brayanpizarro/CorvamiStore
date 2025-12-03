@@ -14,9 +14,8 @@ export default function CheckoutPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'balance'>('card');
+  const [paymentMethod, setPaymentMethod] = useState<'card' | 'balance' | null>(null);
   const [formData, setFormData] = useState({
-    // Customer info
     name: user?.name || '',
     email: user?.email || '',
     phone: '',
@@ -102,8 +101,13 @@ export default function CheckoutPage() {
     if (!formData.city.trim()) newErrors.city = 'La ciudad es requerida';
     if (!formData.department.trim()) newErrors.department = 'El departamento es requerido';
 
-    // Solo validar tarjeta si el usuario está autenticado y el método de pago es tarjeta
-    if (isAuthenticated && paymentMethod === 'card') {
+    // Validar método de pago seleccionado
+    if (!paymentMethod) {
+      newErrors.payment = 'Selecciona un método de pago';
+    }
+
+    // Validar tarjeta si el método de pago es tarjeta (para todos)
+    if (paymentMethod === 'card') {
       if (!formData.cardNumber.trim()) newErrors.cardNumber = 'Número de tarjeta requerido';
       else if (formData.cardNumber.replace(/\s/g, '').length !== 16) {
         newErrors.cardNumber = 'Número de tarjeta inválido';
@@ -117,9 +121,11 @@ export default function CheckoutPage() {
       else if (formData.cvv.length < 3) {
         newErrors.cvv = 'CVV inválido';
       }
-    } else if (isAuthenticated && paymentMethod === 'balance') {
-      // Validar que el usuario tenga saldo suficiente
-      if (user && user.balance < total) {
+    } else if (paymentMethod === 'balance') {
+      // Validar que el usuario tenga saldo suficiente (solo usuarios registrados)
+      if (!isAuthenticated) {
+        newErrors.payment = 'El pago con saldo solo está disponible para usuarios registrados';
+      } else if (user && user.balance < total) {
         newErrors.payment = `Saldo insuficiente. Tienes ${formatPrice(user.balance)} y necesitas ${formatPrice(total)}`;
       }
     }
@@ -168,22 +174,15 @@ export default function CheckoutPage() {
       // Crear orden
       const order = await ordersApi.createOrder(orderData);
 
-      // Si es invitado, la orden ya está pagada automáticamente
-      if (!user) {
-        // Limpiar carrito
-        clear();
-        // Redirigir a confirmación
-        navigate(`/order-confirmation/${order.id}`);
-        return;
-      }
-
-      // Procesar pago para usuarios registrados según el método seleccionado
+      // Procesar pago segun el metodo seleccionado
       let paidOrder;
       if (paymentMethod === 'balance') {
+        // Pago con saldo (solo usuarios registrados)
         paidOrder = await ordersApi.processBalancePayment(order.id);
         // Refrescar el perfil del usuario para actualizar el saldo
         await refreshProfile();
       } else {
+        // Pago con tarjeta (invitados y usuarios registrados)
         const paymentData: ProcessPaymentData = {
           cardNumber: formData.cardNumber,
           cardHolder: formData.cardHolder,
@@ -200,9 +199,9 @@ export default function CheckoutPage() {
 
       // Redirigir a confirmación
       navigate(`/order-confirmation/${paidOrder.id}`);
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error processing order:', error);
-      alert(error.message || 'Error al procesar el pedido. Por favor intenta de nuevo.');
+      alert(error instanceof Error ? error.message : 'Error al procesar el pedido. Por favor intenta de nuevo.');
     } finally {
       setIsProcessing(false);
     }
@@ -403,7 +402,7 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              {/* Información de Pago */}
+              {/* Informacion de pago */}
               <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-6`}>
                 <div className="flex items-center mb-4">
                   <FaCreditCard className={`text-2xl mr-3 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
@@ -412,13 +411,12 @@ export default function CheckoutPage() {
                   </h2>
                 </div>
 
-                {/* Selector de Método de Pago - Solo para usuarios registrados */}
-                {isAuthenticated && user && (
-                  <div className="mb-6">
-                    <label className={`block text-sm font-medium mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Método de Pago
-                    </label>
-                    <div className="grid grid-cols-2 gap-4">
+                {/*metodo de pago */}
+                <div className="mb-6">
+                  <label className={`block text-sm font-medium mb-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                    Método de Pago *
+                  </label>
+                  <div className={`grid ${isAuthenticated && user ? 'grid-cols-2' : 'grid-cols-1'} gap-4`}>
                       <button
                         type="button"
                         onClick={() => setPaymentMethod('card')}
@@ -440,44 +438,36 @@ export default function CheckoutPage() {
                         </p>
                       </button>
 
-                      <button
-                        type="button"
-                        onClick={() => setPaymentMethod('balance')}
-                        className={`p-4 rounded-lg border-2 transition-all ${
-                          paymentMethod === 'balance'
-                            ? 'border-emerald-500 bg-emerald-500/10'
-                            : isDark
-                            ? 'border-gray-700 hover:border-gray-600'
-                            : 'border-gray-300 hover:border-gray-400'
-                        }`}
-                      >
-                        <FaWallet className={`text-2xl mb-2 mx-auto ${
-                          paymentMethod === 'balance' ? 'text-emerald-500' : isDark ? 'text-gray-400' : 'text-gray-600'
-                        }`} />
-                        <p className={`text-sm font-medium ${
-                          paymentMethod === 'balance' ? 'text-emerald-500' : isDark ? 'text-white' : 'text-gray-900'
-                        }`}>
-                          Saldo Disponible
-                        </p>
-                        <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {formatPrice(user.balance)}
-                        </p>
-                      </button>
+                      {isAuthenticated && user && (
+                        <button
+                          type="button"
+                          onClick={() => setPaymentMethod('balance')}
+                          className={`p-4 rounded-lg border-2 transition-all ${
+                            paymentMethod === 'balance'
+                              ? 'border-emerald-500 bg-emerald-500/10'
+                              : isDark
+                              ? 'border-gray-700 hover:border-gray-600'
+                              : 'border-gray-300 hover:border-gray-400'
+                          }`}
+                        >
+                          <FaWallet className={`text-2xl mb-2 mx-auto ${
+                            paymentMethod === 'balance' ? 'text-emerald-500' : isDark ? 'text-gray-400' : 'text-gray-600'
+                          }`} />
+                          <p className={`text-sm font-medium ${
+                            paymentMethod === 'balance' ? 'text-emerald-500' : isDark ? 'text-white' : 'text-gray-900'
+                          }`}>
+                            Saldo Disponible
+                          </p>
+                          <p className={`text-xs mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                            {formatPrice(user.balance)}
+                          </p>
+                        </button>
+                      )}
                     </div>
                     {errors.payment && <p className="text-red-500 text-sm mt-2">{errors.payment}</p>}
                   </div>
-                )}
 
-                {/* Información para invitados */}
-                {!isAuthenticated && (
-                  <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-blue-900/30 border border-blue-700' : 'bg-blue-50 border border-blue-200'}`}>
-                    <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
-                      ✓ Como invitado, tu pedido se procesará automáticamente. Recibirás un correo de confirmación.
-                    </p>
-                  </div>
-                )}
-
-                {isAuthenticated && paymentMethod === 'card' && (
+                {paymentMethod === 'card' && (
                   <>
                     <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
                       <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
@@ -643,7 +633,7 @@ export default function CheckoutPage() {
             </form>
           </div>
 
-          {/* Resumen del Pedido */}
+          {/* resumen del pedido*/}
           <div>
             <div className={`${isDark ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow-md p-6 sticky top-24`}>
               <h2 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
