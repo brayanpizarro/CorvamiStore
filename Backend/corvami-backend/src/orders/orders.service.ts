@@ -152,7 +152,7 @@ export class OrdersService {
     orderId: string,
     paymentData: {
       cardNumber: string;
-      cardName: string;
+      cardHolder: string;
       expiryDate: string;
       cvv: string;
     },
