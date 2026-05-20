@@ -1,15 +1,11 @@
-import { Entity, ObjectIdColumn, Column } from 'typeorm';
-import { ObjectId } from 'mongodb';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity('users')
 export class User {
-  @ObjectIdColumn()
-  _id: ObjectId;
+  @PrimaryColumn()
+  userId: string;
 
-  @Column()
-  userId: string; // UUID único
-
-  @Column()
+  @Column({ unique: true })
   email: string;
 
   @Column()
@@ -27,19 +23,19 @@ export class User {
   @Column({ nullable: true })
   country?: string;
 
-  @Column({ default: 0 })
-  balance: number; // Saldo disponible
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  balance: number;
 
   @Column({ default: false })
-  isRegistered: boolean; // true = usuario registrado, false = usuario invitado
+  isRegistered: boolean;
 
   @Column({ nullable: true })
-  password?: string; // Solo para usuarios registrados
+  password?: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn()
   updatedAt: Date;
 
   @Column({ default: true })

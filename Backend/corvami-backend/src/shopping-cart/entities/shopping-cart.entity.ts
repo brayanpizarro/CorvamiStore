@@ -1,33 +1,41 @@
 import {
   Entity,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
-@Entity()
+export interface CartItem {
+  productId: string;
+  quantity: number;
+  unitPrice?: number;
+  name?: string;
+  image?: string;
+}
+
+@Entity('shopping_carts')
 export class ShoppingCart {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn()
   id: string;
 
-  @Column()
-  userId: string;
+  @Column({ nullable: true })
+  userId?: string;
 
-  @Column('jsonb')
+  @Column({ nullable: true })
+  sessionId?: string;
+
+  @Column('jsonb', { default: '[]' })
   items: CartItem[];
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   totalPrice: number;
 
-  @Column()
+  @Column({ default: 0 })
+  totalItems: number;
+
+  @Column({ default: 'USD' })
   currency: string;
-
-  @CreateDateColumn({ type: 'timestamp' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp' })
-  updatedAt: Date;
 
   @Column({
     type: 'enum',
@@ -35,9 +43,10 @@ export class ShoppingCart {
     default: 'active',
   })
   status: 'active' | 'completed' | 'abandoned';
-}
 
-export interface CartItem {
-  productId: string;
-  quantity: number;
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

@@ -4,7 +4,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MongoRepository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Order } from './entities/order.entity';
@@ -17,7 +17,7 @@ import { randomUUID } from 'crypto';
 export class OrdersService {
   constructor(
     @InjectRepository(Order)
-    private readonly ordersRepo: MongoRepository<Order>,
+    private readonly ordersRepo: Repository<Order>,
     private readonly usersService: UsersService,
     private readonly productosService: ProductosService,
     private readonly emailService: EmailService,
@@ -124,9 +124,10 @@ export class OrdersService {
   }
 
   async findByEmail(email: string): Promise<Order[]> {
-    return await this.ordersRepo.find({
-      where: { 'shippingInfo.email': email },
-    });
+    return this.ordersRepo
+      .createQueryBuilder('order')
+      .where("order.shippingInfo->>'email' = :email", { email })
+      .getMany();
   }
 
   async update(
@@ -144,8 +145,8 @@ export class OrdersService {
   }
 
   async remove(orderId: string): Promise<void> {
-    const order = await this.findOne(orderId);
-    await this.ordersRepo.delete({ orderId: order.orderId });
+    await this.findOne(orderId);
+    await this.ordersRepo.delete({ orderId });
   }
 
   async processCardPayment(

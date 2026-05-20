@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MongoRepository } from 'typeorm';
+import { Repository, IsNull } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { Comment } from './entities/comment.entity';
 import { CreateCommentDto } from './dto/create-comment.dto';
@@ -14,7 +14,7 @@ import { OrdersService } from '../orders/orders.service';
 export class CommentsService {
   constructor(
     @InjectRepository(Comment)
-    private readonly repo: MongoRepository<Comment>,
+    private readonly repo: Repository<Comment>,
     private readonly ordersService: OrdersService,
   ) {}
 
@@ -33,7 +33,7 @@ export class CommentsService {
       }
     }
 
-    const entity: Partial<Comment> = {
+    const entity = this.repo.create({
       commentId: randomUUID(),
       productId: dto.productId,
       userId: dto.userId,
@@ -44,15 +44,10 @@ export class CommentsService {
       parentCommentId: dto.parentCommentId,
       helpfulVotes: [],
       unhelpfulVotes: [],
-      status: 'published',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    const result = await this.repo.insert(entity as Comment);
-    return {
-      commentId: entity.commentId,
-      insertedId: result.identifiers[0]?._id,
-    };
+      status: 'published' as const,
+    });
+    const saved = await this.repo.save(entity);
+    return { commentId: saved.commentId };
   }
 
   async listByProduct(
@@ -63,20 +58,16 @@ export class CommentsService {
   ) {
     const skip = (page - 1) * limit;
     const order =
-      sort === 'new' ? { createdAt: -1 } : { rating: -1, createdAt: -1 };
+      sort === 'new'
+        ? { createdAt: 'DESC' as const }
+        : { rating: 'DESC' as const, createdAt: 'DESC' as const };
 
-    // Obtener total de reseñas (sin respuestas)
-    const total = await this.repo.count({
-      where: { productId, status: 'published', parentCommentId: null } as any,
-    });
-
-    // Obtener reseñas paginadas
-    const reviews = await this.repo.find({
-      where: { productId, status: 'published', parentCommentId: null } as any,
+    const [reviews, total] = await this.repo.findAndCount({
+      where: { productId, status: 'published', parentCommentId: IsNull() },
       skip,
       take: limit,
       order,
-    } as any);
+    });
 
     return {
       reviews,
@@ -91,50 +82,48 @@ export class CommentsService {
   }
 
   async update(commentId: string, dto: UpdateCommentDto) {
-    const result = await this.repo.updateOne(
-      { commentId },
-      { $set: { ...dto, updatedAt: new Date() } },
-    );
-    return { matched: result.matchedCount, modified: result.modifiedCount };
+    const result = await this.repo.update({ commentId }, { ...dto });
+    return { affected: result.affected };
   }
 
   async updateStatus(commentId: string, dto: UpdateCommentStatusDto) {
-    const result = await this.repo.updateOne(
-      { commentId },
-      { $set: { status: dto.status, updatedAt: new Date() } },
-    );
-    return { matched: result.matchedCount, modified: result.modifiedCount };
+    const result = await this.repo.update({ commentId }, { status: dto.status });
+    return { affected: result.affected };
   }
 
   async remove(commentId: string) {
-    const result = await this.repo.deleteOne({ commentId });
-    return { deleted: result.deletedCount };
+    const result = await this.repo.delete({ commentId });
+    return { deleted: result.affected };
   }
 
   async ratingsSummary(productId: string) {
-    const cursor = this.repo.aggregate([
-      { $match: { productId, status: 'published' } },
-      {
-        $group: {
-          _id: '$productId',
-          count: { $sum: 1 },
-          avg: { $avg: '$rating' },
-          r1: { $sum: { $cond: [{ $eq: ['$rating', 1] }, 1, 0] } },
-          r2: { $sum: { $cond: [{ $eq: ['$rating', 2] }, 1, 0] } },
-          r3: { $sum: { $cond: [{ $eq: ['$rating', 3] }, 1, 0] } },
-          r4: { $sum: { $cond: [{ $eq: ['$rating', 4] }, 1, 0] } },
-          r5: { $sum: { $cond: [{ $eq: ['$rating', 5] }, 1, 0] } },
-        },
-      },
-    ]);
-    const arr = await cursor.toArray();
-    if (!arr.length)
+    const result = await this.repo
+      .createQueryBuilder('comment')
+      .select('COUNT(*)', 'count')
+      .addSelect('AVG(comment.rating)', 'avg')
+      .addSelect("SUM(CASE WHEN comment.rating = 1 THEN 1 ELSE 0 END)", 'r1')
+      .addSelect("SUM(CASE WHEN comment.rating = 2 THEN 1 ELSE 0 END)", 'r2')
+      .addSelect("SUM(CASE WHEN comment.rating = 3 THEN 1 ELSE 0 END)", 'r3')
+      .addSelect("SUM(CASE WHEN comment.rating = 4 THEN 1 ELSE 0 END)", 'r4')
+      .addSelect("SUM(CASE WHEN comment.rating = 5 THEN 1 ELSE 0 END)", 'r5')
+      .where('comment.productId = :productId', { productId })
+      .andWhere("comment.status = 'published'")
+      .getRawOne();
+
+    if (!result || Number(result.count) === 0) {
       return { count: 0, avg: 0, histogram: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 } };
-    const g = arr[0];
+    }
+
     return {
-      count: g.count,
-      avg: Number(g.avg?.toFixed?.(2) ?? 0),
-      histogram: { 1: g.r1, 2: g.r2, 3: g.r3, 4: g.r4, 5: g.r5 },
+      count: Number(result.count),
+      avg: Number(Number(result.avg).toFixed(2)),
+      histogram: {
+        1: Number(result.r1),
+        2: Number(result.r2),
+        3: Number(result.r3),
+        4: Number(result.r4),
+        5: Number(result.r5),
+      },
     };
   }
 
@@ -148,55 +137,27 @@ export class CommentsService {
     const unhelpfulVotes = comment.unhelpfulVotes || [];
 
     if (isHelpful) {
-      // Toggle helpful
       const hasVoted = helpfulVotes.includes(userId);
-      const newHelpfulVotes = hasVoted
+      comment.helpfulVotes = hasVoted
         ? helpfulVotes.filter((id) => id !== userId)
         : [...helpfulVotes, userId];
-
-      // Remove from unhelpful if exists
-      const newUnhelpfulVotes = unhelpfulVotes.filter((id) => id !== userId);
-
-      await this.repo.updateOne(
-        { commentId },
-        {
-          $set: {
-            helpfulVotes: newHelpfulVotes,
-            unhelpfulVotes: newUnhelpfulVotes,
-            updatedAt: new Date(),
-          },
-        },
-      );
-
+      comment.unhelpfulVotes = unhelpfulVotes.filter((id) => id !== userId);
+      await this.repo.save(comment);
       return {
-        helpfulCount: newHelpfulVotes.length,
-        unhelpfulCount: newUnhelpfulVotes.length,
+        helpfulCount: comment.helpfulVotes.length,
+        unhelpfulCount: comment.unhelpfulVotes.length,
         userVote: hasVoted ? null : 'helpful',
       };
     } else {
-      // Toggle unhelpful
       const hasVoted = unhelpfulVotes.includes(userId);
-      const newUnhelpfulVotes = hasVoted
+      comment.unhelpfulVotes = hasVoted
         ? unhelpfulVotes.filter((id) => id !== userId)
         : [...unhelpfulVotes, userId];
-
-      // Remove from helpful if exists
-      const newHelpfulVotes = helpfulVotes.filter((id) => id !== userId);
-
-      await this.repo.updateOne(
-        { commentId },
-        {
-          $set: {
-            helpfulVotes: newHelpfulVotes,
-            unhelpfulVotes: newUnhelpfulVotes,
-            updatedAt: new Date(),
-          },
-        },
-      );
-
+      comment.helpfulVotes = helpfulVotes.filter((id) => id !== userId);
+      await this.repo.save(comment);
       return {
-        helpfulCount: newHelpfulVotes.length,
-        unhelpfulCount: newUnhelpfulVotes.length,
+        helpfulCount: comment.helpfulVotes.length,
+        unhelpfulCount: comment.unhelpfulVotes.length,
         userVote: hasVoted ? null : 'unhelpful',
       };
     }
@@ -205,7 +166,7 @@ export class CommentsService {
   async getReplies(parentCommentId: string) {
     return this.repo.find({
       where: { parentCommentId, status: 'published' },
-      order: { createdAt: 1 },
-    } as any);
+      order: { createdAt: 'ASC' },
+    });
   }
 }

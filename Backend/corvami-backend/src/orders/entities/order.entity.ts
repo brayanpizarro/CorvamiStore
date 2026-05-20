@@ -1,5 +1,4 @@
-import { Entity, ObjectIdColumn, Column } from 'typeorm';
-import { ObjectId } from 'mongodb';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
 export interface OrderItem {
   productId: string;
@@ -21,48 +20,45 @@ export interface ShippingInfo {
 
 @Entity('orders')
 export class Order {
-  @ObjectIdColumn()
-  _id: ObjectId;
-
-  @Column()
-  orderId: string; // UUID único
+  @PrimaryColumn()
+  orderId: string;
 
   @Column({ nullable: true })
-  userId?: string; // ID del usuario (null para invitados)
+  userId?: string;
 
-  @Column()
-  items: OrderItem[]; // Productos de la orden
+  @Column('jsonb')
+  items: OrderItem[];
 
-  @Column()
-  subtotal: number; // Subtotal de productos
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  subtotal: number;
 
-  @Column()
-  shippingCost: number; // Costo de envío
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  shippingCost: number;
 
-  @Column()
-  total: number; // Total de la orden
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  total: number;
 
-  @Column()
-  shippingInfo: ShippingInfo; // Información de envío
-
-  @Column({ default: 'pending' })
-  status: string; // pending, paid, processing, shipped, delivered, cancelled
+  @Column('jsonb')
+  shippingInfo: ShippingInfo;
 
   @Column({ default: 'pending' })
-  paymentMethod: string; // pending, credit_card, etc.
+  status: string;
+
+  @Column({ default: 'pending' })
+  paymentMethod: string;
 
   @Column({ default: false })
   isPaid: boolean;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'timestamptz' })
   paidAt?: Date;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   notes?: string;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @UpdateDateColumn()
   updatedAt: Date;
 }

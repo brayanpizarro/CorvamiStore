@@ -4,20 +4,16 @@ import {
   Index,
   CreateDateColumn,
   UpdateDateColumn,
-  ObjectIdColumn,
+  PrimaryColumn,
 } from 'typeorm';
-import { ObjectId } from 'mongodb';
 
 @Entity()
 @Index(['name'])
 @Index(['category'])
 @Index(['brand'])
 export class Producto {
-  @ObjectIdColumn()
-  _id: ObjectId;
-
-  @Column({ unique: true })
-  productId: string; // UUID asignado en el servicio
+  @PrimaryColumn()
+  productId: string;
 
   @Column({ length: 50 })
   name: string;

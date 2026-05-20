@@ -1,30 +1,26 @@
 import {
   Entity,
-  ObjectIdColumn,
+  PrimaryColumn,
   Column,
   Index,
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ObjectId } from 'mongodb';
 
 @Entity()
 @Index(['productId', 'createdAt'])
 export class Comment {
-  @ObjectIdColumn()
-  _id: ObjectId;
+  @PrimaryColumn()
+  commentId: string;
 
   @Column()
-  commentId: string; // uuid
+  productId: string;
 
   @Column()
-  productId: string; // uuid del Producto (productId)
-
-  @Column()
-  userId: string; // uuid del usuario
+  userId: string;
 
   @Column('int')
-  rating: number; // 1-5
+  rating: number;
 
   @Column({ length: 140, nullable: true })
   title?: string;
@@ -33,16 +29,16 @@ export class Comment {
   content: string;
 
   @Column({ type: 'simple-array', nullable: true })
-  mediaUrls?: string[]; // opcional
+  mediaUrls?: string[];
 
-  @Column({ type: 'simple-array', default: [] })
-  helpfulVotes: string[]; // Array de userIds que marcaron como útil
+  @Column({ type: 'simple-array', nullable: true })
+  helpfulVotes: string[];
 
-  @Column({ type: 'simple-array', default: [] })
-  unhelpfulVotes: string[]; // Array de userIds que marcaron como no útil
+  @Column({ type: 'simple-array', nullable: true })
+  unhelpfulVotes: string[];
 
   @Column({ nullable: true })
-  parentCommentId?: string; // Para respuestas a reseñas
+  parentCommentId?: string;
 
   @Column({
     type: 'enum',
@@ -51,9 +47,9 @@ export class Comment {
   })
   status: 'pending' | 'published' | 'hidden' | 'reported';
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @CreateDateColumn()
   createdAt: Date;
 
-  @UpdateDateColumn({ type: 'timestamp' })
+  @UpdateDateColumn()
   updatedAt: Date;
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MongoRepository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { randomUUID } from 'crypto';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
@@ -10,11 +10,11 @@ import { Producto } from './entities/producto.entity';
 export class ProductosService {
   constructor(
     @InjectRepository(Producto)
-    private readonly repo: MongoRepository<Producto>,
+    private readonly repo: Repository<Producto>,
   ) {}
 
   async create(dto: CreateProductoDto) {
-    const entity: Partial<Producto> = {
+    const entity = this.repo.create({
       productId: randomUUID(),
       name: dto.name,
       description: dto.description,
@@ -22,17 +22,13 @@ export class ProductosService {
       stock: dto.stock,
       imageUrl: dto.imageUrl,
       category: dto.category,
+      subcategory: dto.subcategory,
       brand: dto.brand,
       tags: dto.tags,
       isActive: dto.isActive !== undefined ? dto.isActive : true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    const result = await this.repo.insert(entity as Producto);
-    return {
-      productId: entity.productId,
-      insertedId: result.identifiers[0]?._id,
-    };
+    });
+    const saved = await this.repo.save(entity);
+    return { productId: saved.productId };
   }
 
   findAll() {
@@ -44,28 +40,18 @@ export class ProductosService {
   }
 
   async update(productId: string, dto: UpdateProductoDto) {
-    const result = await this.repo.updateOne(
-      { productId },
-      { $set: { ...dto, updatedAt: new Date() } },
-    );
-    return { matched: result.matchedCount, modified: result.modifiedCount };
+    const result = await this.repo.update({ productId }, { ...dto });
+    return { affected: result.affected };
   }
 
   async remove(productId: string) {
-    const result = await this.repo.deleteOne({ productId });
-    return { deleted: result.deletedCount };
+    const result = await this.repo.delete({ productId });
+    return { deleted: result.affected };
   }
 
   async setImage(productId: string, imageUrl: string) {
-    const result = await this.repo.updateOne(
-      { productId },
-      { $set: { imageUrl, updatedAt: new Date() } },
-    );
-    return {
-      matched: result.matchedCount,
-      modified: result.modifiedCount,
-      imageUrl,
-    };
+    const result = await this.repo.update({ productId }, { imageUrl });
+    return { affected: result.affected, imageUrl };
   }
 
   async reduceStock(productId: string, quantity: number) {
@@ -76,10 +62,7 @@ export class ProductosService {
     if (product.stock < quantity) {
       throw new Error(`Stock insuficiente para ${product.name}`);
     }
-    const result = await this.repo.updateOne(
-      { productId },
-      { $set: { stock: product.stock - quantity, updatedAt: new Date() } },
-    );
-    return { matched: result.matchedCount, modified: result.modifiedCount };
+    const result = await this.repo.update({ productId }, { stock: product.stock - quantity });
+    return { affected: result.affected };
   }
 }

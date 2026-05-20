@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MongoRepository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Producto } from '../productos/entities/producto.entity';
 import { randomUUID } from 'crypto';
 
@@ -10,7 +10,7 @@ export class SeedService {
 
   constructor(
     @InjectRepository(Producto)
-    private readonly productosRepo: MongoRepository<Producto>,
+    private readonly productosRepo: Repository<Producto>,
   ) {}
 
   async seed() {
@@ -390,7 +390,7 @@ export class SeedService {
     }
 
     this.logger.log(
-      `✨ Seed completado. ${creados} productos creados, ${errores} errores.`,
+      `Seed completado. ${creados} productos creados, ${errores} errores.`,
     );
   }
 }
