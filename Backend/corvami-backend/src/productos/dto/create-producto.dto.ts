@@ -33,8 +33,13 @@ export class CreateProductoDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(100)
+  @MaxLength(50)
   category?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  subcategory?: string;
 
   @IsOptional()
   @IsString()
