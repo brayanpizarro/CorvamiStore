@@ -1,13 +1,10 @@
-import { Entity, PrimaryColumn, Column } from 'typeorm';
+import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 
-/**
- * Entidad de solo lectura mapeada a la tabla 'productos'
- * en la base de datos externa de Inventario (conexión 'external').
- */
-@Entity('productos')
+/** Entidad de solo lectura — Inventario.Producto (conexión 'external') */
+@Entity({ name: 'Producto', schema: 'Inventario' })
 export class Producto {
   @PrimaryColumn()
-  id_producto: number;
+  id: number;
 
   @Column({ nullable: true })
   codigo: string;
@@ -15,12 +12,21 @@ export class Producto {
   @Column()
   nombre: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2 })
-  precio_unit: number;
+  @Column({ nullable: true })
+  descripcion: string;
+
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  precio: number;
 
   @Column({ default: 0 })
   stock_actual: number;
 
-  @Column({ nullable: true })
-  categoria: string;
+  @Column({ default: 0 })
+  stock_minimo: number;
+
+  @CreateDateColumn({ nullable: true })
+  createdAt: Date;
+
+  @UpdateDateColumn({ nullable: true })
+  updatedAt: Date;
 }

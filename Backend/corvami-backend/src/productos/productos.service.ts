@@ -19,7 +19,7 @@ export class ProductosService {
   }
 
   findOne(id: string | number) {
-    return this.repo.findOneBy({ id_producto: Number(id) });
+    return this.repo.findOneBy({ id: Number(id) });
   }
 
   // ── Operaciones de escritura ─────────────────────────────────────────────

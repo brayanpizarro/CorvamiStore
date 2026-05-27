@@ -4,7 +4,6 @@ import {
   Column,
   OneToOne,
   JoinColumn,
-  CreateDateColumn,
 } from 'typeorm';
 import { VentasPedido } from './ventas-pedido.entity';
 
@@ -16,7 +15,7 @@ export class VentasFactura {
   @Column()
   id_pedido: number;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @Column({ type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
   fecha_emision: Date;
 
   @Column({ type: 'decimal', precision: 10, scale: 2 })

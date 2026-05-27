@@ -6,8 +6,6 @@ import {
   OneToMany,
   OneToOne,
   JoinColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { Cliente } from '../../users/entities/user.entity';
 import { VentasDetalle } from './ventas-detalle.entity';
@@ -25,13 +23,13 @@ export class VentasPedido {
   @Column({ nullable: true })
   id_empleado: number;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @Column({ type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
   fecha: Date;
 
-  @Column({ default: 'pendiente' })
+  @Column({ length: 20, default: 'pendiente' })
   estado: string;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
   total: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
@@ -40,7 +38,7 @@ export class VentasPedido {
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   costo_envio: number;
 
-  @Column({ default: 'online' })
+  @Column({ length: 20, nullable: true })
   canal: string;
 
   // ── Campos operativos ──────────────────────────────────────────────────────
@@ -64,7 +62,7 @@ export class VentasPedido {
   @Column({ nullable: true })
   userId?: string;
 
-  @UpdateDateColumn()
+  @Column({ type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 
   // ── Relaciones locales ─────────────────────────────────────────────────────

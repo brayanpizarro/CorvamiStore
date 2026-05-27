@@ -4,7 +4,6 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
-  CreateDateColumn,
 } from 'typeorm';
 import { Cliente } from '../../users/entities/user.entity';
 
@@ -13,7 +12,7 @@ export class Carrito {
   @PrimaryGeneratedColumn()
   id_carrito: number;
 
-  @Column({ nullable: true })
+  @Column({ length: 50 })
   id_sesion: string;
 
   @Column({ nullable: true })
@@ -26,7 +25,7 @@ export class Carrito {
   @Column()
   cantidad: number;
 
-  @CreateDateColumn({ type: 'timestamp' })
+  @Column({ type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
   fecha_creacion: Date;
 
   @ManyToOne(() => Cliente, (cliente) => cliente.carrito, { nullable: true })

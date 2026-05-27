@@ -1,33 +1,20 @@
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: corvami-postgres
-    ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=corvami
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-    networks:
-      - corvami-network
-
   backend:
     build: .
     container_name: corvami-backend
     ports:
       - "3000:3000"
     environment:
-      # ── BD local (PostgreSQL en Docker) ──────────────────────────────────────
-      - DB_HOST=postgres
+      # ── BD propia (schema Ventas en si2 Neon) ────────────────────────────────
+      - DB_HOST=ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech
       - DB_PORT=5432
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=corvami
-      # ── BD externa Neon (solo lectura: empleados + productos) ─────────────────
+      - DB_USER=neondb_owner
+      - DB_PASSWORD=npg_V58gYFmBOPda
+      - DB_NAME=si2
+      - DB_SCHEMA=Ventas
+      # ── BD externa (schemas Inventario y RRHH en si2 Neon) ───────────────────
       - EXT_DB_HOST=ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech
       - EXT_DB_PORT=5432
       - EXT_DB_USER=neondb_owner
@@ -40,13 +27,8 @@ services:
       - CLOUDINARY_API_SECRET=7ybs0jIHP5eS2IO-XzcsWpTZPps
       - EMAIL_USER=soporteucenin@gmail.com
       - EMAIL_PASSWORD=xsdkpcsxftgnnfcn
-    depends_on:
-      - postgres
     networks:
       - corvami-network
-
-volumes:
-  postgres-data:
 
 networks:
   corvami-network:

@@ -17,21 +17,23 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
-    // ─── Conexión LOCAL (tablas propias del ecommerce) ───────────────────────
+    // ─── Conexión PROPIA (schema Ventas en si2 — tablas del ecommerce) ────────
     TypeOrmModule.forRoot({
       name: 'default',
       type: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
+      host: process.env.DB_HOST || 'ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech',
       port: Number(process.env.DB_PORT || 5432),
-      username: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres',
-      database: process.env.DB_NAME || 'corvami',
-      synchronize: true,
+      username: process.env.DB_USER || 'neondb_owner',
+      password: process.env.DB_PASSWORD || 'npg_V58gYFmBOPda',
+      database: process.env.DB_NAME || 'si2',
+      schema: process.env.DB_SCHEMA || 'Ventas',
+      synchronize: false,
       autoLoadEntities: true,
+      extra: { ssl: { require: true, rejectUnauthorized: false } },
       // Tablas propias: clientes, ventas_pedido, ventas_detalle, ventas_factura, carrito
     }),
 
-    // ─── Conexión EXTERNA (tablas consultadas: empleados y productos) ────────
+    // ─── Conexión EXTERNA (otros schemas de si2: Inventario y RRHH) ──────────
     TypeOrmModule.forRoot({
       name: 'external',
       type: 'postgres',
@@ -40,10 +42,10 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
       username: process.env.EXT_DB_USER || 'neondb_owner',
       password: process.env.EXT_DB_PASSWORD || 'npg_V58gYFmBOPda',
       database: process.env.EXT_DB_NAME || 'si2',
-      synchronize: false,   // NUNCA sincronizar la BD externa
+      synchronize: false,   // NUNCA modificar tablas externas
       autoLoadEntities: true,
-      ssl: { rejectUnauthorized: false }, // Neon requiere SSL
-      // Tablas consultadas (solo lectura): empleados, productos
+      extra: { ssl: { require: true, rejectUnauthorized: false } },
+      // Tablas consultadas: Inventario.productos, RRHH.empleados
     }),
 
     ThrottlerModule.forRoot([{

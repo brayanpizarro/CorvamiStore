@@ -3,8 +3,6 @@ import {
   PrimaryGeneratedColumn,
   Column,
   OneToMany,
-  CreateDateColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 import { VentasPedido } from '../../orders/entities/ventas-pedido.entity';
 import { Carrito } from '../../shopping-cart/entities/shopping-cart.entity';
@@ -14,27 +12,26 @@ export class Cliente {
   @PrimaryGeneratedColumn()
   id_cliente: number;
 
-  /** Identificador UUID usado por el sistema de auth / JWT */
-  @Column({ unique: true })
-  userId: string;
-
-  // ── Campos del esquema ecommerce ────────────────────────────────────────────
-  @Column({ nullable: true })
+  // ── Columnas del schema SQL (Ventas.clientes) ───────────────────────────────
+  @Column({ length: 12, nullable: true, unique: true })
   rut: string;
 
-  @Column()
+  @Column({ length: 100 })
   nombre: string;
 
-  @Column({ unique: true })
+  @Column({ length: 100, unique: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ length: 15, nullable: true })
   telefono: string;
 
-  @Column({ default: 'particular' })
+  @Column({ length: 10, nullable: true })
   tipo: string;
 
-  // ── Campos operativos de la aplicación ──────────────────────────────────────
+  // ── Columnas de autenticación (añadidas via ALTER TABLE) ────────────────────
+  @Column({ unique: true, nullable: true })
+  userId: string;
+
   @Column({ nullable: true })
   password?: string;
 
@@ -46,22 +43,6 @@ export class Cliente {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
   balance: number;
-
-  // ── Campos de compatibilidad (uso interno) ──────────────────────────────────
-  @Column({ nullable: true })
-  address?: string;
-
-  @Column({ nullable: true })
-  city?: string;
-
-  @Column({ nullable: true })
-  country?: string;
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
 
   // ── Relaciones ──────────────────────────────────────────────────────────────
   @OneToMany(() => VentasPedido, (pedido) => pedido.cliente)

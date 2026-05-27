@@ -1,20 +1,26 @@
 import { Entity, PrimaryColumn, Column } from 'typeorm';
 
-/**
- * Entidad de solo lectura mapeada a la tabla 'empleados'
- * en la base de datos externa de RRHH (conexión 'external').
- */
-@Entity('empleados')
+/** Entidad de solo lectura — RRHH.RRHH_empleado (conexión 'external') */
+@Entity({ name: 'RRHH_empleado', schema: 'RRHH' })
 export class Empleado {
   @PrimaryColumn()
   id_empleado: number;
 
+  @Column({ nullable: true })
+  rut: string;
+
   @Column()
   nombre: string;
 
-  @Column()
-  apellido: string;
+  @Column({ nullable: true })
+  id_rol: number;
 
   @Column({ nullable: true })
-  cargo: string;
+  correo: string;
+
+  @Column({ nullable: true })
+  telefono: string;
+
+  @Column({ nullable: true })
+  estado: string;
 }
