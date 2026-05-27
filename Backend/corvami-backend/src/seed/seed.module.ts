@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SeedService } from './seed.service';
-import { Producto } from '../productos/entities/producto.entity';
+import { Cliente } from '../users/entities/user.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Producto])],
+  imports: [TypeOrmModule.forFeature([Cliente])],
   providers: [SeedService],
   exports: [SeedService],
 })

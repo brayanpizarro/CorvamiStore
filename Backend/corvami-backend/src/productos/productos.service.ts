@@ -1,68 +1,54 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { randomUUID } from 'crypto';
-import { CreateProductoDto } from './dto/create-producto.dto';
-import { UpdateProductoDto } from './dto/update-producto.dto';
 import { Producto } from './entities/producto.entity';
 
 @Injectable()
 export class ProductosService {
+  private readonly logger = new Logger(ProductosService.name);
+
   constructor(
-    @InjectRepository(Producto)
+    // Conexión 'external' → BD de Inventario (solo lectura)
+    @InjectRepository(Producto, 'external')
     private readonly repo: Repository<Producto>,
   ) {}
 
-  async create(dto: CreateProductoDto) {
-    const entity = this.repo.create({
-      productId: randomUUID(),
-      name: dto.name,
-      description: dto.description,
-      price: dto.price,
-      stock: dto.stock,
-      imageUrl: dto.imageUrl,
-      category: dto.category,
-      subcategory: dto.subcategory,
-      brand: dto.brand,
-      tags: dto.tags,
-      isActive: dto.isActive !== undefined ? dto.isActive : true,
-    });
-    const saved = await this.repo.save(entity);
-    return { productId: saved.productId };
-  }
-
+  /** Solo lectura — los productos viven en el Inventario externo */
   findAll() {
     return this.repo.find();
   }
 
-  findOne(productId: string) {
-    return this.repo.findOneBy({ productId });
+  findOne(id: string | number) {
+    return this.repo.findOneBy({ id_producto: Number(id) });
   }
 
-  async update(productId: string, dto: UpdateProductoDto) {
-    const result = await this.repo.update({ productId }, { ...dto });
-    return { affected: result.affected };
+  // ── Operaciones de escritura ─────────────────────────────────────────────
+  // La BD de Inventario es externa (solo lectura).
+  // Se mantienen los métodos para no romper importadores existentes,
+  // pero no persisten datos.
+
+  async create(_dto: any) {
+    this.logger.warn('create() ignorado: productos es una tabla externa (solo lectura)');
+    return { id_producto: null };
   }
 
-  async remove(productId: string) {
-    const result = await this.repo.delete({ productId });
-    return { deleted: result.affected };
+  async update(id: string | number, _dto: any) {
+    this.logger.warn(`update(${id}) ignorado: productos es una tabla externa (solo lectura)`);
+    return { affected: 0 };
   }
 
-  async setImage(productId: string, imageUrl: string) {
-    const result = await this.repo.update({ productId }, { imageUrl });
-    return { affected: result.affected, imageUrl };
+  async remove(id: string | number) {
+    this.logger.warn(`remove(${id}) ignorado: productos es una tabla externa (solo lectura)`);
+    return { deleted: 0 };
   }
 
-  async reduceStock(productId: string, quantity: number) {
-    const product = await this.findOne(productId);
-    if (!product) {
-      throw new Error(`Producto ${productId} no encontrado`);
-    }
-    if (product.stock < quantity) {
-      throw new Error(`Stock insuficiente para ${product.name}`);
-    }
-    const result = await this.repo.update({ productId }, { stock: product.stock - quantity });
-    return { affected: result.affected };
+  async setImage(id: string | number, _imageUrl: string) {
+    this.logger.warn(`setImage(${id}) ignorado: productos es una tabla externa (solo lectura)`);
+    return { affected: 0 };
+  }
+
+  async reduceStock(id: string | number, _quantity: number) {
+    this.logger.warn(`reduceStock(${id}) ignorado: stock gestionado por Inventario externo`);
+    return { affected: 0 };
   }
 }

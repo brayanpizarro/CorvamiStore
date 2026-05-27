@@ -1,52 +1,35 @@
 import {
   Entity,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Column,
+  ManyToOne,
+  JoinColumn,
   CreateDateColumn,
-  UpdateDateColumn,
 } from 'typeorm';
+import { Cliente } from '../../users/entities/user.entity';
 
-export interface CartItem {
-  productId: string;
-  quantity: number;
-  unitPrice?: number;
-  name?: string;
-  image?: string;
-}
-
-@Entity('shopping_carts')
-export class ShoppingCart {
-  @PrimaryColumn()
-  id: string;
+@Entity('carrito')
+export class Carrito {
+  @PrimaryGeneratedColumn()
+  id_carrito: number;
 
   @Column({ nullable: true })
-  userId?: string;
+  id_sesion: string;
 
   @Column({ nullable: true })
-  sessionId?: string;
+  id_cliente: number;
 
-  @Column('jsonb', { default: '[]' })
-  items: CartItem[];
+  /** Referencia al id del producto en la BD externa (Inventario) */
+  @Column()
+  id_producto: number;
 
-  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  totalPrice: number;
+  @Column()
+  cantidad: number;
 
-  @Column({ default: 0 })
-  totalItems: number;
+  @CreateDateColumn({ type: 'timestamp' })
+  fecha_creacion: Date;
 
-  @Column({ default: 'USD' })
-  currency: string;
-
-  @Column({
-    type: 'enum',
-    enum: ['active', 'completed', 'abandoned'],
-    default: 'active',
-  })
-  status: 'active' | 'completed' | 'abandoned';
-
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  @ManyToOne(() => Cliente, (cliente) => cliente.carrito, { nullable: true })
+  @JoinColumn({ name: 'id_cliente' })
+  cliente: Cliente;
 }

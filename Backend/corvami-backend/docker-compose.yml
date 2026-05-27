@@ -21,11 +21,19 @@ services:
     ports:
       - "3000:3000"
     environment:
+      # ── BD local (PostgreSQL en Docker) ──────────────────────────────────────
       - DB_HOST=postgres
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=corvami
+      # ── BD externa Neon (solo lectura: empleados + productos) ─────────────────
+      - EXT_DB_HOST=ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech
+      - EXT_DB_PORT=5432
+      - EXT_DB_USER=neondb_owner
+      - EXT_DB_PASSWORD=npg_V58gYFmBOPda
+      - EXT_DB_NAME=si2
+      # ── Aplicación ────────────────────────────────────────────────────────────
       - PORT=3000
       - CLOUDINARY_CLOUD_NAME=def0eymwn
       - CLOUDINARY_API_KEY=298765669195532

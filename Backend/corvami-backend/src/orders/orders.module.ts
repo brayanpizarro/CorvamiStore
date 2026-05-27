@@ -2,16 +2,16 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
-import { Order } from './entities/order.entity';
+import { VentasPedido } from './entities/ventas-pedido.entity';
+import { VentasDetalle } from './entities/ventas-detalle.entity';
+import { VentasFactura } from './entities/ventas-factura.entity';
 import { UsersModule } from '../users/users.module';
-import { ProductosModule } from '../productos/productos.module';
 import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order]),
+    TypeOrmModule.forFeature([VentasPedido, VentasDetalle, VentasFactura]),
     UsersModule,
-    ProductosModule,
     EmailModule,
   ],
   controllers: [OrdersController],

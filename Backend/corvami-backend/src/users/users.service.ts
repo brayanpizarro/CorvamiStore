@@ -7,17 +7,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
+import { Cliente } from './entities/user.entity';
 import { randomUUID } from 'crypto';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private readonly usersRepo: Repository<User>,
+    @InjectRepository(Cliente)
+    private readonly usersRepo: Repository<Cliente>,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<Cliente> {
     if (createUserDto.isRegistered) {
       const existingUser = await this.usersRepo.findOne({
         where: { email: createUserDto.email },
@@ -29,20 +29,26 @@ export class UsersService {
 
     const user = this.usersRepo.create({
       userId: randomUUID(),
-      ...createUserDto,
+      email: createUserDto.email,
+      nombre: createUserDto.name,
+      telefono: createUserDto.phone,
+      address: createUserDto.address,
+      city: createUserDto.city,
+      country: createUserDto.country,
       balance: createUserDto.balance || 0,
       isRegistered: createUserDto.isRegistered || false,
       isActive: true,
+      password: createUserDto.password,
     });
 
     return await this.usersRepo.save(user);
   }
 
-  async findAll(): Promise<User[]> {
+  async findAll(): Promise<Cliente[]> {
     return await this.usersRepo.find();
   }
 
-  async findOne(userId: string): Promise<User> {
+  async findOne(userId: string): Promise<Cliente> {
     const user = await this.usersRepo.findOne({ where: { userId } });
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
@@ -50,23 +56,26 @@ export class UsersService {
     return user;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<Cliente | null> {
     return await this.usersRepo.findOne({ where: { email } });
   }
 
-  async update(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(userId: string, updateUserDto: UpdateUserDto): Promise<Cliente> {
     const user = await this.findOne(userId);
-    Object.assign(user, updateUserDto);
+    const { name, phone, ...rest } = updateUserDto as any;
+    if (name !== undefined) user.nombre = name;
+    if (phone !== undefined) user.telefono = phone;
+    Object.assign(user, rest);
     return await this.usersRepo.save(user);
   }
 
-  async addBalance(userId: string, amount: number): Promise<User> {
+  async addBalance(userId: string, amount: number): Promise<Cliente> {
     const user = await this.findOne(userId);
     user.balance = Number(user.balance) + amount;
     return await this.usersRepo.save(user);
   }
 
-  async deductBalance(userId: string, amount: number): Promise<User> {
+  async deductBalance(userId: string, amount: number): Promise<Cliente> {
     const user = await this.findOne(userId);
     if (Number(user.balance) < amount) {
       throw new BadRequestException('Saldo insuficiente');

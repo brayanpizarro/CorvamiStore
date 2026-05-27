@@ -1,4 +1,4 @@
-import {
+﻿import {
   Injectable,
   NotFoundException,
   BadRequestException,
@@ -7,53 +7,42 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { Order } from './entities/order.entity';
+import { VentasPedido } from './entities/ventas-pedido.entity';
+import { VentasDetalle } from './entities/ventas-detalle.entity';
+import { VentasFactura } from './entities/ventas-factura.entity';
 import { UsersService } from '../users/users.service';
-import { ProductosService } from '../productos/productos.service';
 import { EmailService } from '../email/email.service';
-import { randomUUID } from 'crypto';
 
 @Injectable()
 export class OrdersService {
   constructor(
-    @InjectRepository(Order)
-    private readonly ordersRepo: Repository<Order>,
+    @InjectRepository(VentasPedido)
+    private readonly pedidosRepo: Repository<VentasPedido>,
+    @InjectRepository(VentasDetalle)
+    private readonly detallesRepo: Repository<VentasDetalle>,
+    @InjectRepository(VentasFactura)
+    private readonly facturasRepo: Repository<VentasFactura>,
     private readonly usersService: UsersService,
-    private readonly productosService: ProductosService,
     private readonly emailService: EmailService,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto): Promise<Order> {
-    // Validar stock de productos
-    for (const item of createOrderDto.items) {
-      const product = await this.productosService.findOne(item.productId);
-      if (!product) {
-        throw new BadRequestException(
-          `Producto ${item.productId} no encontrado`,
-        );
-      }
-      if (product.stock < item.quantity) {
-        throw new BadRequestException(
-          `Stock insuficiente para ${product.name}. Disponible: ${product.stock}`,
-        );
-      }
-    }
+  private parseId(id: string | number): number {
+    return typeof id === 'string' ? parseInt(id, 10) : id;
+  }
 
-    // Determinar si es invitado
+  async create(createOrderDto: CreateOrderDto): Promise<VentasPedido> {
     const isGuest =
       createOrderDto.customer.isGuest || !createOrderDto.customer.userId;
 
-    // Crear orden
-    const order = this.ordersRepo.create({
-      orderId: randomUUID(),
+    const detallesData = createOrderDto.items.map((item) => ({
+      id_producto: Number(item.productId),
+      cantidad: item.quantity,
+      precio_unit: item.unitPrice,
+      subtotal: item.totalPrice,
+    }));
+
+    const pedido = this.pedidosRepo.create({
       userId: createOrderDto.customer.userId || undefined,
-      items: createOrderDto.items.map((item) => ({
-        productId: item.productId,
-        name: item.name,
-        quantity: item.quantity,
-        unitPrice: item.unitPrice,
-        totalPrice: item.totalPrice,
-      })),
       shippingInfo: {
         name: createOrderDto.customer.name,
         email: createOrderDto.customer.email,
@@ -63,238 +52,190 @@ export class OrdersService {
         department: createOrderDto.customer.department,
         zipCode: createOrderDto.customer.zipCode,
       },
-      total: createOrderDto.total,
       subtotal: createOrderDto.subtotal,
-      shippingCost: createOrderDto.shipping,
-      status: isGuest ? 'paid' : 'pending',
+      costo_envio: createOrderDto.shipping,
+      total: createOrderDto.total,
+      canal: isGuest ? 'invitado' : 'online',
+      estado: isGuest ? 'pagado' : 'pendiente',
       isPaid: isGuest,
       paidAt: isGuest ? new Date() : undefined,
-      paymentMethod: isGuest ? 'guest_checkout' : 'pending',
+      paymentMethod: isGuest ? 'guest_checkout' : 'pendiente',
       notes: isGuest
         ? `Compra como invitado. Total: $${createOrderDto.total.toLocaleString()}`
-        : createOrderDto.notes,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+        : (createOrderDto as any).notes,
     });
 
-    const savedOrder = await this.ordersRepo.save(order);
+    const savedPedido = await this.pedidosRepo.save(pedido);
 
-    // Si es invitado, reducir stock inmediatamente
+    const detalles = this.detallesRepo.create(
+      detallesData.map((d) => ({ ...d, id_pedido: savedPedido.id_pedido })),
+    );
+    savedPedido.detalles = await this.detallesRepo.save(detalles);
+
+    const iva = Number((savedPedido.total * 0.19).toFixed(2));
+    const monto_neto = Number((savedPedido.total - iva).toFixed(2));
+    const factura = this.facturasRepo.create({
+      id_pedido: savedPedido.id_pedido,
+      monto_neto,
+      iva,
+      total: savedPedido.total,
+    });
+    savedPedido.factura = await this.facturasRepo.save(factura);
+
     if (isGuest) {
-      for (const item of savedOrder.items) {
-        const product = await this.productosService.findOne(item.productId);
-        if (product) {
-          await this.productosService.update(item.productId, {
-            stock: product.stock - item.quantity,
-          });
-        }
-      }
-
-      // Enviar correo de confirmación
       try {
-        await this.emailService.sendOrderConfirmationEmail(savedOrder);
-      } catch (error) {
-        console.error('Error enviando correo de confirmación:', error);
+        await this.emailService.sendOrderConfirmationEmail(savedPedido);
+      } catch (err) {
+        console.error('Error enviando correo de confirmacion:', err);
       }
     }
 
-    return savedOrder;
+    return savedPedido;
   }
 
-  async findAll(): Promise<Order[]> {
-    return await this.ordersRepo.find();
+  async findAll(): Promise<VentasPedido[]> {
+    return this.pedidosRepo.find({ relations: ['detalles', 'factura'] });
   }
 
-  async findOne(orderId: string): Promise<Order> {
-    const order = await this.ordersRepo.findOne({
-      where: { orderId },
+  async findOne(id: string | number): Promise<VentasPedido> {
+    const pedido = await this.pedidosRepo.findOne({
+      where: { id_pedido: this.parseId(id) },
+      relations: ['detalles', 'factura'],
     });
-
-    if (!order) {
-      throw new NotFoundException(`Orden con ID ${orderId} no encontrada`);
+    if (!pedido) {
+      throw new NotFoundException(`Pedido con ID ${id} no encontrado`);
     }
-
-    return order;
+    return pedido;
   }
 
-  async findByUser(userId: string): Promise<Order[]> {
-    return await this.ordersRepo.find({
+  async findByUser(userId: string): Promise<VentasPedido[]> {
+    return this.pedidosRepo.find({
       where: { userId },
+      relations: ['detalles', 'factura'],
     });
   }
 
-  async findByEmail(email: string): Promise<Order[]> {
-    return this.ordersRepo
-      .createQueryBuilder('order')
-      .where("order.shippingInfo->>'email' = :email", { email })
+  async findByEmail(email: string): Promise<VentasPedido[]> {
+    return this.pedidosRepo
+      .createQueryBuilder('pedido')
+      .where("pedido.shippingInfo->>'email' = :email", { email })
+      .leftJoinAndSelect('pedido.detalles', 'detalles')
+      .leftJoinAndSelect('pedido.factura', 'factura')
       .getMany();
   }
 
   async update(
-    orderId: string,
+    id: string | number,
     updateOrderDto: UpdateOrderDto,
-  ): Promise<Order> {
-    const order = await this.findOne(orderId);
-
-    Object.assign(order, {
-      ...updateOrderDto,
-      updatedAt: new Date(),
-    });
-
-    return await this.ordersRepo.save(order);
+  ): Promise<VentasPedido> {
+    const pedido = await this.findOne(id);
+    Object.assign(pedido, updateOrderDto);
+    return this.pedidosRepo.save(pedido);
   }
 
-  async remove(orderId: string): Promise<void> {
-    await this.findOne(orderId);
-    await this.ordersRepo.delete({ orderId });
+  async remove(id: string | number): Promise<void> {
+    await this.findOne(id);
+    await this.pedidosRepo.delete({ id_pedido: this.parseId(id) });
   }
 
   async processCardPayment(
-    orderId: string,
+    id: string | number,
     paymentData: {
       cardNumber: string;
       cardHolder: string;
       expiryDate: string;
       cvv: string;
     },
-  ): Promise<Order> {
-    const order = await this.findOne(orderId);
+  ): Promise<VentasPedido> {
+    const pedido = await this.findOne(id);
 
-    if (order.isPaid) {
-      throw new BadRequestException('Esta orden ya ha sido pagada');
+    if (pedido.isPaid) {
+      throw new BadRequestException('Este pedido ya ha sido pagado');
     }
 
-    // Validar tarjeta (simulación)
     const validCards = [
-      '4111111111111111', // Visa
-      '5555555555554444', // Mastercard
-      '378282246310005', // Amex
-      '6011111111111117', // Discover
+      '4111111111111111',
+      '5555555555554444',
+      '378282246310005',
+      '6011111111111117',
     ];
-
-    const cleanedCard: string = paymentData.cardNumber.replace(/\s/g, '');
-
+    const cleanedCard = paymentData.cardNumber.replace(/\s/g, '');
     if (!validCards.includes(cleanedCard)) {
       throw new BadRequestException(
-        'Tarjeta inválida. Usa: 4111 1111 1111 1111 para pruebas',
+        'Tarjeta invalida. Usa: 4111 1111 1111 1111 para pruebas',
       );
     }
 
-    // Simular procesamiento de pago exitoso
     const transactionId = `TXN-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`;
-
-    // Actualizar orden
-    order.isPaid = true;
-    order.paidAt = new Date();
-    order.status = 'paid';
-    order.paymentMethod = 'credit_card';
-    order.updatedAt = new Date();
-
-    // Guardar información del pago en notas (opcional)
-    if (!order.notes) {
-      order.notes = `Pago procesado con tarjeta **** **** **** ${cleanedCard.slice(-4)}. ID: ${transactionId}`;
+    pedido.isPaid = true;
+    pedido.paidAt = new Date();
+    pedido.estado = 'pagado';
+    pedido.paymentMethod = 'tarjeta';
+    if (!pedido.notes) {
+      pedido.notes = `Pago con tarjeta **** **** **** ${cleanedCard.slice(-4)}. ID: ${transactionId}`;
     }
 
-    // Reducir stock de productos
-    for (const item of order.items) {
-      const product = await this.productosService.findOne(item.productId);
-      if (product) {
-        await this.productosService.update(item.productId, {
-          stock: product.stock - item.quantity,
-        });
-      }
-    }
-
-    const savedOrder = await this.ordersRepo.save(order);
-
-    // Enviar correo de confirmación
+    const saved = await this.pedidosRepo.save(pedido);
     try {
-      await this.emailService.sendOrderConfirmationEmail(order);
-    } catch (error) {
-      console.error('Error enviando correo de confirmación:', error);
-      // No fallar la orden si el correo falla
+      await this.emailService.sendOrderConfirmationEmail(saved);
+    } catch (err) {
+      console.error('Error enviando correo:', err);
     }
-
-    return savedOrder;
+    return saved;
   }
 
-  async processBalancePayment(orderId: string, userId: string): Promise<Order> {
-    const order = await this.findOne(orderId);
+  async processBalancePayment(
+    id: string | number,
+    userId: string,
+  ): Promise<VentasPedido> {
+    const pedido = await this.findOne(id);
 
-    if (order.isPaid) {
-      throw new BadRequestException('Esta orden ya ha sido pagada');
+    if (pedido.isPaid) {
+      throw new BadRequestException('Este pedido ya ha sido pagado');
+    }
+    if (pedido.userId !== userId) {
+      throw new BadRequestException('No tienes permiso para pagar este pedido');
     }
 
-    // Verificar que la orden pertenezca al usuario
-    if (order.userId !== userId) {
-      throw new BadRequestException('No tienes permiso para pagar esta orden');
-    }
-
-    // Obtener usuario y verificar saldo
     const user = await this.usersService.findOne(userId);
-    if (!user) {
-      throw new BadRequestException('Usuario no encontrado');
-    }
-
-    if (user.balance < order.total) {
+    if (Number(user.balance) < Number(pedido.total)) {
       throw new BadRequestException(
-        `Saldo insuficiente. Necesitas $${order.total.toLocaleString()} pero tienes $${user.balance.toLocaleString()}`,
+        `Saldo insuficiente. Necesitas $${pedido.total} pero tienes $${user.balance}`,
       );
     }
 
-    // Descontar del saldo del usuario
-    user.balance -= order.total;
-    await this.usersService.update(userId, { balance: user.balance });
+    await this.usersService.deductBalance(userId, Number(pedido.total));
 
-    // Actualizar orden
-    order.isPaid = true;
-    order.paidAt = new Date();
-    order.status = 'paid';
-    order.paymentMethod = 'balance';
-    order.updatedAt = new Date();
-
-    if (!order.notes) {
-      order.notes = `Pago procesado con saldo. Monto: $${order.total.toLocaleString()}`;
+    pedido.isPaid = true;
+    pedido.paidAt = new Date();
+    pedido.estado = 'pagado';
+    pedido.paymentMethod = 'saldo';
+    if (!pedido.notes) {
+      pedido.notes = `Pago con saldo. Monto: $${pedido.total}`;
     }
 
-    // Reducir stock de productos
-    for (const item of order.items) {
-      const product = await this.productosService.findOne(item.productId);
-      if (product) {
-        await this.productosService.update(item.productId, {
-          stock: product.stock - item.quantity,
-        });
-      }
-    }
-
-    const savedOrder = await this.ordersRepo.save(order);
-
-    // Enviar correo de confirmación
+    const saved = await this.pedidosRepo.save(pedido);
     try {
-      await this.emailService.sendOrderConfirmationEmail(order);
-    } catch (error) {
-      console.error('Error enviando correo de confirmación:', error);
-      // No fallar la orden si el correo falla
+      await this.emailService.sendOrderConfirmationEmail(saved);
+    } catch (err) {
+      console.error('Error enviando correo:', err);
     }
-
-    return savedOrder;
+    return saved;
   }
 
   async hasUserPurchasedProduct(
     userId: string,
     productId: string,
   ): Promise<boolean> {
-    // Buscar órdenes del usuario que estén pagadas
-    const orders = await this.ordersRepo.find({
-      where: {
-        userId,
-        isPaid: true,
-      },
-    });
-
-    // Verificar si alguna orden contiene el producto
-    return orders.some((order) =>
-      order.items.some((item) => item.productId === productId),
-    );
+    const count = await this.detallesRepo
+      .createQueryBuilder('det')
+      .innerJoin('det.pedido', 'ped')
+      .where('ped.userId = :userId', { userId })
+      .andWhere('ped.isPaid = true')
+      .andWhere('det.id_producto = :id_producto', {
+        id_producto: Number(productId),
+      })
+      .getCount();
+    return count > 0;
   }
 }

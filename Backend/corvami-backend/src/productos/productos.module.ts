@@ -6,7 +6,8 @@ import { Producto } from './entities/producto.entity';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Producto])],
+  // 'external' = conexión a la BD de Inventario (solo lectura)
+  imports: [TypeOrmModule.forFeature([Producto], 'external')],
   controllers: [ProductosController],
   providers: [ProductosService, CloudinaryService],
   exports: [ProductosService],
