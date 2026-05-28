@@ -53,7 +53,7 @@ const Header: React.FC = () => {
               to="/"
               className="text-lg sm:text-xl md:text-2xl font-bold text-white hover:text-green-400 transition-colors"
             >
-              Corvami Store
+              NN
             </Link>
           </div>
 

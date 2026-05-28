@@ -61,8 +61,8 @@ const ContactPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className={`font-semibold mb-1 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>Email</h3>
-                    <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>contacto@corvamistore.com</p>
-                    <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>soporte@corvamistore.com</p>
+                    <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>contacto@nn.com</p>
+                    <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>soporte@nn.com</p>
                   </div>
                 </div>
 

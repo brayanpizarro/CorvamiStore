@@ -18,7 +18,7 @@ const Footer: React.FC = () => {
                 ? 'text-green-400' 
                 : 'text-gray-800'
             }`}>
-              Corvami Store
+              NN
             </h3>
             <p className={`mb-6 ${
               theme === 'dark' 
@@ -194,7 +194,7 @@ const Footer: React.FC = () => {
             ? 'border-green-500/30 text-gray-400'
             : 'border-gray-300 text-gray-500'
         }`}>
-          <p>&copy; 2025 Corvami Store. Todos los derechos reservados.</p>
+          <p>&copy; 2025 NN. Todos los derechos reservados.</p>
         </div>
       </div>
     </footer>
