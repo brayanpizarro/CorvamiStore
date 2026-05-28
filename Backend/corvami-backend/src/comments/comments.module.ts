@@ -6,10 +6,7 @@ import { Comment } from './entities/comment.entity';
 import { OrdersModule } from '../orders/orders.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Comment]),
-    OrdersModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Comment]), OrdersModule],
   controllers: [CommentsController],
   providers: [CommentsService],
   exports: [CommentsService],

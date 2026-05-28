@@ -30,7 +30,11 @@ export class CommentsController {
     @Body() dto: CreateCommentDto,
     @CurrentUser() user: any,
   ) {
-    return this.commentsService.create({ ...dto, productId, userId: user.userId });
+    return this.commentsService.create({
+      ...dto,
+      productId,
+      userId: user.userId,
+    });
   }
 
   @Public()

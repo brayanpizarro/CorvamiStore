@@ -1,32 +1,38 @@
-import { Entity, PrimaryColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 /** Entidad de solo lectura — Inventario.Producto (conexión 'external') */
 @Entity({ name: 'Producto', schema: 'Inventario' })
 export class Producto {
   @PrimaryColumn()
-  id: number;
+  id!: number;
 
   @Column({ nullable: true })
-  codigo: string;
+  codigo!: string;
 
   @Column()
-  nombre: string;
+  nombre!: string;
 
   @Column({ nullable: true })
-  descripcion: string;
+  descripcion!: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  precio: number;
+  precio!: number;
 
   @Column({ default: 0 })
-  stock_actual: number;
+  stock_actual!: number;
 
   @Column({ default: 0 })
-  stock_minimo: number;
+  stock_minimo!: number;
 
   @CreateDateColumn({ nullable: true })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({ nullable: true })
-  updatedAt: Date;
+  updatedAt!: Date;
 }

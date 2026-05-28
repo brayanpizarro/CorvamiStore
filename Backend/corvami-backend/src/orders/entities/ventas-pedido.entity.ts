@@ -14,42 +14,46 @@ import { VentasFactura } from './ventas-factura.entity';
 @Entity('ventas_pedido')
 export class VentasPedido {
   @PrimaryGeneratedColumn()
-  id_pedido: number;
+  id_pedido!: number;
 
   @Column({ nullable: true })
-  id_cliente: number;
+  id_cliente!: number;
 
   /** Referencia al id del empleado en la BD externa (RRHH) */
   @Column({ nullable: true })
-  id_empleado: number;
+  id_empleado!: number;
 
-  @Column({ type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
-  fecha: Date;
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  fecha!: Date;
 
   @Column({ length: 20, default: 'pendiente' })
-  estado: string;
+  estado!: string;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
-  total: number;
+  total!: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  subtotal: number;
+  subtotal!: number;
 
   @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
-  costo_envio: number;
+  costo_envio!: number;
 
   @Column({ length: 20, nullable: true })
-  canal: string;
+  canal!: string;
 
   // ── Campos operativos ──────────────────────────────────────────────────────
   @Column({ default: false })
-  isPaid: boolean;
+  isPaid!: boolean;
 
   @Column({ nullable: true, type: 'timestamptz' })
   paidAt?: Date;
 
   @Column({ default: 'pendiente' })
-  paymentMethod: string;
+  paymentMethod!: string;
 
   @Column({ nullable: true, type: 'text' })
   notes?: string;
@@ -62,17 +66,23 @@ export class VentasPedido {
   @Column({ nullable: true })
   userId?: string;
 
-  @Column({ type: 'timestamp', nullable: true, default: () => 'CURRENT_TIMESTAMP' })
-  updatedAt: Date;
+  @Column({
+    type: 'timestamp',
+    nullable: true,
+    default: () => 'CURRENT_TIMESTAMP',
+  })
+  updatedAt!: Date;
 
   // ── Relaciones locales ─────────────────────────────────────────────────────
   @ManyToOne(() => Cliente, (cliente) => cliente.pedidos, { nullable: true })
   @JoinColumn({ name: 'id_cliente' })
-  cliente: Cliente;
+  cliente!: Cliente;
 
-  @OneToMany(() => VentasDetalle, (detalle) => detalle.pedido, { cascade: true })
-  detalles: VentasDetalle[];
+  @OneToMany(() => VentasDetalle, (detalle) => detalle.pedido, {
+    cascade: true,
+  })
+  detalles!: VentasDetalle[];
 
   @OneToOne(() => VentasFactura, (factura) => factura.pedido, { cascade: true })
-  factura: VentasFactura;
+  factura!: VentasFactura;
 }

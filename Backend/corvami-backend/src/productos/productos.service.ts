@@ -28,27 +28,37 @@ export class ProductosService {
   // pero no persisten datos.
 
   async create(_dto: any) {
-    this.logger.warn('create() ignorado: productos es una tabla externa (solo lectura)');
+    this.logger.warn(
+      'create() ignorado: productos es una tabla externa (solo lectura)',
+    );
     return { id_producto: null };
   }
 
   async update(id: string | number, _dto: any) {
-    this.logger.warn(`update(${id}) ignorado: productos es una tabla externa (solo lectura)`);
+    this.logger.warn(
+      `update(${id}) ignorado: productos es una tabla externa (solo lectura)`,
+    );
     return { affected: 0 };
   }
 
   async remove(id: string | number) {
-    this.logger.warn(`remove(${id}) ignorado: productos es una tabla externa (solo lectura)`);
+    this.logger.warn(
+      `remove(${id}) ignorado: productos es una tabla externa (solo lectura)`,
+    );
     return { deleted: 0 };
   }
 
   async setImage(id: string | number, _imageUrl: string) {
-    this.logger.warn(`setImage(${id}) ignorado: productos es una tabla externa (solo lectura)`);
+    this.logger.warn(
+      `setImage(${id}) ignorado: productos es una tabla externa (solo lectura)`,
+    );
     return { affected: 0 };
   }
 
   async reduceStock(id: string | number, _quantity: number) {
-    this.logger.warn(`reduceStock(${id}) ignorado: stock gestionado por Inventario externo`);
+    this.logger.warn(
+      `reduceStock(${id}) ignorado: stock gestionado por Inventario externo`,
+    );
     return { affected: 0 };
   }
 }

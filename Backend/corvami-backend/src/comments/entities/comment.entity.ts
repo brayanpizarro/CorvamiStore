@@ -11,31 +11,31 @@ import {
 @Index(['productId', 'createdAt'])
 export class Comment {
   @PrimaryColumn()
-  commentId: string;
+  commentId!: string;
 
   @Column()
-  productId: string;
+  productId!: string;
 
   @Column()
-  userId: string;
+  userId!: string;
 
   @Column('int')
-  rating: number;
+  rating!: number;
 
   @Column({ length: 140, nullable: true })
   title?: string;
 
   @Column('text')
-  content: string;
+  content!: string;
 
   @Column({ type: 'simple-array', nullable: true })
   mediaUrls?: string[];
 
   @Column({ type: 'simple-array', nullable: true })
-  helpfulVotes: string[];
+  helpfulVotes!: string[];
 
   @Column({ type: 'simple-array', nullable: true })
-  unhelpfulVotes: string[];
+  unhelpfulVotes!: string[];
 
   @Column({ nullable: true })
   parentCommentId?: string;
@@ -45,11 +45,11 @@ export class Comment {
     enum: ['pending', 'published', 'hidden', 'reported'],
     default: 'published',
   })
-  status: 'pending' | 'published' | 'hidden' | 'reported';
+  status!: 'pending' | 'published' | 'hidden' | 'reported';
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

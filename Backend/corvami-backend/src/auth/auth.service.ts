@@ -32,9 +32,6 @@ export class AuthService {
       password: hashedPassword,
       name: registerDto.name,
       phone: registerDto.phone,
-      address: registerDto.address,
-      city: registerDto.city,
-      country: registerDto.country,
       balance: 0,
       isRegistered: true,
     });

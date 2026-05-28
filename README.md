@@ -2,7 +2,8 @@
 
 ### Requisitos previos
 - [Node.js](https://nodejs.org/) v18 o superior
-- [Docker](https://www.docker.com/) y Docker Compose (para el backend con base de datos local)
+- [Docker](https://www.docker.com/) y Docker Compose
+- Acceso a la base de datos **Neon PostgreSQL (si2)**
 
 ---
 
@@ -10,7 +11,7 @@
 
 #### Opción A — Con Docker (recomendado)
 
-Levanta el backend junto con PostgreSQL local en contenedores:
+El backend se conecta directamente a Neon (no levanta PostgreSQL local):
 
 ```bash
 cd CorvamiStore/Backend/corvami-backend
@@ -21,10 +22,7 @@ El API quedará disponible en `http://localhost:3000`.
 
 #### Opción B — Sin Docker (desarrollo local)
 
-1. Asegúrate de tener una instancia de PostgreSQL corriendo en `localhost:5432` con:
-   - Usuario: `postgres` / Contraseña: `postgres` / Base de datos: `corvami`
-
-2. Instala dependencias y levanta en modo desarrollo:
+Instala dependencias y levanta en modo desarrollo:
 
 ```bash
 cd CorvamiStore/Backend/corvami-backend
@@ -53,19 +51,13 @@ La aplicación quedará disponible en `http://localhost:5173`.
 Crea un archivo `.env` en `Backend/corvami-backend/` con las siguientes variables si no usas Docker:
 
 ```env
-# Base de datos local
-DB_HOST=localhost
+# Neon PostgreSQL — conexión principal (schema: Ventas)
+DB_HOST=ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech
 DB_PORT=5432
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_NAME=corvami
-
-# Base de datos externa Neon (solo lectura: empleados + productos)
-EXT_DB_HOST=ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech
-EXT_DB_PORT=5432
-EXT_DB_USER=neondb_owner
-EXT_DB_PASSWORD=<tu_contraseña>
-EXT_DB_NAME=si2
+DB_USER=neondb_owner
+DB_PASSWORD=<tu_contraseña>
+DB_NAME=si2
+DB_SCHEMA=Ventas
 
 # Auth
 JWT_SECRET=corvami-secret-key-2024
@@ -74,6 +66,10 @@ JWT_SECRET=corvami-secret-key-2024
 EMAIL_USER=tu_correo@gmail.com
 EMAIL_PASSWORD=tu_app_password
 ```
+
+> **Nota:** Ambas conexiones TypeORM (`default` y `external`) apuntan a la misma base Neon si2.
+> - Conexión `default` → schema `Ventas` (tablas propias, `synchronize: false`)
+> - Conexión `external` → schemas `Inventario` y `RRHH` (**solo lectura**, `synchronize: false`)
 
 ---
 
@@ -126,21 +122,27 @@ erDiagram
         datetime fecha_creacion
     }
 
-    %% TABLAS CONSULTADAS (externas)
-    empleados_externos {
+    %% TABLAS EXTERNAS (solo lectura)
+    %% Schema: RRHH — tabla: RRHH_empleado
+    RRHH_empleado {
         int id_empleado PK
+        string rut
         string nombre
-        string apellido
-        string cargo
+        int id_rol
+        string correo
+        string telefono
+        string estado
     }
 
-    productos_externos {
-        int id_producto PK
+    %% Schema: Inventario — tabla: Producto
+    Producto {
+        int id PK
         string codigo
         string nombre
-        decimal precio_unit
+        string descripcion
+        decimal precio
         int stock_actual
-        string categoria
+        int stock_minimo
     }
 
     %% RELACIONES
@@ -150,7 +152,7 @@ erDiagram
     ventas_pedido ||--|| ventas_factura : "genera"
     ventas_pedido ||--|{ ventas_detalle : "contiene"
     
-    ventas_pedido }o--|| empleados_externos : "atendido por"
+    ventas_pedido }o--|| RRHH_empleado : "atendido por"
     
-    ventas_detalle }o--|| productos_externos : "referencia"
-    carrito }o--|| productos_externos : "referencia"
+    ventas_detalle }o--|| Producto : "referencia"
+    carrito }o--|| Producto : "referencia"

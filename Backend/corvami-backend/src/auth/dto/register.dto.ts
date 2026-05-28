@@ -12,17 +12,6 @@ export class RegisterDto {
   name: string;
 
   @IsString()
-  phone: string;
-
-  @IsString()
   @IsOptional()
-  address?: string;
-
-  @IsString()
-  @IsOptional()
-  city?: string;
-
-  @IsString()
-  @IsOptional()
-  country?: string;
+  phone?: string;
 }

@@ -4,23 +4,23 @@ import { Entity, PrimaryColumn, Column } from 'typeorm';
 @Entity({ name: 'RRHH_empleado', schema: 'RRHH' })
 export class Empleado {
   @PrimaryColumn()
-  id_empleado: number;
+  id_empleado!: number;
 
   @Column({ nullable: true })
-  rut: string;
+  rut!: string;
 
   @Column()
-  nombre: string;
+  nombre!: string;
 
   @Column({ nullable: true })
-  id_rol: number;
+  id_rol!: number;
 
   @Column({ nullable: true })
-  correo: string;
+  correo!: string;
 
   @Column({ nullable: true })
-  telefono: string;
+  telefono!: string;
 
   @Column({ nullable: true })
-  estado: string;
+  estado!: string;
 }

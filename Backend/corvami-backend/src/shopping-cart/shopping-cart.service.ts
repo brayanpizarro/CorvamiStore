@@ -1,9 +1,7 @@
 ﻿import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  CreateShoppingCartDto,
-} from './dto/create-shopping-cart.dto';
+import { CreateShoppingCartDto } from './dto/create-shopping-cart.dto';
 import {
   AddItemToCartDto,
   UpdateCartItemDto,
@@ -25,10 +23,7 @@ export class ShoppingCartService {
   }
 
   private async toCartView(items: Carrito[]) {
-    const totalPrice = items.reduce(
-      (sum) => sum,
-      0,
-    );
+    const totalPrice = items.reduce((sum) => sum, 0);
     return { items, totalItems: items.length, totalPrice };
   }
 

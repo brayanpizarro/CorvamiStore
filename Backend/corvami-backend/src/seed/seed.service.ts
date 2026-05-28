@@ -21,9 +21,24 @@ export class SeedService {
     }
 
     const clientesSeed = [
-      { nombre: 'Juan Perez', email: 'juan@example.com', telefono: '+56912345678', rut: '12345678-9' },
-      { nombre: 'Maria Lopez', email: 'maria@example.com', telefono: '+56998765432', rut: '98765432-1' },
-      { nombre: 'Admin User', email: 'admin@corvami.cl', telefono: '+56911111111', rut: '11111111-1' },
+      {
+        nombre: 'Juan Perez',
+        email: 'juan@example.com',
+        telefono: '+56912345678',
+        rut: '12345678-9',
+      },
+      {
+        nombre: 'Maria Lopez',
+        email: 'maria@example.com',
+        telefono: '+56998765432',
+        rut: '98765432-1',
+      },
+      {
+        nombre: 'Admin User',
+        email: 'admin@corvami.cl',
+        telefono: '+56911111111',
+        rut: '11111111-1',
+      },
     ];
 
     const clientes = clientesSeed.map((c) =>

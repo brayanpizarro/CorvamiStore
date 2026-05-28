@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, IsNull } from 'typeorm';
 import { randomUUID } from 'crypto';
@@ -87,7 +91,10 @@ export class CommentsService {
   }
 
   async updateStatus(commentId: string, dto: UpdateCommentStatusDto) {
-    const result = await this.repo.update({ commentId }, { status: dto.status });
+    const result = await this.repo.update(
+      { commentId },
+      { status: dto.status },
+    );
     return { affected: result.affected };
   }
 
@@ -101,11 +108,11 @@ export class CommentsService {
       .createQueryBuilder('comment')
       .select('COUNT(*)', 'count')
       .addSelect('AVG(comment.rating)', 'avg')
-      .addSelect("SUM(CASE WHEN comment.rating = 1 THEN 1 ELSE 0 END)", 'r1')
-      .addSelect("SUM(CASE WHEN comment.rating = 2 THEN 1 ELSE 0 END)", 'r2')
-      .addSelect("SUM(CASE WHEN comment.rating = 3 THEN 1 ELSE 0 END)", 'r3')
-      .addSelect("SUM(CASE WHEN comment.rating = 4 THEN 1 ELSE 0 END)", 'r4')
-      .addSelect("SUM(CASE WHEN comment.rating = 5 THEN 1 ELSE 0 END)", 'r5')
+      .addSelect('SUM(CASE WHEN comment.rating = 1 THEN 1 ELSE 0 END)', 'r1')
+      .addSelect('SUM(CASE WHEN comment.rating = 2 THEN 1 ELSE 0 END)', 'r2')
+      .addSelect('SUM(CASE WHEN comment.rating = 3 THEN 1 ELSE 0 END)', 'r3')
+      .addSelect('SUM(CASE WHEN comment.rating = 4 THEN 1 ELSE 0 END)', 'r4')
+      .addSelect('SUM(CASE WHEN comment.rating = 5 THEN 1 ELSE 0 END)', 'r5')
       .where('comment.productId = :productId', { productId })
       .andWhere("comment.status = 'published'")
       .getRawOne();

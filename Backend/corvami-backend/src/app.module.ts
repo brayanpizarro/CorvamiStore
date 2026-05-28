@@ -21,7 +21,9 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     TypeOrmModule.forRoot({
       name: 'default',
       type: 'postgres',
-      host: process.env.DB_HOST || 'ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech',
+      host:
+        process.env.DB_HOST ||
+        'ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech',
       port: Number(process.env.DB_PORT || 5432),
       username: process.env.DB_USER || 'neondb_owner',
       password: process.env.DB_PASSWORD || 'npg_V58gYFmBOPda',
@@ -37,21 +39,25 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     TypeOrmModule.forRoot({
       name: 'external',
       type: 'postgres',
-      host: process.env.EXT_DB_HOST || 'ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech',
+      host:
+        process.env.EXT_DB_HOST ||
+        'ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech',
       port: Number(process.env.EXT_DB_PORT || 5432),
       username: process.env.EXT_DB_USER || 'neondb_owner',
       password: process.env.EXT_DB_PASSWORD || 'npg_V58gYFmBOPda',
       database: process.env.EXT_DB_NAME || 'si2',
-      synchronize: false,   // NUNCA modificar tablas externas
+      synchronize: false, // NUNCA modificar tablas externas
       autoLoadEntities: true,
       extra: { ssl: { require: true, rejectUnauthorized: false } },
       // Tablas consultadas: Inventario.productos, RRHH.empleados
     }),
 
-    ThrottlerModule.forRoot([{
-      ttl: 60000, // 60 segundos
-      limit: 100, // 100 requests por minuto
-    }]),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 60 segundos
+        limit: 100, // 100 requests por minuto
+      },
+    ]),
     ProductosModule,
     ShoppingCartModule,
     CommentsModule,

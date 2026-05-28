@@ -15,19 +15,8 @@ export class CreateUserDto {
   name: string;
 
   @IsString()
-  phone: string;
-
-  @IsString()
   @IsOptional()
-  address?: string;
-
-  @IsString()
-  @IsOptional()
-  city?: string;
-
-  @IsString()
-  @IsOptional()
-  country?: string;
+  phone?: string;
 
   @IsNumber()
   @IsOptional()

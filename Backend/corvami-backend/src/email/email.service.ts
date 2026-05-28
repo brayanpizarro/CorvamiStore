@@ -228,8 +228,8 @@ export class EmailService {
       order.paymentMethod === 'balance'
         ? 'Saldo de Cuenta'
         : order.paymentMethod === 'guest_checkout'
-        ? 'Compra como Invitado'
-        : 'Tarjeta de Crédito';
+          ? 'Compra como Invitado'
+          : 'Tarjeta de Crédito';
 
     const mailOptions = {
       from: process.env.EMAIL_USER,
