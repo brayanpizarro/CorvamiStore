@@ -13,11 +13,10 @@ interface User {
   email: string;
   name: string;
   phone?: string;
-  address?: string;
-  city?: string;
-  country?: string;
+  rut?: string;
   balance: number;
   isRegistered: boolean;
+  isActive: boolean;
 }
 
 interface AuthContextValue {
@@ -26,7 +25,7 @@ interface AuthContextValue {
   isAuthenticated: boolean;
   isGuest: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, phone?: string, address?: string, city?: string, country?: string) => Promise<void>;
+  register: (email: string, password: string, name: string, phone?: string) => Promise<void>;
   logout: () => void;
   continueAsGuest: () => void;
   refreshProfile: () => Promise<void>;
@@ -85,13 +84,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (
-    email: string, 
-    password: string, 
-    name: string, 
+    email: string,
+    password: string,
+    name: string,
     phone?: string,
-    address?: string,
-    city?: string,
-    country?: string
   ) => {
     try {
       const authData = await registerApi({
@@ -99,12 +95,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         password,
         name,
         phone,
-        address,
-        city,
-        country,
-        balance: 0,
       });
-      setUser(authData.user);
+      setUser({
+        userId: authData.user.userId,
+        email: authData.user.email,
+        name: authData.user.name,
+        balance: Number(authData.user.balance),
+        isRegistered: true,
+        isActive: true,
+      });
       setIsGuest(false);
       localStorage.removeItem(STORAGE_GUEST_KEY);
       setShowAuthModal(false);

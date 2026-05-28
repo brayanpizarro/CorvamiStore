@@ -1,14 +1,10 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
 
 export interface RegisterData {
   email: string;
   password: string;
   name: string;
   phone?: string;
-  address?: string;
-  city?: string;
-  country?: string;
-  balance?: number;
 }
 
 export interface LoginData {
@@ -22,21 +18,34 @@ export interface AuthResponse {
     userId: string;
     email: string;
     name: string;
-    balance: number;
-    isRegistered: boolean;
+    balance: number | string;
   };
 }
 
+/** Perfil completo tal como lo devuelve GET /auth/profile (entidad Cliente) */
+interface RawProfile {
+  id_cliente: number;
+  userId: string;
+  email: string;
+  nombre: string;
+  telefono?: string;
+  rut?: string;
+  tipo?: string;
+  balance: number | string;
+  isRegistered: boolean;
+  isActive: boolean;
+}
+
+/** Interfaz normalizada del usuario para el frontend */
 export interface User {
   userId: string;
   email: string;
   name: string;
   phone?: string;
-  address?: string;
-  city?: string;
-  country?: string;
+  rut?: string;
   balance: number;
   isRegistered: boolean;
+  isActive: boolean;
 }
 
 // Guardar token en localStorage
@@ -109,7 +118,7 @@ export const getProfile = async (): Promise<User> => {
   const response = await fetch(`${API_URL}/auth/profile`, {
     method: 'GET',
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
   });
@@ -123,7 +132,17 @@ export const getProfile = async (): Promise<User> => {
     throw new Error(error.message || 'Error al obtener perfil');
   }
 
-  return await response.json();
+  const raw: RawProfile = await response.json();
+  return {
+    userId: raw.userId,
+    email: raw.email,
+    name: raw.nombre,
+    phone: raw.telefono,
+    rut: raw.rut,
+    balance: Number(raw.balance),
+    isRegistered: raw.isRegistered,
+    isActive: raw.isActive,
+  };
 };
 
 // Cerrar sesión
