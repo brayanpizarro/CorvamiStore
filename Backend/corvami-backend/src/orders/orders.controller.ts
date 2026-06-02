@@ -30,12 +30,14 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-  @Public()
+  @UseGuards(JwtAuthGuard)
   @Post()
-  @ApiOperation({ summary: 'Crear un nuevo pedido' })
+  @ApiBearerAuth('JWT')
+  @ApiOperation({ summary: 'Crear un nuevo pedido (requiere autenticación)' })
   @ApiResponse({ status: 201, description: 'Pedido creado.' })
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+  @ApiResponse({ status: 401, description: 'No autenticado.' })
+  create(@Body() createOrderDto: CreateOrderDto, @CurrentUser() user: any) {
+    return this.ordersService.create(createOrderDto, user.userId);
   }
 
   @Public()

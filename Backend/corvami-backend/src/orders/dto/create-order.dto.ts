@@ -5,7 +5,6 @@ import {
   IsArray,
   IsOptional,
   ValidateNested,
-  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -66,15 +65,6 @@ export class CustomerInfoDto {
   @IsString()
   @IsOptional()
   zipCode?: string;
-
-  @ApiProperty({ example: true, description: 'True si el cliente es invitado (no registrado)' })
-  @IsBoolean()
-  isGuest: boolean;
-
-  @ApiPropertyOptional({ example: 'uuid-usuario', description: 'ID del usuario autenticado (si aplica)' })
-  @IsString()
-  @IsOptional()
-  userId?: string;
 }
 
 export class CreateOrderDto {
