@@ -20,6 +20,8 @@ docker-compose up --build
 
 El API quedará disponible en `http://localhost:3000`.
 
+> 📄 **Documentación Swagger:** `http://localhost:3000/api/docs`
+
 #### Opción B — Sin Docker (desarrollo local)
 
 Instala dependencias y levanta en modo desarrollo:
@@ -32,9 +34,9 @@ npm run start:dev
 
 El API quedará disponible en `http://localhost:3000`.
 
----
+> 📄 **Documentación Swagger:** `http://localhost:3000/api/docs`
 
-### Frontend (React + Vite)
+---
 
 ```bash
 cd CorvamiStore/Frontend/corvami-frontend
