@@ -5,12 +5,13 @@ import { OrdersController } from './orders.controller';
 import { VentasPedido } from './entities/ventas-pedido.entity';
 import { VentasDetalle } from './entities/ventas-detalle.entity';
 import { VentasFactura } from './entities/ventas-factura.entity';
+import { Cliente } from '../users/entities/user.entity';
 import { UsersModule } from '../users/users.module';
 import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([VentasPedido, VentasDetalle, VentasFactura]),
+    TypeOrmModule.forFeature([VentasPedido, VentasDetalle, VentasFactura, Cliente]),
     UsersModule,
     EmailModule,
   ],

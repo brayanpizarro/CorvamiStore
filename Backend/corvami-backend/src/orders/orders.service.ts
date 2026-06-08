@@ -10,6 +10,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { VentasPedido } from './entities/ventas-pedido.entity';
 import { VentasDetalle } from './entities/ventas-detalle.entity';
 import { VentasFactura } from './entities/ventas-factura.entity';
+import { Cliente } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { EmailService } from '../email/email.service';
 
@@ -22,6 +23,8 @@ export class OrdersService {
     private readonly detallesRepo: Repository<VentasDetalle>,
     @InjectRepository(VentasFactura)
     private readonly facturasRepo: Repository<VentasFactura>,
+    @InjectRepository(Cliente)
+    private readonly clientesRepo: Repository<Cliente>,
     private readonly usersService: UsersService,
     private readonly emailService: EmailService,
   ) {}
@@ -30,19 +33,31 @@ export class OrdersService {
     return typeof id === 'string' ? parseInt(id, 10) : id;
   }
 
-  async create(createOrderDto: CreateOrderDto): Promise<VentasPedido> {
-    const isGuest =
-      createOrderDto.customer.isGuest || !createOrderDto.customer.userId;
+  async create(createOrderDto: CreateOrderDto, userId: string): Promise<VentasPedido> {
+    // Buscar el cliente por userId del token JWT
+    const cliente = await this.clientesRepo.findOne({ where: { userId } });
+    if (!cliente) {
+      throw new NotFoundException(`Usuario con ID ${userId} no encontrado`);
+    }
 
-    const detallesData = createOrderDto.items.map((item) => ({
-      id_producto: Number(item.productId),
-      cantidad: item.quantity,
-      precio_unit: item.unitPrice,
-      subtotal: item.totalPrice,
-    }));
+    const detallesData = createOrderDto.items.map((item) => {
+      const id_producto = Number(item.productId);
+      if (isNaN(id_producto) || id_producto <= 0) {
+        throw new BadRequestException(
+          `productId inválido: "${item.productId}". Debe ser un número entero positivo.`,
+        );
+      }
+      return {
+        id_producto,
+        cantidad: item.quantity,
+        precio_unit: item.unitPrice,
+        subtotal: item.totalPrice,
+      };
+    });
 
     const pedido = this.pedidosRepo.create({
-      userId: createOrderDto.customer.userId || undefined,
+      id_cliente: cliente.id_cliente,
+      userId,
       shippingInfo: {
         name: createOrderDto.customer.name,
         email: createOrderDto.customer.email,
@@ -55,14 +70,11 @@ export class OrdersService {
       subtotal: createOrderDto.subtotal,
       costo_envio: createOrderDto.shipping,
       total: createOrderDto.total,
-      canal: isGuest ? 'invitado' : 'online',
-      estado: isGuest ? 'pagado' : 'pendiente',
-      isPaid: isGuest,
-      paidAt: isGuest ? new Date() : undefined,
-      paymentMethod: isGuest ? 'guest_checkout' : 'pendiente',
-      notes: isGuest
-        ? `Compra como invitado. Total: $${createOrderDto.total.toLocaleString()}`
-        : (createOrderDto as any).notes,
+      canal: 'WEB',
+      estado: 'pendiente',
+      isPaid: false,
+      paymentMethod: 'pendiente',
+      notes: (createOrderDto as any).notes,
     });
 
     const savedPedido = await this.pedidosRepo.save(pedido);
@@ -81,14 +93,6 @@ export class OrdersService {
       total: savedPedido.total,
     });
     savedPedido.factura = await this.facturasRepo.save(factura);
-
-    if (isGuest) {
-      try {
-        await this.emailService.sendOrderConfirmationEmail(savedPedido);
-      } catch (err) {
-        console.error('Error enviando correo de confirmacion:', err);
-      }
-    }
 
     return savedPedido;
   }
