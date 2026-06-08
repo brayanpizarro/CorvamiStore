@@ -51,16 +51,16 @@ const AuthModal: React.FC = () => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div 
         className={`relative w-full max-w-md mx-4 rounded-2xl shadow-2xl overflow-hidden ${
-          theme === 'dark' ? 'bg-gray-900 border border-gray-800' : 'bg-white'
+          theme === 'dark' ? 'bg-card border border-border' : 'bg-card border border-border'
         }`}
       >
         {/* Botón cerrar */}
         <button
           onClick={() => setShowAuthModal(false)}
           className={`absolute top-4 right-4 p-2 rounded-full transition-colors ${
-            theme === 'dark' 
-              ? 'hover:bg-gray-800 text-gray-400 hover:text-white' 
-              : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+            theme === 'dark'
+              ? 'hover:bg-muted text-muted-foreground hover:text-foreground'
+              : 'hover:bg-muted text-muted-foreground hover:text-foreground'
           }`}
         >
           <AiOutlineClose size={20} />
@@ -71,12 +71,12 @@ const AuthModal: React.FC = () => {
           {/* Header */}
           <div className="text-center mb-6">
             <h2 className={`text-2xl font-bold mb-2 ${
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
+              theme === 'dark' ? 'text-foreground' : 'text-foreground'
             }`}>
               {isLogin ? '¡Bienvenido de vuelta!' : 'Crear cuenta'}
             </h2>
             <p className={`text-sm ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              theme === 'dark' ? 'text-muted-foreground' : 'text-muted-foreground'
             }`}>
               Inicia sesión para continuar o compra como invitado
             </p>
@@ -88,13 +88,13 @@ const AuthModal: React.FC = () => {
               <>
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    theme === 'dark' ? 'text-foreground/80' : 'text-foreground/80'
                   }`}>
                     Nombre *
                   </label>
                   <div className="relative">
                     <AiOutlineUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                      theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                      theme === 'dark' ? 'text-muted-foreground' : 'text-muted-foreground'
                     }`} size={18} />
                     <input
                       type="text"
@@ -103,24 +103,20 @@ const AuthModal: React.FC = () => {
                       onChange={handleInputChange}
                       placeholder="Tu nombre completo"
                       required
-                      className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors ${
-                        theme === 'dark'
-                          ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-green-500'
-                          : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500'
-                      } focus:outline-none focus:ring-2 focus:ring-green-500/20`}
+                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-input text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring"
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className={`block text-sm font-medium mb-2 ${
-                    theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                    theme === 'dark' ? 'text-foreground/80' : 'text-foreground/80'
                   }`}>
                     Teléfono
                   </label>
                   <div className="relative">
                     <AiOutlinePhone className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                      theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                      theme === 'dark' ? 'text-muted-foreground' : 'text-muted-foreground'
                     }`} size={18} />
                     <input
                       type="tel"
@@ -128,11 +124,7 @@ const AuthModal: React.FC = () => {
                       value={formData.phone}
                       onChange={handleInputChange}
                       placeholder="3001234567"
-                      className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors ${
-                        theme === 'dark'
-                          ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-green-500'
-                          : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500'
-                      } focus:outline-none focus:ring-2 focus:ring-green-500/20`}
+                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-input text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring"
                     />
                   </div>
                 </div>
@@ -141,13 +133,13 @@ const AuthModal: React.FC = () => {
 
             <div>
               <label className={`block text-sm font-medium mb-2 ${
-                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                theme === 'dark' ? 'text-foreground/80' : 'text-foreground/80'
               }`}>
                 Email *
               </label>
               <div className="relative">
                 <AiOutlineMail className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                  theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                  theme === 'dark' ? 'text-muted-foreground' : 'text-muted-foreground'
                 }`} size={18} />
                 <input
                   type="email"
@@ -156,24 +148,20 @@ const AuthModal: React.FC = () => {
                   onChange={handleInputChange}
                   placeholder="tu@email.com"
                   required
-                  className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors ${
-                    theme === 'dark'
-                      ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-green-500'
-                      : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500'
-                  } focus:outline-none focus:ring-2 focus:ring-green-500/20`}
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-input text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring"
                 />
               </div>
             </div>
 
             <div>
               <label className={`block text-sm font-medium mb-2 ${
-                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                theme === 'dark' ? 'text-foreground/80' : 'text-foreground/80'
               }`}>
                 Contraseña *
               </label>
               <div className="relative">
                 <AiOutlineLock className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                  theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                  theme === 'dark' ? 'text-muted-foreground' : 'text-muted-foreground'
                 }`} size={18} />
                 <input
                   type="password"
@@ -183,17 +171,13 @@ const AuthModal: React.FC = () => {
                   placeholder="Mínimo 6 caracteres"
                   required
                   minLength={6}
-                  className={`w-full pl-10 pr-4 py-3 rounded-lg border transition-colors ${
-                    theme === 'dark'
-                      ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-500 focus:border-green-500'
-                      : 'bg-gray-50 border-gray-300 text-gray-900 placeholder-gray-400 focus:border-green-500'
-                  } focus:outline-none focus:ring-2 focus:ring-green-500/20`}
+                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-input text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring"
                 />
               </div>
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500 text-red-500 text-sm">
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/40 text-destructive-foreground text-sm">
                 {error}
               </div>
             )}
@@ -202,7 +186,7 @@ const AuthModal: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 px-4 bg-green-500 hover:bg-green-600 text-black font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="neon-button w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Cargando...' : isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
             </button>
@@ -211,13 +195,13 @@ const AuthModal: React.FC = () => {
           {/* Divisor */}
           <div className="relative my-6">
             <div className={`absolute inset-0 flex items-center ${
-              theme === 'dark' ? 'border-gray-800' : 'border-gray-300'
+              theme === 'dark' ? 'border-border' : 'border-border'
             }`}>
               <div className="w-full border-t"></div>
             </div>
             <div className="relative flex justify-center text-sm">
               <span className={`px-2 ${
-                theme === 'dark' ? 'bg-gray-900 text-gray-400' : 'bg-white text-gray-500'
+                theme === 'dark' ? 'bg-card text-muted-foreground' : 'bg-card text-muted-foreground'
               }`}>
                 o
               </span>
@@ -229,8 +213,8 @@ const AuthModal: React.FC = () => {
             onClick={handleGuestClick}
             className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
               theme === 'dark'
-                ? 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-700'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-900 border border-gray-300'
+                ? 'bg-secondary hover:bg-accent text-secondary-foreground border border-border'
+                : 'bg-secondary hover:bg-accent text-secondary-foreground border border-border'
             }`}
           >
             Continuar como invitado
@@ -242,8 +226,8 @@ const AuthModal: React.FC = () => {
               onClick={() => setIsLogin(!isLogin)}
               className={`text-sm font-medium transition-colors ${
                 theme === 'dark'
-                  ? 'text-gray-400 hover:text-green-400'
-                  : 'text-gray-600 hover:text-green-600'
+                    ? 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}

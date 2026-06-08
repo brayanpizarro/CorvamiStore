@@ -56,25 +56,25 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({ isOpen, onClose }) =>
 
   return (
     <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 ${
-      theme === 'dark' ? 'bg-black/80' : 'bg-gray-900/50'
+      theme === 'dark' ? 'bg-black/80' : 'bg-slate-900/50'
     } backdrop-blur-sm`}>
       <div className={`max-w-md w-full rounded-2xl p-6 ${
-        theme === 'dark' ? 'bg-gray-900 border-2 border-green-500/50' : 'bg-white'
+        theme === 'dark' ? 'bg-slate-900 border-2 border-emerald-500/30' : 'bg-white'
       } shadow-2xl`}>
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-xl bg-green-500/20">
-              <Wallet className="text-green-500" size={24} />
+            <div className="p-3 rounded-xl bg-emerald-500/15">
+              <Wallet className="text-emerald-300" size={24} />
             </div>
             <div>
               <h2 className={`text-2xl font-bold ${
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
               }`}>
                 Agregar Saldo
               </h2>
               <p className={`text-sm ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
               }`}>
                 Recarga tu cuenta para comprar
               </p>
@@ -83,7 +83,7 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({ isOpen, onClose }) =>
           <button
             onClick={onClose}
             className={`text-2xl font-bold ${
-              theme === 'dark' ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+              theme === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
             }`}
           >
             <X size={24} />
@@ -93,17 +93,17 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({ isOpen, onClose }) =>
         {success ? (
           <div className="text-center py-8">
             <div className="mb-4">
-              <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mx-auto animate-pulse">
+              <div className="w-16 h-16 bg-emerald-400 rounded-full flex items-center justify-center mx-auto animate-pulse">
                 <Plus className="text-black" size={32} />
               </div>
             </div>
             <h3 className={`text-xl font-bold ${
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
+              theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
             }`}>
               ¡Saldo Agregado!
             </h3>
             <p className={`mt-2 ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
             }`}>
               Tu nuevo saldo: {formatPrice(user?.balance || 0)}
             </p>
@@ -112,15 +112,15 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({ isOpen, onClose }) =>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Saldo actual */}
             <div className={`p-4 rounded-lg ${
-              theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+              theme === 'dark' ? 'bg-slate-800' : 'bg-slate-100'
             }`}>
               <p className={`text-sm ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
               }`}>
                 Saldo actual
               </p>
               <p className={`text-2xl font-bold ${
-                theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
               }`}>
                 {formatPrice(user?.balance || 0)}
               </p>
@@ -129,7 +129,7 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({ isOpen, onClose }) =>
             {/* Montos rápidos */}
             <div>
               <label className={`block text-sm font-medium mb-3 ${
-                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
               }`}>
                 Montos sugeridos
               </label>
@@ -141,10 +141,10 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({ isOpen, onClose }) =>
                     onClick={() => setAmount(quickAmount.toString())}
                     className={`py-3 px-4 rounded-lg font-semibold transition-all ${
                       amount === quickAmount.toString()
-                        ? 'bg-green-500 text-black'
+                        ? 'bg-emerald-400 text-slate-950'
                         : theme === 'dark'
-                        ? 'bg-gray-800 text-white hover:bg-gray-700'
-                        : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
+                        ? 'bg-slate-800 text-white hover:bg-slate-700'
+                        : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
                     }`}
                   >
                     {formatPrice(quickAmount)}
@@ -156,13 +156,13 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({ isOpen, onClose }) =>
             {/* Monto personalizado */}
             <div>
               <label className={`block text-sm font-medium mb-2 ${
-                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
               }`}>
                 Monto personalizado
               </label>
               <div className="relative">
                 <span className={`absolute left-4 top-1/2 -translate-y-1/2 font-bold ${
-                  theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                  theme === 'dark' ? 'text-slate-500' : 'text-slate-400'
                 }`}>
                   $
                 </span>
@@ -175,15 +175,15 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({ isOpen, onClose }) =>
                   required
                   className={`w-full pl-8 pr-4 py-3 rounded-lg border-2 text-lg font-semibold ${
                     theme === 'dark'
-                      ? 'bg-gray-800 border-gray-700 text-white focus:border-green-500'
-                      : 'bg-white border-gray-300 text-gray-900 focus:border-green-500'
+                      ? 'bg-slate-800 border-slate-700 text-white focus:border-emerald-400'
+                      : 'bg-white border-slate-300 text-slate-900 focus:border-emerald-500'
                   } focus:outline-none transition-colors`}
                 />
               </div>
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500 text-red-500 text-sm">
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/40 text-red-300 text-sm">
                 {error}
               </div>
             )}
@@ -194,9 +194,9 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({ isOpen, onClose }) =>
               disabled={loading || !amount}
               className={`w-full py-4 rounded-lg font-bold transition-all ${
                 loading || !amount
-                  ? 'bg-gray-400 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400'
-              } text-black`}
+                  ? 'bg-slate-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300'
+              } text-slate-950`}
             >
               {loading ? 'Procesando...' : `Agregar ${amount ? formatPrice(parseInt(amount)) : 'Saldo'}`}
             </button>

@@ -60,21 +60,21 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
       <div
         className={`fixed top-0 right-0 h-screen w-full sm:w-96 z-50 transform transition-transform duration-300 ${
           isOpen ? 'translate-x-0' : 'translate-x-full'
-        } ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} shadow-2xl flex flex-col overflow-hidden`}
+        } ${theme === 'dark' ? 'bg-slate-900' : 'bg-white'} shadow-2xl flex flex-col overflow-hidden`}
       >
         {/* Header */}
         <div className={`flex items-center justify-between p-4 border-b ${
-          theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+          theme === 'dark' ? 'border-slate-800' : 'border-slate-200'
         }`}>
           <div className="flex items-center gap-3">
-            <AiOutlineShoppingCart size={24} className={theme === 'dark' ? 'text-green-400' : 'text-green-600'} />
+            <AiOutlineShoppingCart size={24} className={theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'} />
             <h2 className={`text-xl font-bold ${
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
+              theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
             }`}>
               Mi Carrito
               {itemCount > 0 && (
                 <span className={`ml-2 text-sm font-normal ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                  theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
                 }`}>
                   ({itemCount} {itemCount === 1 ? 'producto' : 'productos'})
                 </span>
@@ -85,8 +85,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
             className={`p-2 rounded-lg transition-colors ${
               theme === 'dark'
-                ? 'hover:bg-gray-800 text-gray-400 hover:text-white'
-                : 'hover:bg-gray-100 text-gray-600 hover:text-gray-900'
+                ? 'hover:bg-slate-800 text-slate-400 hover:text-white'
+                : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
             }`}
           >
             <AiOutlineClose size={24} />
@@ -98,15 +98,15 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
           {!cart || !cart.items || cart.items.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <AiOutlineShoppingCart size={64} className={`mb-4 ${
-                theme === 'dark' ? 'text-gray-700' : 'text-gray-300'
+                theme === 'dark' ? 'text-slate-700' : 'text-slate-300'
               }`} />
               <p className={`text-lg font-semibold mb-2 ${
-                theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
               }`}>
                 Tu carrito está vacío
               </p>
               <p className={`text-sm ${
-                theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+                theme === 'dark' ? 'text-slate-500' : 'text-slate-500'
               }`}>
                 Agrega productos para empezar a comprar
               </p>
@@ -118,8 +118,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                   key={item.productId}
                   className={`flex gap-4 p-4 rounded-lg border ${
                     theme === 'dark'
-                      ? 'bg-gray-800 border-gray-700'
-                      : 'bg-gray-50 border-gray-200'
+                      ? 'bg-slate-800 border-slate-700'
+                      : 'bg-slate-50 border-slate-200'
                   }`}
                 >
                   {/* Image */}
@@ -132,12 +132,12 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <h3 className={`font-semibold text-sm mb-1 truncate ${
-                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
                     }`}>
                       {item.name}
                     </h3>
                     <p className={`text-lg font-bold mb-2 ${
-                      theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                      theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
                     }`}>
                       {formatPrice(item.unitPrice || 0)}
                     </p>
@@ -145,7 +145,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                     {/* Quantity Controls */}
                     <div className="flex items-center justify-between">
                       <div className={`flex items-center border rounded-lg ${
-                        theme === 'dark' ? 'border-gray-600' : 'border-gray-300'
+                        theme === 'dark' ? 'border-slate-600' : 'border-slate-300'
                       }`}>
                         <button
                           onClick={() => handleQuantityChange(item.productId, -1)}
@@ -154,14 +154,14 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                             loading || item.quantity <= 1
                               ? 'opacity-50 cursor-not-allowed'
                               : theme === 'dark'
-                                ? 'hover:bg-gray-700'
-                                : 'hover:bg-gray-200'
+                                ? 'hover:bg-slate-700'
+                                : 'hover:bg-slate-200'
                           } transition-colors`}
                         >
                           <AiOutlineMinus size={14} />
                         </button>
                         <span className={`px-3 text-sm font-semibold ${
-                          theme === 'dark' ? 'text-white' : 'text-gray-900'
+                          theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
                         }`}>
                           {item.quantity}
                         </span>
@@ -172,8 +172,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                             loading
                               ? 'opacity-50 cursor-not-allowed'
                               : theme === 'dark'
-                                ? 'hover:bg-gray-700'
-                                : 'hover:bg-gray-200'
+                                  ? 'hover:bg-slate-700'
+                                  : 'hover:bg-slate-200'
                           } transition-colors`}
                         >
                           <AiOutlinePlus size={14} />
@@ -187,7 +187,7 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                           loading
                             ? 'opacity-50 cursor-not-allowed'
                             : theme === 'dark'
-                              ? 'hover:bg-red-500/20 text-red-400'
+                              ? 'hover:bg-red-500/20 text-red-300'
                               : 'hover:bg-red-50 text-red-600'
                         }`}
                       >
@@ -204,17 +204,17 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
         {/* Footer */}
         {cart && cart.items && cart.items.length > 0 && (
           <div className={`p-4 border-t ${
-            theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
+            theme === 'dark' ? 'border-slate-800' : 'border-slate-200'
           }`}>
             {/* Total */}
             <div className="flex items-center justify-between mb-4">
               <span className={`text-lg font-semibold ${
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
               }`}>
                 Total:
               </span>
               <span className={`text-2xl font-bold ${
-                theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
               }`}>
                 {formatPrice(total)}
               </span>
@@ -227,8 +227,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                 onClick={onClose}
                 className={`block w-full py-3 rounded-xl font-bold text-lg text-center transition-all ${
                   theme === 'dark'
-                    ? 'bg-green-500 hover:bg-green-400 text-black shadow-lg hover:shadow-green-500/50'
-                    : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-green-600/50'
+                    ? 'bg-gradient-to-r from-emerald-400 to-teal-400 hover:from-emerald-300 hover:to-teal-300 text-slate-950 shadow-lg hover:shadow-emerald-500/20'
+                    : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg hover:shadow-emerald-600/20'
                 }`}
               >
                 Ver Carrito Completo
@@ -240,8 +240,8 @@ const CartDrawer: React.FC<CartDrawerProps> = ({ isOpen, onClose }) => {
                   loading
                     ? 'opacity-50 cursor-not-allowed'
                     : theme === 'dark'
-                      ? 'bg-gray-800 hover:bg-gray-700 text-gray-300'
-                      : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                      ? 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                 }`}
               >
                 Vaciar Carrito

@@ -469,8 +469,8 @@ export default function CheckoutPage() {
 
                 {paymentMethod === 'card' && (
                   <>
-                    <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
-                      <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-700'}`}>
+                    <div className={`mb-4 p-3 rounded-lg ${isDark ? 'bg-emerald-900/20' : 'bg-emerald-50'}`}>
+                      <p className={`text-sm ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
                         <FaLock className="inline mr-2" />
                         Usa la tarjeta de prueba: <strong>4111 1111 1111 1111</strong>
                       </p>
@@ -565,7 +565,7 @@ export default function CheckoutPage() {
 
                 {paymentMethod === 'balance' && (
                   <div className={`p-6 rounded-lg ${isDark ? 'bg-emerald-900/20' : 'bg-emerald-50'} border-2 ${
-                    user && user.balance >= total ? 'border-emerald-500' : 'border-yellow-500'
+                    user && user.balance >= total ? 'border-emerald-500' : 'border-red-500'
                   }`}>
                     <div className="flex items-center justify-between mb-4">
                       <div>
@@ -573,7 +573,7 @@ export default function CheckoutPage() {
                           Tu Saldo Actual
                         </p>
                         <p className={`text-3xl font-bold ${
-                          user && user.balance >= total ? 'text-emerald-500' : 'text-yellow-500'
+                          user && user.balance >= total ? 'text-emerald-500' : 'text-red-500'
                         }`}>
                           {user && formatPrice(user.balance)}
                         </p>
@@ -598,7 +598,7 @@ export default function CheckoutPage() {
                           </p>
                         </>
                       ) : (
-                        <p className={`text-sm mt-3 flex items-center gap-2 ${isDark ? 'text-yellow-300' : 'text-yellow-700'}`}>
+                        <p className={`text-sm mt-3 flex items-center gap-2 ${isDark ? 'text-red-300' : 'text-red-700'}`}>
                           <FaExclamationTriangle className="flex-shrink-0" />
                           <span>Saldo insuficiente. Necesitas agregar {user && formatPrice(total - user.balance)} más</span>
                         </p>
@@ -615,7 +615,7 @@ export default function CheckoutPage() {
                 className={`w-full py-4 rounded-lg font-semibold text-white transition-colors ${
                   isProcessing
                     ? 'bg-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700'
+                    : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-500'
                 }`}
               >
                 {isProcessing ? (
@@ -668,19 +668,19 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-sm">
                   <span className={isDark ? 'text-gray-400' : 'text-gray-600'}>Envío</span>
                   {shipping === 0 ? (
-                    <span className="text-green-500 font-semibold">¡Gratis!</span>
+                    <span className="text-emerald-400 font-semibold">¡Gratis!</span>
                   ) : (
                     <span className={isDark ? 'text-white' : 'text-gray-900'}>${shipping.toLocaleString()}</span>
                   )}
                 </div>
                 {subtotal < 200000 && (
-                  <p className="text-xs text-yellow-600">
+                  <p className="text-xs text-red-400">
                     Agrega ${(200000 - subtotal).toLocaleString()} más para envío gratis
                   </p>
                 )}
                 <div className={`flex justify-between text-lg font-bold pt-2 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
                   <span className={isDark ? 'text-white' : 'text-gray-900'}>Total</span>
-                  <span className="text-emerald-600">${total.toLocaleString()}</span>
+                  <span className="text-emerald-500">${total.toLocaleString()}</span>
                 </div>
               </div>
 

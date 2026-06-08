@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AiOutlineMenu, AiOutlineClose, AiOutlineSearch, AiOutlineShoppingCart, AiOutlineUser, AiOutlineWallet } from 'react-icons/ai';
 import { FaBox } from 'react-icons/fa';
-import ThemeToggle from './ThemeToggle';
 import CategoriesDropdown from './CategoriesDropdown';
 import CartDrawer from './CartDrawer';
 import AuthModal from './AuthModal';
@@ -22,131 +21,113 @@ const Header: React.FC = () => {
   const { user, isAuthenticated, isGuest, setShowAuthModal, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
+
   const itemCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-black/95 backdrop-blur-md shadow-2xl shadow-green-500/20 border-b border-green-500/30' : 'bg-black border-b border-green-500/50'
-    }`}>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-background/95 backdrop-blur-xl shadow-2xl shadow-black/20 border-b border-border/80' : 'bg-background border-b border-border'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          {/* Mobile menu button */}
           <button
-            className="lg:hidden text-white hover:text-emerald-100 transition-colors p-2"
+            className="lg:hidden text-foreground hover:text-primary transition-colors p-2"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             {isMenuOpen ? <AiOutlineClose size={24} /> : <AiOutlineMenu size={24} />}
           </button>
 
-          {/* Logo */}
           <div className="flex-shrink-0">
-            <Link 
-              to="/"
-              className="text-lg sm:text-xl md:text-2xl font-bold text-white hover:text-green-400 transition-colors"
-            >
+            <Link to="/" className="text-lg sm:text-xl md:text-2xl font-bold text-foreground hover:text-primary transition-colors">
               NN
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <nav className="hidden lg:flex space-x-6 xl:space-x-8 items-center">
-            <Link 
+            <Link
               to="/"
-              className={`hover:text-emerald-100 transition-colors font-medium text-sm xl:text-base ${
-                location.pathname === '/' ? 'text-green-400' : 'text-white'
-              }`}
+              className={`hover:text-primary transition-colors font-medium text-sm xl:text-base ${location.pathname === '/' ? 'text-primary' : 'text-foreground'}`}
             >
               Inicio
             </Link>
-            <Link 
+            <Link
               to="/products"
-              className={`hover:text-emerald-100 transition-colors font-medium text-sm xl:text-base ${
-                location.pathname === '/products' ? 'text-green-400' : 'text-white'
-              }`}
+              className={`hover:text-primary transition-colors font-medium text-sm xl:text-base ${location.pathname === '/products' ? 'text-primary' : 'text-foreground'}`}
             >
               Productos
             </Link>
             <CategoriesDropdown />
-            <Link 
+            <Link
               to="/offers"
-              className={`hover:text-emerald-100 transition-colors font-medium text-sm xl:text-base ${
-                location.pathname === '/offers' ? 'text-green-400' : 'text-white'
-              }`}
+              className={`hover:text-primary transition-colors font-medium text-sm xl:text-base ${location.pathname === '/offers' ? 'text-primary' : 'text-foreground'}`}
             >
               Ofertas
             </Link>
-            <Link 
+            <Link
               to="/contact"
-              className={`hover:text-emerald-100 transition-colors font-medium text-sm xl:text-base ${
-                location.pathname === '/contact' ? 'text-green-400' : 'text-white'
-              }`}
+              className={`hover:text-primary transition-colors font-medium text-sm xl:text-base ${location.pathname === '/contact' ? 'text-primary' : 'text-foreground'}`}
             >
               Contacto
             </Link>
           </nav>
 
-          {/* Right Icons */}
           <div className="flex items-center space-x-2 sm:space-x-4">
-            <ThemeToggle />
-            <button className="text-white hover:text-green-400 transition-colors hidden sm:block">
+            <button className="text-foreground hover:text-primary transition-colors hidden sm:block">
               <AiOutlineSearch size={20} />
             </button>
-            <button 
-              onClick={() => setIsCartOpen(true)}
-              className="relative text-white hover:text-green-400 transition-colors"
-            >
+            <button onClick={() => setIsCartOpen(true)} className="relative text-foreground hover:text-primary transition-colors">
               <AiOutlineShoppingCart size={20} />
               {itemCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-green-500 text-black text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold glow-green">
+                <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold glow-green">
                   {itemCount}
                 </span>
               )}
             </button>
-            
-            {/* User Menu */}
+
             <div className="relative">
               {isAuthenticated || isGuest ? (
                 <>
-                  <button 
+                  <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="relative text-white hover:text-green-400 transition-colors flex items-center gap-2"
+                    className="relative text-foreground hover:text-primary transition-colors flex items-center gap-2"
                   >
                     <AiOutlineUser size={20} />
                     {isAuthenticated && user && (
-                      <div className="hidden md:flex items-center gap-1 px-2 py-1 bg-green-500/20 rounded-lg">
-                        <AiOutlineWallet size={14} className="text-green-400" />
-                        <span className="text-xs font-semibold text-green-400">
+                      <div className="hidden md:flex items-center gap-1 px-2 py-1 bg-primary/10 rounded-lg border border-border">
+                        <AiOutlineWallet size={14} className="text-primary" />
+                        <span className="text-xs font-semibold text-primary">
                           {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(user.balance)}
                         </span>
                       </div>
                     )}
-                    <span className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full"></span>
+                    <span className="absolute -top-1 -right-1 h-2 w-2 bg-primary rounded-full"></span>
                   </button>
 
-                  {/* User Dropdown */}
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-56 bg-gray-900 rounded-lg shadow-xl border border-gray-800 py-2">
+                    <div className="absolute right-0 mt-2 w-56 bg-card/95 rounded-lg shadow-xl border border-border py-2 backdrop-blur-xl">
                       {isAuthenticated && user && (
                         <>
-                          <div className="px-4 py-3 border-b border-gray-800">
-                            <p className="text-white font-medium text-sm">{user.name}</p>
-                            <p className="text-gray-400 text-xs">{user.email}</p>
+                          <div className="px-4 py-3 border-b border-border">
+                            <p className="text-foreground font-medium text-sm">{user.name}</p>
+                            <p className="text-muted-foreground text-xs">{user.email}</p>
                           </div>
-                          <div className="px-4 py-3 border-b border-gray-800 bg-green-500/10">
+                          <div className="px-4 py-3 border-b border-border bg-primary/10">
                             <div className="flex items-center justify-between mb-2">
-                              <span className="text-gray-400 text-xs">Saldo disponible</span>
-                              <AiOutlineWallet size={14} className="text-green-400" />
+                              <span className="text-muted-foreground text-xs">Saldo disponible</span>
+                              <AiOutlineWallet size={14} className="text-primary" />
                             </div>
-                            <p className="text-green-400 font-bold text-lg mb-3">
+                            <p className="text-primary font-bold text-lg mb-3">
                               {new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(user.balance)}
                             </p>
                             <button
@@ -154,7 +135,7 @@ const Header: React.FC = () => {
                                 setShowUserMenu(false);
                                 setShowAddBalance(true);
                               }}
-                              className="w-full px-3 py-2 bg-green-500 hover:bg-green-600 text-black font-semibold rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
+                              className="w-full px-3 py-2 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-colors text-sm flex items-center justify-center gap-2"
                             >
                               <AiOutlineWallet size={16} />
                               Agregar Saldo
@@ -165,7 +146,7 @@ const Header: React.FC = () => {
                               setShowUserMenu(false);
                               setShowOrders(true);
                             }}
-                            className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors text-sm flex items-center gap-2"
+                            className="w-full text-left px-4 py-2 text-foreground hover:bg-accent transition-colors text-sm flex items-center gap-2"
                           >
                             <FaBox size={14} />
                             <span>Mis Órdenes</span>
@@ -173,14 +154,14 @@ const Header: React.FC = () => {
                         </>
                       )}
                       {isGuest && (
-                        <div className="px-4 py-2 border-b border-gray-800">
-                          <p className="text-gray-400 text-xs">Modo invitado</p>
+                        <div className="px-4 py-2 border-b border-border">
+                          <p className="text-muted-foreground text-xs">Modo invitado</p>
                           <button
                             onClick={() => {
                               setShowUserMenu(false);
                               setShowAuthModal(true);
                             }}
-                            className="mt-2 text-green-400 text-xs hover:text-green-300"
+                            className="mt-2 text-primary text-xs hover:text-primary/80"
                           >
                             Crear cuenta para guardar tu info
                           </button>
@@ -190,7 +171,7 @@ const Header: React.FC = () => {
                         <Link
                           to="/profile"
                           onClick={() => setShowUserMenu(false)}
-                          className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors text-sm flex items-center gap-2"
+                          className="w-full text-left px-4 py-2 text-foreground hover:bg-accent transition-colors text-sm flex items-center gap-2"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -204,7 +185,7 @@ const Header: React.FC = () => {
                           setShowUserMenu(false);
                           navigate('/');
                         }}
-                        className="w-full text-left px-4 py-2 text-white hover:bg-gray-800 transition-colors text-sm flex items-center gap-2"
+                        className="w-full text-left px-4 py-2 text-foreground hover:bg-accent transition-colors text-sm flex items-center gap-2"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -217,7 +198,7 @@ const Header: React.FC = () => {
               ) : (
                 <button
                   onClick={() => setShowAuthModal(true)}
-                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold hover:from-green-400 hover:to-emerald-400 transition-all transform hover:scale-105"
+                  className="neon-button px-4 py-2 rounded-lg bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all transform hover:scale-105"
                 >
                   Iniciar Sesión
                 </button>
@@ -226,37 +207,20 @@ const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="lg:hidden bg-emerald-600 border-t border-emerald-400">
+          <div className="lg:hidden bg-card border-t border-border">
             <div className="px-2 pt-2 pb-3 space-y-1">
-              <Link 
-                to="/"
-                onClick={() => setIsMenuOpen(false)}
-                className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md"
-              >
+              <Link to="/" onClick={() => setIsMenuOpen(false)} className="block w-full text-left px-3 py-2 text-foreground hover:bg-accent rounded-md">
                 Inicio
               </Link>
-              <Link 
-                to="/products"
-                onClick={() => setIsMenuOpen(false)}
-                className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md"
-              >
+              <Link to="/products" onClick={() => setIsMenuOpen(false)} className="block w-full text-left px-3 py-2 text-foreground hover:bg-accent rounded-md">
                 Productos
               </Link>
-              <button className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md">Categorías</button>
-              <Link 
-                to="/offers"
-                onClick={() => setIsMenuOpen(false)}
-                className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md"
-              >
+              <button className="block w-full text-left px-3 py-2 text-foreground hover:bg-accent rounded-md">Categorías</button>
+              <Link to="/offers" onClick={() => setIsMenuOpen(false)} className="block w-full text-left px-3 py-2 text-foreground hover:bg-accent rounded-md">
                 Ofertas
               </Link>
-              <Link 
-                to="/contact"
-                onClick={() => setIsMenuOpen(false)}
-                className="block w-full text-left px-3 py-2 text-white hover:bg-emerald-700 rounded-md"
-              >
+              <Link to="/contact" onClick={() => setIsMenuOpen(false)} className="block w-full text-left px-3 py-2 text-foreground hover:bg-accent rounded-md">
                 Contacto
               </Link>
             </div>
@@ -264,27 +228,17 @@ const Header: React.FC = () => {
         )}
       </div>
 
-      {/* Cart Drawer */}
       <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-      
-      {/* Auth Modal */}
+
       {!isAuthenticated && !isGuest && (
         <div onClick={() => setShowAuthModal(false)}>
           <AuthModal />
         </div>
       )}
 
-      {/* Add Balance Modal */}
-      <AddBalanceModal 
-        isOpen={showAddBalance} 
-        onClose={() => setShowAddBalance(false)} 
-      />
+      <AddBalanceModal isOpen={showAddBalance} onClose={() => setShowAddBalance(false)} />
 
-      {/* Orders Modal */}
-      <OrdersModal 
-        isOpen={showOrders} 
-        onClose={() => setShowOrders(false)} 
-      />
+      <OrdersModal isOpen={showOrders} onClose={() => setShowOrders(false)} />
     </header>
   );
 };

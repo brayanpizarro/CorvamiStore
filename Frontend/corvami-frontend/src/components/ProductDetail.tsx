@@ -350,7 +350,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <MdOutlineLocalShipping className="text-green-500" size={20} />
+                <MdOutlineLocalShipping className="text-emerald-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -367,7 +367,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <MdOutlineShield className="text-blue-500" size={20} />
+                <MdOutlineShield className="text-emerald-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -384,7 +384,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <MdOutlineLoop className="text-purple-500" size={20} />
+                <MdOutlineLoop className="text-teal-500" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
@@ -401,7 +401,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
               }`}>
-                <RiAwardLine className="text-yellow-500" size={20} />
+                <RiAwardLine className="text-emerald-400" size={20} />
                 <div>
                   <p className={`text-xs font-semibold ${
                     theme === 'dark' ? 'text-white' : 'text-gray-900'
