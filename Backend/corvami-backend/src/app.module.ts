@@ -4,7 +4,6 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { ProductosModule } from './productos/productos.module';
 import { ShoppingCartModule } from './shopping-cart/shopping-cart.module';
-import { CommentsModule } from './comments/comments.module';
 import { SeedModule } from './seed/seed.module';
 import { UsersModule } from './users/users.module';
 import { OrdersModule } from './orders/orders.module';
@@ -58,7 +57,6 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     ]),
     ProductosModule,
     ShoppingCartModule,
-    CommentsModule,
     SeedModule,
     UsersModule,
     OrdersModule,
