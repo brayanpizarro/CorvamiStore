@@ -10,31 +10,20 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Recuperar tema del localStorage o usar 'dark' como default
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    return savedTheme || 'dark';
-  });
-
-  const toggleTheme = () => {
-    setTheme(prev => {
-      const newTheme = prev === 'light' ? 'dark' : 'light';
-      localStorage.setItem('theme', newTheme);
-      return newTheme;
-    });
-  };
+  const [theme, setTheme] = useState<Theme>('dark');
 
   useEffect(() => {
-    // Aplicar la clase al documento y guardar en localStorage
-    localStorage.setItem('theme', theme);
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.body.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      document.body.classList.remove('dark');
-    }
-  }, [theme]);
+    localStorage.setItem('theme', 'dark');
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme('dark');
+    localStorage.setItem('theme', 'dark');
+    document.documentElement.classList.add('dark');
+    document.body.classList.add('dark');
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>

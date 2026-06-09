@@ -408,14 +408,14 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                     step="50000"
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([0, parseInt(e.target.value)])}
-                    className="w-full h-2 accent-green-500 cursor-pointer"
+                    className="w-full h-2 accent-emerald-500 cursor-pointer"
                   />
                   <div className={`flex items-center justify-between text-sm font-medium ${
                     theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
                   }`}>
                     <span>{formatPrice(0)}</span>
                     <span className={`px-3 py-1 rounded-lg ${
-                      theme === 'dark' ? 'bg-gray-800 text-green-400' : 'bg-green-50 text-green-700'
+                      theme === 'dark' ? 'bg-gray-800 text-emerald-400' : 'bg-emerald-50 text-emerald-700'
                     }`}>
                       {formatPrice(priceRange[1])}
                     </span>

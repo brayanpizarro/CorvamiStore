@@ -48,32 +48,32 @@ export default function ProfilePage() {
     const statusConfig: Record<string, { label: string; bgColor: string; textColor: string; icon: any }> = {
       'pending': {
         label: 'Pendiente',
-        bgColor: isDark ? 'bg-yellow-900/30' : 'bg-yellow-100',
-        textColor: isDark ? 'text-yellow-400' : 'text-yellow-800',
+        bgColor: isDark ? 'bg-red-900/20' : 'bg-red-100',
+        textColor: isDark ? 'text-red-300' : 'text-red-800',
         icon: FaClock
       },
       'paid': {
         label: 'Pagado',
-        bgColor: isDark ? 'bg-green-900/30' : 'bg-green-100',
-        textColor: isDark ? 'text-green-400' : 'text-green-800',
+        bgColor: isDark ? 'bg-emerald-900/20' : 'bg-emerald-100',
+        textColor: isDark ? 'text-emerald-300' : 'text-emerald-800',
         icon: FaCheckCircle
       },
       'processing': {
         label: 'Procesando',
-        bgColor: isDark ? 'bg-blue-900/30' : 'bg-blue-100',
-        textColor: isDark ? 'text-blue-400' : 'text-blue-800',
+        bgColor: isDark ? 'bg-teal-900/20' : 'bg-teal-100',
+        textColor: isDark ? 'text-teal-300' : 'text-teal-800',
         icon: FaBox
       },
       'shipped': {
         label: 'Enviado',
-        bgColor: isDark ? 'bg-purple-900/30' : 'bg-purple-100',
-        textColor: isDark ? 'text-purple-400' : 'text-purple-800',
+        bgColor: isDark ? 'bg-slate-800' : 'bg-slate-100',
+        textColor: isDark ? 'text-slate-300' : 'text-slate-700',
         icon: FaTruck
       },
       'delivered': {
         label: 'Entregado',
-        bgColor: isDark ? 'bg-emerald-900/30' : 'bg-emerald-100',
-        textColor: isDark ? 'text-emerald-400' : 'text-emerald-800',
+        bgColor: isDark ? 'bg-emerald-900/20' : 'bg-emerald-100',
+        textColor: isDark ? 'text-emerald-300' : 'text-emerald-800',
         icon: FaCheckCircle
       }
     };

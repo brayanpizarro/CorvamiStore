@@ -90,24 +90,24 @@ const OffersPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className={`min-h-screen ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'}`}>
+      <div className="min-h-screen bg-[#05070b]">
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>Cargando ofertas...</p>
+          <p className="text-gray-400">Cargando ofertas...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'}`}>
+    <div className="min-h-screen bg-[#05070b]">
       {/* Header */}
-      <div className={`py-12 ${theme === 'dark' ? 'bg-gradient-to-r from-red-900/20 to-orange-900/20' : 'bg-gradient-to-r from-red-50 to-orange-50'} border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
+      <div className="py-12 bg-gradient-to-r from-red-900/20 to-emerald-900/20 border-b border-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-3 mb-4">
             <div className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-lg">
               OFERTAS
             </div>
-            <div className={`px-4 py-2 rounded-lg font-semibold ${theme === 'dark' ? 'bg-gray-800 text-green-400' : 'bg-white text-green-600'}`}>
+            <div className="px-4 py-2 rounded-lg font-semibold bg-gray-800 text-emerald-400">
               Hasta 40% OFF
             </div>
           </div>
@@ -124,11 +124,7 @@ const OffersPage: React.FC = () => {
       <div className={`py-4 ${theme === 'dark' ? 'bg-gray-900' : 'bg-white'} border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-2">
-            <button className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              theme === 'dark'
-                ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                : 'bg-green-100 text-green-600 border border-green-200'
-            }`}>
+            <button className="px-4 py-2 rounded-lg font-medium transition-colors bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               Todas las ofertas
             </button>
             <button className={`px-4 py-2 rounded-lg font-medium transition-colors ${

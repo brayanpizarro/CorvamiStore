@@ -57,10 +57,10 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
     switch (status.toLowerCase()) {
       case 'completed':
       case 'completado':
-        return 'text-green-500 bg-green-500/10';
+        return 'text-emerald-400 bg-emerald-500/10';
       case 'pending':
       case 'pendiente':
-        return 'text-yellow-500 bg-yellow-500/10';
+        return 'text-red-300 bg-red-500/10';
       case 'cancelled':
       case 'cancelado':
         return 'text-red-500 bg-red-500/10';

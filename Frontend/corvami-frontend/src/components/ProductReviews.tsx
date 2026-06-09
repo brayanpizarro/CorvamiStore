@@ -321,16 +321,16 @@ export default function ProductReviews({ productId }: ProductReviewsProps) {
           )}
           
           {isGuest && (
-            <div className={`p-4 rounded-lg ${isDark ? 'bg-yellow-900/30 border border-yellow-700' : 'bg-yellow-50 border border-yellow-200'}`}>
-              <p className={`text-sm ${isDark ? 'text-yellow-300' : 'text-yellow-800'}`}>
+            <div className={`p-4 rounded-lg ${isDark ? 'bg-red-900/20 border border-red-700' : 'bg-red-50 border border-red-200'}`}>
+              <p className={`text-sm ${isDark ? 'text-red-300' : 'text-red-800'}`}>
                 Los usuarios invitados no pueden dejar reseñas. Por favor registra una cuenta.
               </p>
             </div>
           )}
           
           {isAuthenticated && !isGuest && !canReview && !checkingPurchase && (
-            <div className={`p-4 rounded-lg ${isDark ? 'bg-blue-900/30 border border-blue-700' : 'bg-blue-50 border border-blue-200'}`}>
-              <p className={`text-sm ${isDark ? 'text-blue-300' : 'text-blue-800'}`}>
+            <div className={`p-4 rounded-lg ${isDark ? 'bg-emerald-900/20 border border-emerald-700' : 'bg-emerald-50 border border-emerald-200'}`}>
+              <p className={`text-sm ${isDark ? 'text-emerald-300' : 'text-emerald-800'}`}>
                 Solo puedes dejar una reseña si has comprado este producto.
               </p>
             </div>

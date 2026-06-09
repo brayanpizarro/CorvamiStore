@@ -103,26 +103,26 @@ const CartPage: React.FC = () => {
   if (items.length === 0) {
     return (
       <div className={`min-h-screen py-20 transition-all duration-300 ${
-        theme === 'dark' ? 'bg-black' : 'bg-gray-50'
+        theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'
       }`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center py-20">
-            <div className={`text-6xl mb-6 ${theme === 'dark' ? 'text-gray-600' : 'text-gray-400'}`}>
+            <div className={`text-6xl mb-6 ${theme === 'dark' ? 'text-slate-600' : 'text-slate-400'}`}>
               <AiOutlineShoppingCart className="mx-auto" size={96} />
             </div>
             <h2 className={`text-3xl font-bold mb-4 ${
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
+              theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
             }`}>
               Tu carrito está vacío
             </h2>
             <p className={`text-lg mb-8 ${
-              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+              theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
             }`}>
               ¡Agrega productos para comenzar tu compra!
             </p>
             <Link
               to="/products"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold rounded-lg hover:from-green-400 hover:to-emerald-400 transition-all transform hover:scale-105"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-bold rounded-lg hover:from-emerald-300 hover:to-teal-300 transition-all transform hover:scale-105"
             >
               Ver Productos
             </Link>
@@ -134,7 +134,7 @@ const CartPage: React.FC = () => {
 
   return (
     <div className={`min-h-screen py-20 transition-all duration-300 ${
-      theme === 'dark' ? 'bg-black' : 'bg-gray-50'
+      theme === 'dark' ? 'bg-slate-950' : 'bg-slate-50'
     }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
@@ -142,19 +142,19 @@ const CartPage: React.FC = () => {
           <Link
             to="/"
             className={`inline-flex items-center gap-2 mb-4 ${
-              theme === 'dark' ? 'text-green-400 hover:text-green-300' : 'text-green-600 hover:text-green-700'
+              theme === 'dark' ? 'text-emerald-300 hover:text-teal-300' : 'text-emerald-600 hover:text-teal-700'
             } transition-colors`}
           >
             <MdArrowBack size={20} />
             <span>Seguir comprando</span>
           </Link>
           <h1 className={`text-4xl font-bold ${
-            theme === 'dark' ? 'text-white' : 'text-gray-900'
+            theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
           }`}>
             Carrito de Compras
           </h1>
           <p className={`text-lg mt-2 ${
-            theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+            theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
           }`}>
             {items.length} {items.length === 1 ? 'producto' : 'productos'} en tu carrito
           </p>
@@ -168,8 +168,8 @@ const CartPage: React.FC = () => {
                 key={item.productId}
                 className={`rounded-xl border-2 p-6 transition-all duration-300 ${
                   theme === 'dark'
-                    ? 'bg-gray-800/50 border-green-500/30 hover:border-green-400/60'
-                    : 'bg-white border-gray-200 hover:border-green-400/60'
+                    ? 'bg-slate-900/70 border-slate-800 hover:border-emerald-400/40'
+                    : 'bg-white border-slate-200 hover:border-emerald-400/60'
                 }`}
               >
                 <div className="flex gap-6">
@@ -185,12 +185,12 @@ const CartPage: React.FC = () => {
                   {/* Detalles */}
                   <div className="flex-1 min-w-0">
                     <h3 className={`text-xl font-bold mb-2 ${
-                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
                     }`}>
                       {item.name}
                     </h3>
                     <p className={`text-2xl font-bold mb-4 ${
-                      theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                      theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
                     }`}>
                       {formatPrice(item.unitPrice || item.price || 0)}
                     </p>
@@ -203,14 +203,14 @@ const CartPage: React.FC = () => {
                           disabled={loading}
                           className={`p-2 rounded-lg transition-colors ${
                             theme === 'dark'
-                              ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                              : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                                ? 'bg-slate-800 hover:bg-slate-700 text-slate-100'
+                                : 'bg-slate-200 hover:bg-slate-300 text-slate-900'
                           } disabled:opacity-50`}
                         >
                           <AiOutlineMinus size={16} />
                         </button>
                         <span className={`w-12 text-center font-bold ${
-                          theme === 'dark' ? 'text-white' : 'text-gray-900'
+                          theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
                         }`}>
                           {item.quantity}
                         </span>
@@ -219,8 +219,8 @@ const CartPage: React.FC = () => {
                           disabled={loading}
                           className={`p-2 rounded-lg transition-colors ${
                             theme === 'dark'
-                              ? 'bg-gray-700 hover:bg-gray-600 text-white'
-                              : 'bg-gray-200 hover:bg-gray-300 text-gray-900'
+                              ? 'bg-slate-800 hover:bg-slate-700 text-slate-100'
+                              : 'bg-slate-200 hover:bg-slate-300 text-slate-900'
                           } disabled:opacity-50`}
                         >
                           <AiOutlinePlus size={16} />
@@ -232,7 +232,7 @@ const CartPage: React.FC = () => {
                         disabled={loading}
                         className={`ml-auto p-2 rounded-lg transition-colors ${
                           theme === 'dark'
-                            ? 'bg-red-900/50 hover:bg-red-800/70 text-red-400'
+                            ? 'bg-red-500/10 hover:bg-red-500/20 text-red-300'
                             : 'bg-red-100 hover:bg-red-200 text-red-600'
                         } disabled:opacity-50`}
                       >
@@ -242,7 +242,7 @@ const CartPage: React.FC = () => {
 
                     {/* Subtotal por producto */}
                     <div className={`mt-3 text-sm ${
-                      theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
+                      theme === 'dark' ? 'text-slate-400' : 'text-slate-600'
                     }`}>
                       Subtotal: {formatPrice((item.unitPrice || item.price || 0) * item.quantity)}
                     </div>
@@ -256,29 +256,29 @@ const CartPage: React.FC = () => {
           <div className="lg:col-span-1">
             <div className={`rounded-xl border-2 p-6 sticky top-24 ${
               theme === 'dark'
-                ? 'bg-gray-800/50 border-green-500/30'
-                : 'bg-white border-gray-200'
+                ? 'bg-slate-900/70 border-slate-800'
+                : 'bg-white border-slate-200'
             }`}>
               <h2 className={`text-2xl font-bold mb-6 ${
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
+                theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
               }`}>
                 Resumen del Pedido
               </h2>
 
               <div className="space-y-4 mb-6">
                 <div className={`flex justify-between ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
                 }`}>
                   <span>Subtotal</span>
                   <span className="font-semibold">{formatPrice(subtotal)}</span>
                 </div>
                 <div className={`flex justify-between ${
-                  theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
+                  theme === 'dark' ? 'text-slate-300' : 'text-slate-700'
                 }`}>
                   <span>Envío</span>
                   <span className="font-semibold">
                     {shipping === 0 ? (
-                      <span className="text-green-500">GRATIS</span>
+                      <span className="text-emerald-400">GRATIS</span>
                     ) : (
                       formatPrice(shipping)
                     )}
@@ -287,27 +287,27 @@ const CartPage: React.FC = () => {
                 {subtotal < 200000 && (
                   <div className={`text-sm p-3 rounded-lg ${
                     theme === 'dark'
-                      ? 'bg-green-900/20 text-green-400'
-                      : 'bg-green-50 text-green-700'
+                      ? 'bg-emerald-500/10 text-emerald-300'
+                      : 'bg-emerald-50 text-emerald-700'
                   }`}>
                     ¡Agrega {formatPrice(200000 - subtotal)} más para envío gratis!
                   </div>
                 )}
                 <div className={`pt-4 border-t-2 ${
-                  theme === 'dark' ? 'border-gray-700' : 'border-gray-200'
+                  theme === 'dark' ? 'border-slate-700' : 'border-slate-200'
                 }`}>
                   <div className={`flex justify-between text-xl font-bold ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-900'
+                    theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
                   }`}>
                     <span>Total</span>
-                    <span className="text-green-500">{formatPrice(total)}</span>
+                    <span className="text-emerald-400">{formatPrice(total)}</span>
                   </div>
                 </div>
               </div>
 
               <Link
                 to="/checkout"
-                className="block w-full py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-black font-bold rounded-lg hover:from-green-400 hover:to-emerald-400 transition-all transform hover:scale-105 shadow-lg mb-4 text-center"
+                className="block w-full py-4 bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-bold rounded-lg hover:from-emerald-300 hover:to-teal-300 transition-all transform hover:scale-105 shadow-lg mb-4 text-center"
               >
                 Proceder al Pago
               </Link>
@@ -316,8 +316,8 @@ const CartPage: React.FC = () => {
                 to="/products"
                 className={`block w-full py-3 text-center rounded-lg border-2 font-semibold transition-all ${
                   theme === 'dark'
-                    ? 'border-green-500/50 text-green-400 hover:bg-green-500/10'
-                    : 'border-green-500 text-green-600 hover:bg-green-50'
+                    ? 'border-emerald-400/40 text-emerald-300 hover:bg-emerald-500/10'
+                    : 'border-emerald-500 text-emerald-600 hover:bg-emerald-50'
                 }`}
               >
                 Seguir Comprando
@@ -330,7 +330,7 @@ const CartPage: React.FC = () => {
         {!loadingRecommendations && recommendedProducts.length > 0 && (
           <div className="mt-16">
             <h2 className={`text-3xl font-bold mb-8 ${
-              theme === 'dark' ? 'text-white' : 'text-gray-900'
+              theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
             }`}>
               También te puede interesar
             </h2>
@@ -341,8 +341,8 @@ const CartPage: React.FC = () => {
                   to={`/products`}
                   className={`rounded-xl border-2 overflow-hidden transition-all duration-300 hover:scale-105 ${
                     theme === 'dark'
-                      ? 'bg-gray-800/50 border-green-500/30 hover:border-green-400/60'
-                      : 'bg-white border-gray-200 hover:border-green-400/60'
+                      ? 'bg-slate-900/70 border-slate-800 hover:border-emerald-400/40'
+                      : 'bg-white border-slate-200 hover:border-emerald-400/60'
                   }`}
                 >
                   <img
@@ -352,7 +352,7 @@ const CartPage: React.FC = () => {
                   />
                   <div className="p-4">
                     <h3 className={`font-bold mb-2 line-clamp-2 ${
-                      theme === 'dark' ? 'text-white' : 'text-gray-900'
+                      theme === 'dark' ? 'text-slate-100' : 'text-slate-900'
                     }`}>
                       {product.name}
                     </h3>
@@ -366,7 +366,7 @@ const CartPage: React.FC = () => {
                       ))}
                     </div>
                     <p className={`text-xl font-bold ${
-                      theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                      theme === 'dark' ? 'text-emerald-300' : 'text-emerald-600'
                     }`}>
                       {formatPrice(product.price)}
                     </p>

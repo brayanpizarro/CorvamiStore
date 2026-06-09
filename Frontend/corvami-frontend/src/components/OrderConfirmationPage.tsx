@@ -89,8 +89,8 @@ export default function OrderConfirmationPage() {
               </h3>
               <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
                 order.isPaid 
-                  ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
-                  : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                  ? 'bg-emerald-900/30 text-emerald-300 dark:bg-emerald-900/40 dark:text-emerald-200' 
+                  : 'bg-red-900/30 text-red-300 dark:bg-red-900/40 dark:text-red-200'
               }`}>
                 {order.isPaid ? 'Pagado' : 'Pendiente'}
               </span>
@@ -98,14 +98,14 @@ export default function OrderConfirmationPage() {
           </div>
 
           {/* Email Confirmation Notice */}
-          <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-blue-900/30' : 'bg-blue-50'}`}>
+          <div className={`mb-6 p-4 rounded-lg ${isDark ? 'bg-emerald-900/20' : 'bg-emerald-50'}`}>
             <div className="flex items-start">
-              <FaEnvelope className={`text-xl mr-3 mt-0.5 ${isDark ? 'text-blue-400' : 'text-blue-600'}`} />
+              <FaEnvelope className={`text-xl mr-3 mt-0.5 ${isDark ? 'text-emerald-400' : 'text-emerald-600'}`} />
               <div>
-                <p className={`font-medium ${isDark ? 'text-blue-300' : 'text-blue-900'}`}>
+                <p className={`font-medium ${isDark ? 'text-emerald-300' : 'text-emerald-900'}`}>
                   Correo de Confirmación Enviado
                 </p>
-                <p className={`text-sm ${isDark ? 'text-blue-400' : 'text-blue-700'}`}>
+                <p className={`text-sm ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
                   Hemos enviado los detalles de tu pedido a <strong>{order.customer.email}</strong>
                 </p>
               </div>

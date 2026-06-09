@@ -1,6 +1,5 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { useTheme } from './contexts/ThemeContext';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import FeaturesSection from './components/FeaturesSection';
@@ -33,14 +32,8 @@ function HomePage() {
 }
 
 function App() {
-  const { theme } = useTheme();
-
   return (
-    <div className={`min-h-screen transition-all duration-300 ${
-      theme === 'dark' 
-        ? 'bg-gradient-to-b from-black via-gray-900 to-black' 
-        : 'bg-gradient-to-b from-white via-gray-50 to-gray-100'
-    }`}>
+    <div className="min-h-screen bg-background text-foreground transition-all duration-300">
       <Routes>
         {/* Rutas con Header y Footer */}
         <Route path="/" element={

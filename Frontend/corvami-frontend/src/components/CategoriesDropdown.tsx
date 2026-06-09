@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MdKeyboardArrowDown } from 'react-icons/md';
-import { useTheme } from '../contexts/ThemeContext';
 
 interface Category {
   id: string;
@@ -10,7 +9,6 @@ interface Category {
 }
 
 const CategoriesDropdown: React.FC = () => {
-  const { theme } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
 
   const categories: Category[] = [
@@ -51,7 +49,7 @@ const CategoriesDropdown: React.FC = () => {
       {/* Botón de Categorías */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-4 py-2 text-white hover:text-emerald-100 transition-colors font-medium"
+        className="flex items-center gap-2 px-4 py-2 text-foreground hover:text-primary transition-colors font-medium"
       >
         <span>Categorías</span>
         <MdKeyboardArrowDown 
@@ -70,11 +68,7 @@ const CategoriesDropdown: React.FC = () => {
           />
           
           {/* Menú desplegable */}
-          <div className={`absolute top-full left-0 mt-2 w-80 rounded-xl shadow-2xl border z-50 transition-all duration-300 ${
-            theme === 'dark'
-              ? 'bg-gray-900/95 border-green-500/30 shadow-green-500/20 backdrop-blur-md'
-              : 'bg-white/95 border-gray-200 shadow-gray-200/50 backdrop-blur-md'
-          }`}>
+          <div className="absolute top-full left-0 mt-2 w-80 rounded-xl shadow-2xl border z-50 transition-all duration-300 bg-card/95 border-border shadow-black/20 backdrop-blur-md">
             <div className="p-4">
               
               <div className="grid gap-2">
@@ -82,40 +76,19 @@ const CategoriesDropdown: React.FC = () => {
                   return (
                     <div key={category.id} className="group">
                       {/* Categoría Principal */}
-                      <Link 
+                      <Link
                         to={`/category/${category.id}`}
                         onClick={() => setIsOpen(false)}
-                        className={`w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-300 text-left ${
-                        theme === 'dark'
-                          ? 'hover:bg-gray-800/70 hover:border-green-400/50 border border-transparent'
-                          : 'hover:bg-gray-50 hover:border-green-200 border border-transparent'
-                      }`}>
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                          theme === 'dark' ? 'bg-green-500/20' : 'bg-green-100'
-                        }`}>
-                          {/* Placeholder icon */}
-                          <div className={`w-4 h-4 rounded-sm ${
-                            theme === 'dark' ? 'bg-green-400' : 'bg-green-600'
-                          }`}></div>
+                        className="w-full flex items-center gap-3 p-3 rounded-lg transition-all duration-300 text-left hover:bg-accent border border-transparent hover:border-border group"
+                      >
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary/10">
+                          <div className="w-4 h-4 rounded-sm bg-primary"></div>
                         </div>
                         <div className="flex-1">
-                          <div className={`font-medium ${
-                            theme === 'dark' ? 'text-white group-hover:text-green-400' : 'text-gray-900 group-hover:text-green-600'
-                          }`}>
-                            {category.name}
-                          </div>
-                          <div className={`text-xs ${
-                            theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                          }`}>
-                            {category.subcategories?.length} subcategorías
-                          </div>
+                          <div className="font-medium text-foreground group-hover:text-primary">{category.name}</div>
+                          <div className="text-xs text-muted-foreground">{category.subcategories?.length} subcategorías</div>
                         </div>
-                        <MdKeyboardArrowDown 
-                          size={14} 
-                          className={`opacity-0 group-hover:opacity-100 transition-opacity ${
-                            theme === 'dark' ? 'text-green-400' : 'text-green-600'
-                          }`}
-                        />
+                        <MdKeyboardArrowDown size={14} className="opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
                       </Link>
                       
                       {/* Subcategorías (se mostrarían en hover o click) */}
@@ -126,11 +99,7 @@ const CategoriesDropdown: React.FC = () => {
                               key={sub}
                               to={`/category/${category.id}?subcategory=${encodeURIComponent(sub)}`}
                               onClick={() => setIsOpen(false)}
-                              className={`text-left px-3 py-1 rounded text-sm transition-colors ${
-                                theme === 'dark'
-                                  ? 'text-gray-400 hover:text-green-400'
-                                  : 'text-gray-600 hover:text-green-600'
-                              }`}
+                              className="text-left px-3 py-1 rounded text-sm transition-colors text-muted-foreground hover:text-primary"
                             >
                               {sub}
                             </Link>
@@ -143,12 +112,8 @@ const CategoriesDropdown: React.FC = () => {
               </div>
               
               {/* Ver todas las categorías */}
-              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <button className={`w-full py-2 px-4 rounded-lg font-medium transition-all duration-300 ${
-                  theme === 'dark'
-                    ? 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                    : 'bg-green-50 text-green-600 hover:bg-green-100'
-                }`}>
+              <div className="mt-4 pt-4 border-t border-border">
+                <button className="w-full py-2 px-4 rounded-lg font-medium transition-all duration-300 bg-primary/10 text-primary hover:bg-primary/20">
                   Ver todas las categorías →
                 </button>
               </div>
