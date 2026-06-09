@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsBoolean,
   MinLength,
+  IsIn,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -37,4 +38,10 @@ export class CreateUserDto {
   @IsOptional()
   @MinLength(6)
   password?: string;
+
+  @ApiPropertyOptional({ example: 'persona', description: 'Tipo de cliente: persona o empresa', enum: ['persona', 'empresa'] })
+  @IsString()
+  @IsOptional()
+  @IsIn(['persona', 'empresa'])
+  tipo?: string;
 }

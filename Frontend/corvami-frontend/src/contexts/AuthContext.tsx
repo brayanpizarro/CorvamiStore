@@ -14,6 +14,8 @@ interface User {
   name: string;
   phone?: string;
   rut?: string;
+  /** 'persona' = registrado desde el ecommerce | 'empresa' = proviene de RRHH */
+  tipo?: string;
   balance: number;
   isRegistered: boolean;
   isActive: boolean;
@@ -103,6 +105,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         balance: Number(authData.user.balance),
         isRegistered: true,
         isActive: true,
+        tipo: 'persona',
       });
       setIsGuest(false);
       localStorage.removeItem(STORAGE_GUEST_KEY);

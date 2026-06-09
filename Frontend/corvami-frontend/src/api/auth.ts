@@ -43,6 +43,8 @@ export interface User {
   name: string;
   phone?: string;
   rut?: string;
+  /** 'persona' = registrado desde el ecommerce | 'empresa' = proviene de RRHH */
+  tipo?: string;
   balance: number;
   isRegistered: boolean;
   isActive: boolean;
@@ -139,6 +141,7 @@ export const getProfile = async (): Promise<User> => {
     name: raw.nombre,
     phone: raw.telefono,
     rut: raw.rut,
+    tipo: raw.tipo,
     balance: Number(raw.balance),
     isRegistered: raw.isRegistered,
     isActive: raw.isActive,

@@ -421,6 +421,14 @@ export default function ProfilePage() {
                       </p>
                     </div>
                   )}
+                  <div>
+                    <label className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                      Tipo de cliente
+                    </label>
+                    <p className={`text-lg capitalize ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {user.tipo ?? 'Persona'}
+                    </p>
+                  </div>
                 </div>
 
                 <div className="mt-6">

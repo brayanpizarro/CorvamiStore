@@ -36,6 +36,7 @@ export class UsersService {
       isRegistered: createUserDto.isRegistered || false,
       isActive: true,
       password: createUserDto.password,
+      tipo: createUserDto.tipo,
     });
 
     return await this.usersRepo.save(user);

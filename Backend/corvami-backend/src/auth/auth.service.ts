@@ -26,7 +26,8 @@ export class AuthService {
     // Hash de la contraseña
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    // Crear usuario
+    // Crear usuario — los registros desde el ecommerce son siempre de tipo 'persona'.
+    // Los usuarios de tipo 'empresa' provienen exclusivamente de la BD de RRHH.
     const user = await this.usersService.create({
       email: registerDto.email,
       password: hashedPassword,
@@ -34,6 +35,7 @@ export class AuthService {
       phone: registerDto.phone,
       balance: 0,
       isRegistered: true,
+      tipo: 'persona',
     });
 
     // Generar token
