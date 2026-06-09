@@ -5,9 +5,6 @@ import {
   Min,
   MaxLength,
   IsPositive,
-  IsUrl,
-  IsBoolean,
-  IsArray,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -31,11 +28,6 @@ export class CreateProductoDto {
   @IsNumber()
   @Min(0)
   stock: number;
-
-  @ApiPropertyOptional({ example: 'https://res.cloudinary.com/.../imagen.jpg', description: 'URL de la imagen del producto' })
-  @IsOptional()
-  @IsUrl()
-  imageUrl?: string;
 
   @ApiPropertyOptional({ example: 'Ropa', description: 'Categoría principal', maxLength: 50 })
   @IsOptional()

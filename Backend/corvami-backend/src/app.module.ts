@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { ProductosModule } from './productos/productos.module';
 import { ShoppingCartModule } from './shopping-cart/shopping-cart.module';
 import { CommentsModule } from './comments/comments.module';
@@ -11,8 +9,8 @@ import { SeedModule } from './seed/seed.module';
 import { UsersModule } from './users/users.module';
 import { OrdersModule } from './orders/orders.module';
 import { AuthModule } from './auth/auth.module';
-import { EmailModule } from './email/email.module';
 import { EmpleadosModule } from './empleados/empleados.module';
+import { InventoryModule } from './inventory/inventory.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
@@ -35,7 +33,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
       // Tablas propias: clientes, ventas_pedido, ventas_detalle, ventas_factura, carrito
     }),
 
-    // ─── Conexión EXTERNA (otros schemas de si2: Inventario y RRHH) ──────────
+    // ─── Conexión EXTERNA (otros schemas de si2: RRHH) ────────────────────────────
     TypeOrmModule.forRoot({
       name: 'external',
       type: 'postgres',
@@ -46,10 +44,10 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
       username: process.env.EXT_DB_USER || 'neondb_owner',
       password: process.env.EXT_DB_PASSWORD || 'npg_V58gYFmBOPda',
       database: process.env.EXT_DB_NAME || 'si2',
-      synchronize: false, // NUNCA modificar tablas externas
+      synchronize: false,
       autoLoadEntities: true,
       extra: { ssl: { require: true, rejectUnauthorized: false } },
-      // Tablas consultadas: Inventario.productos, RRHH.empleados
+      // Tablas consultadas: RRHH.empleados
     }),
 
     ThrottlerModule.forRoot([
@@ -65,12 +63,11 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     UsersModule,
     OrdersModule,
     AuthModule,
-    EmailModule,
     EmpleadosModule,
+    InventoryModule,
   ],
-  controllers: [AppController],
+  controllers: [],
   providers: [
-    AppService,
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

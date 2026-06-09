@@ -3,48 +3,41 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
-  UseInterceptors,
-  UploadedFile,
   BadRequestException,
   UseGuards,
+  ParseIntPipe,
+  Query,
+  Patch,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
   ApiParam,
-  ApiConsumes,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
+import { IsString, IsOptional, IsBoolean } from 'class-validator';
 import { ProductosService } from './productos.service';
-import { CreateProductoDto } from './dto/create-producto.dto';
-import { UpdateProductoDto } from './dto/update-producto.dto';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { Public } from '../auth/decorators/public.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-// Eliminado almacenamiento local, ahora se sube a Cloudinary
+
+class AddImagenDto {
+  @IsString()
+  imagenData: string; // base64 o URL
+
+  @IsOptional()
+  @IsBoolean()
+  esPrincipal?: boolean;
+}
 
 @ApiTags('Productos')
 @Controller('productos')
 export class ProductosController {
-  constructor(
-    private readonly productosService: ProductosService,
-    private readonly cloudinary: CloudinaryService,
-  ) {}
-
-  @UseGuards(JwtAuthGuard)
-  @Post()
-  @ApiBearerAuth('JWT')
-  @ApiOperation({ summary: 'Crear un producto' })
-  @ApiResponse({ status: 201, description: 'Producto creado.' })
-  create(@Body() createProductoDto: CreateProductoDto) {
-    return this.productosService.create(createProductoDto);
-  }
+  constructor(private readonly productosService: ProductosService) {}
 
   @Public()
   @Get()
@@ -57,84 +50,60 @@ export class ProductosController {
   @Public()
   @Get(':id')
   @ApiOperation({ summary: 'Obtener producto por ID' })
-  @ApiParam({ name: 'id', description: 'UUID del producto' })
+  @ApiParam({ name: 'id', description: 'ID del producto' })
   @ApiResponse({ status: 200, description: 'Datos del producto.' })
   @ApiResponse({ status: 404, description: 'Producto no encontrado.' })
   findOne(@Param('id') id: string) {
     return this.productosService.findOne(id);
   }
 
+  // ── Imágenes de producto ─────────────────────────────────────────────────
+
+  @Public()
+  @Get(':id/imagenes')
+  @ApiOperation({ summary: 'Listar imágenes de un producto' })
+  @ApiParam({ name: 'id', description: 'ID del producto' })
+  @ApiResponse({ status: 200, description: 'Lista de imágenes.' })
+  getImagenes(@Param('id', ParseIntPipe) id: number) {
+    return this.productosService.getImagenesByProducto(id);
+  }
+
   @UseGuards(JwtAuthGuard)
-  @Patch(':id')
+  @Post(':id/imagenes')
   @ApiBearerAuth('JWT')
-  @ApiOperation({ summary: 'Actualizar un producto' })
-  @ApiParam({ name: 'id', description: 'UUID del producto' })
-  @ApiResponse({ status: 200, description: 'Producto actualizado.' })
-  update(
-    @Param('id') id: string,
-    @Body() updateProductoDto: UpdateProductoDto,
+  @ApiOperation({ summary: 'Guardar imagen de un producto en la BD' })
+  @ApiParam({ name: 'id', description: 'ID del producto' })
+  @ApiQuery({ name: 'principal', required: false, type: Boolean, description: 'Marcar como imagen principal' })
+  @ApiBody({ schema: { type: 'object', properties: { imagenData: { type: 'string', description: 'Imagen en base64 o URL' }, esPrincipal: { type: 'boolean' } } } })
+  @ApiResponse({ status: 201, description: 'Imagen guardada.' })
+  async addImagen(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: AddImagenDto,
+    @Query('principal') principal?: string,
   ) {
-    return this.productosService.update(id, updateProductoDto);
+    if (!body.imagenData) throw new BadRequestException('imagenData es requerido');
+    const esPrincipal = body.esPrincipal ?? principal === 'true' ?? false;
+    return this.productosService.addImagen(id, body.imagenData, esPrincipal);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
+  @Patch('imagenes/:imagenId/principal')
   @ApiBearerAuth('JWT')
-  @ApiOperation({ summary: 'Eliminar un producto' })
-  @ApiParam({ name: 'id', description: 'UUID del producto' })
-  @ApiResponse({ status: 200, description: 'Producto eliminado.' })
-  remove(@Param('id') id: string) {
-    return this.productosService.remove(id);
+  @ApiOperation({ summary: 'Establecer imagen como principal del producto' })
+  @ApiParam({ name: 'imagenId', description: 'ID del registro ProductoImagen' })
+  @ApiResponse({ status: 200, description: 'Imagen marcada como principal.' })
+  setImagenPrincipal(@Param('imagenId', ParseIntPipe) imagenId: number) {
+    return this.productosService.setImagenPrincipal(imagenId);
   }
 
-  // Subir imagen a Cloudinary
   @UseGuards(JwtAuthGuard)
-  @Post(':id/image')
-  @ApiBearerAuth('JWT')
-  @ApiOperation({ summary: 'Subir imagen de un producto a Cloudinary' })
-  @ApiParam({ name: 'id', description: 'UUID del producto' })
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({ schema: { type: 'object', properties: { file: { type: 'string', format: 'binary', description: 'Imagen (jpeg, png, webp, gif) máx. 5MB' } } } })
-  @ApiResponse({ status: 201, description: 'Imagen subida. Retorna la URL pública.' })
-  @UseInterceptors(
-    FileInterceptor('file', {
-      limits: { fileSize: 5 * 1024 * 1024 },
-      fileFilter: (req, file, cb) => {
-        const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-        if (!allowed.includes(file.mimetype)) {
-          return cb(
-            new BadRequestException(
-              'Solo se permiten imágenes (jpeg, png, webp, gif)',
-            ),
-            false,
-          );
-        }
-        cb(null, true);
-      },
-    }),
-  )
-  async uploadImage(@Param('id') id: string, @UploadedFile() file: any) {
-    if (!file) return { error: 'No file uploaded' };
-    const result: any = await this.cloudinary.uploadProductImage(
-      id,
-      file.buffer,
-      file.originalname,
-    );
-    // result.secure_url -> URL pública
-    await this.productosService.setImage(id, result.secure_url);
-    return { productId: id, imageUrl: result.secure_url };
-  }
-
-  // Borrar imagen del producto (Cloudinary + limpiar campo)
-  @UseGuards(JwtAuthGuard)
-  @Delete(':id/image')
+  @Delete('imagenes/:imagenId')
   @ApiBearerAuth('JWT')
   @ApiOperation({ summary: 'Eliminar imagen de un producto' })
-  @ApiParam({ name: 'id', description: 'UUID del producto' })
+  @ApiParam({ name: 'imagenId', description: 'ID del registro ProductoImagen' })
   @ApiResponse({ status: 200, description: 'Imagen eliminada.' })
-  async deleteImage(@Param('id') id: string) {
-    await this.cloudinary.deleteProductImage(id);
-    await this.productosService.setImage(id, undefined as any);
-    return { productId: id, imageDeleted: true };
+  async deleteImagen(@Param('imagenId', ParseIntPipe) imagenId: number) {
+    await this.productosService.removeImagen(imagenId);
+    return { deleted: true, imagenId };
   }
 }

@@ -1,64 +1,74 @@
-import { Injectable, Logger, NotImplementedException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Producto } from './entities/producto.entity';
+import { ProductoImagen } from './entities/producto-imagen.entity';
+import { InventoryService } from '../inventory/inventory.service';
 
 @Injectable()
 export class ProductosService {
-  private readonly logger = new Logger(ProductosService.name);
-
   constructor(
-    // Conexión 'external' → BD de Inventario (solo lectura)
-    @InjectRepository(Producto, 'external')
-    private readonly repo: Repository<Producto>,
+    // Conexión 'default' → schema Ventas (tabla propia de imágenes)
+    @InjectRepository(ProductoImagen)
+    private readonly imagenRepo: Repository<ProductoImagen>,
+
+    private readonly inventoryService: InventoryService,
   ) {}
 
-  /** Solo lectura — los productos viven en el Inventario externo */
+  // ── Productos — datos desde el servicio de Inventario ────────────────────
+
   findAll() {
-    return this.repo.find();
+    return this.inventoryService.getStock();
   }
 
   findOne(id: string | number) {
-    return this.repo.findOneBy({ id: Number(id) });
+    return this.inventoryService.getStockById(Number(id));
   }
 
-  // ── Operaciones de escritura ─────────────────────────────────────────────
-  // La BD de Inventario es externa (solo lectura).
-  // Se mantienen los métodos para no romper importadores existentes,
-  // pero no persisten datos.
+  // ── Imágenes de producto (tabla propia en schema Ventas) ─────────────────
 
-  async create(_dto: any) {
-    this.logger.warn(
-      'create() ignorado: productos es una tabla externa (solo lectura)',
-    );
-    return { id_producto: null };
+  async addImagen(
+    productoId: number,
+    imagenData: string,
+    esPrincipal = false,
+  ): Promise<ProductoImagen> {
+    if (esPrincipal) {
+      await this.imagenRepo.update({ productoId }, { esPrincipal: false });
+    }
+    const imagen = this.imagenRepo.create({
+      productoId,
+      imagenData,
+      esPrincipal,
+    });
+    return this.imagenRepo.save(imagen);
   }
 
-  async update(id: string | number, _dto: any) {
-    this.logger.warn(
-      `update(${id}) ignorado: productos es una tabla externa (solo lectura)`,
-    );
-    return { affected: 0 };
+  getImagenesByProducto(productoId: number): Promise<ProductoImagen[]> {
+    return this.imagenRepo.find({
+      where: { productoId },
+      order: { esPrincipal: 'DESC', createdAt: 'ASC' },
+    });
   }
 
-  async remove(id: string | number) {
-    this.logger.warn(
-      `remove(${id}) ignorado: productos es una tabla externa (solo lectura)`,
-    );
-    return { deleted: 0 };
+  async getImagenById(id: number): Promise<ProductoImagen> {
+    const imagen = await this.imagenRepo.findOneBy({ id });
+    if (!imagen) {
+      throw new NotFoundException(`Imagen con id ${id} no encontrada`);
+    }
+    return imagen;
   }
 
-  async setImage(id: string | number, _imageUrl: string) {
-    this.logger.warn(
-      `setImage(${id}) ignorado: productos es una tabla externa (solo lectura)`,
-    );
-    return { affected: 0 };
+  async removeImagen(id: number): Promise<void> {
+    const imagen = await this.getImagenById(id);
+    await this.imagenRepo.remove(imagen);
   }
 
-  async reduceStock(id: string | number, _quantity: number) {
-    this.logger.warn(
-      `reduceStock(${id}) ignorado: stock gestionado por Inventario externo`,
+  async setImagenPrincipal(id: number): Promise<ProductoImagen> {
+    const imagen = await this.getImagenById(id);
+    await this.imagenRepo.update(
+      { productoId: imagen.productoId },
+      { esPrincipal: false },
     );
-    return { affected: 0 };
+    imagen.esPrincipal = true;
+    return this.imagenRepo.save(imagen);
   }
 }

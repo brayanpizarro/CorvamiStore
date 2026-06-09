@@ -34,7 +34,6 @@ async function bootstrap() {
     .addTag('Orders', 'Pedidos y pagos')
     .addTag('Cart', 'Carrito de compras')
     .addTag('Comments', 'Reseñas y comentarios de productos')
-    .addTag('Email', 'Envío de correos')
     .addTag('Empleados', 'Gestión de empleados')
     .build();
 

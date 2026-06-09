@@ -2,14 +2,16 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProductosService } from './productos.service';
 import { ProductosController } from './productos.controller';
-import { Producto } from './entities/producto.entity';
-import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { ProductoImagen } from './entities/producto-imagen.entity';
+import { InventoryModule } from '../inventory/inventory.module';
 
 @Module({
-  // 'external' = conexión a la BD de Inventario (solo lectura)
-  imports: [TypeOrmModule.forFeature([Producto], 'external')],
+  imports: [
+    TypeOrmModule.forFeature([ProductoImagen]),
+    InventoryModule,
+  ],
   controllers: [ProductosController],
-  providers: [ProductosService, CloudinaryService],
+  providers: [ProductosService],
   exports: [ProductosService],
 })
 export class ProductosModule {}

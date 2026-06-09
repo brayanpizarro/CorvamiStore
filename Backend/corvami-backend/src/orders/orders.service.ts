@@ -12,7 +12,7 @@ import { VentasDetalle } from './entities/ventas-detalle.entity';
 import { VentasFactura } from './entities/ventas-factura.entity';
 import { Cliente } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
-import { EmailService } from '../email/email.service';
+import { InventoryService } from '../inventory/inventory.service';
 
 @Injectable()
 export class OrdersService {
@@ -26,7 +26,7 @@ export class OrdersService {
     @InjectRepository(Cliente)
     private readonly clientesRepo: Repository<Cliente>,
     private readonly usersService: UsersService,
-    private readonly emailService: EmailService,
+    private readonly inventoryService: InventoryService,
   ) {}
 
   private parseId(id: string | number): number {
@@ -54,6 +54,12 @@ export class OrdersService {
         subtotal: item.totalPrice,
       };
     });
+
+    // ── CONFIRMACIÓN DE STOCK ────────────────────────────────────────────────
+    await this.inventoryService.checkStockAvailability(
+      detallesData.map((d) => ({ producto_id: d.id_producto, cantidad: d.cantidad })),
+    );
+    // ────────────────────────────────────────────────────────────────────────
 
     const pedido = this.pedidosRepo.create({
       id_cliente: cliente.id_cliente,
@@ -180,11 +186,10 @@ export class OrdersService {
     }
 
     const saved = await this.pedidosRepo.save(pedido);
-    try {
-      await this.emailService.sendOrderConfirmationEmail(saved);
-    } catch (err) {
-      console.error('Error enviando correo:', err);
-    }
+    await this.inventoryService.registerOutput(
+      saved.detalles.map((d) => ({ producto_id: d.id_producto, cantidad: d.cantidad })),
+      `Despacho ventas #${saved.id_pedido}`,
+    );
     return saved;
   }
 
@@ -219,11 +224,10 @@ export class OrdersService {
     }
 
     const saved = await this.pedidosRepo.save(pedido);
-    try {
-      await this.emailService.sendOrderConfirmationEmail(saved);
-    } catch (err) {
-      console.error('Error enviando correo:', err);
-    }
+    await this.inventoryService.registerOutput(
+      saved.detalles.map((d) => ({ producto_id: d.id_producto, cantidad: d.cantidad })),
+      `Despacho ventas #${saved.id_pedido}`,
+    );
     return saved;
   }
 

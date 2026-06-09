@@ -20,7 +20,6 @@ docker-compose up --build
 
 El API quedará disponible en `http://localhost:3000`.
 
-> 📄 **Documentación Swagger:** `http://localhost:3000/api/docs`
 
 #### Opción B — Sin Docker (desarrollo local)
 
@@ -34,7 +33,7 @@ npm run start:dev
 
 El API quedará disponible en `http://localhost:3000`.
 
-> 📄 **Documentación Swagger:** `http://localhost:3000/api/docs`
+-**Documentación Swagger:** `http://localhost:3000/api/docs`
 
 ---
 

@@ -7,13 +7,13 @@ import { VentasDetalle } from './entities/ventas-detalle.entity';
 import { VentasFactura } from './entities/ventas-factura.entity';
 import { Cliente } from '../users/entities/user.entity';
 import { UsersModule } from '../users/users.module';
-import { EmailModule } from '../email/email.module';
+import { InventoryModule } from '../inventory/inventory.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([VentasPedido, VentasDetalle, VentasFactura, Cliente]),
     UsersModule,
-    EmailModule,
+    InventoryModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],
