@@ -70,6 +70,21 @@ export const isAuthenticated = (): boolean => {
   return !!getAuthToken();
 };
 
+// Función helper para normalizar RawProfile a User
+const normalizeToUser = (raw: RawProfile): User => {
+  return {
+    userId: raw.userId,
+    email: raw.email,
+    name: raw.nombre,
+    phone: raw.telefono,
+    rut: raw.rut,
+    tipo: raw.tipo,
+    balance: typeof raw.balance === 'string' ? parseFloat(raw.balance) : raw.balance,
+    isRegistered: raw.isRegistered,
+    isActive: raw.isActive,
+  };
+};
+
 // Registrar usuario
 export const register = async (data: RegisterData): Promise<AuthResponse> => {
   const response = await fetch(`${API_URL}/auth/register`, {
@@ -135,17 +150,7 @@ export const getProfile = async (): Promise<User> => {
   }
 
   const raw: RawProfile = await response.json();
-  return {
-    userId: raw.userId,
-    email: raw.email,
-    name: raw.nombre,
-    phone: raw.telefono,
-    rut: raw.rut,
-    tipo: raw.tipo,
-    balance: Number(raw.balance),
-    isRegistered: raw.isRegistered,
-    isActive: raw.isActive,
-  };
+  return normalizeToUser(raw);
 };
 
 // Cerrar sesión
@@ -174,5 +179,7 @@ export const addBalance = async (userId: string, amount: number): Promise<User> 
     throw new Error(error.message || 'Error al agregar balance');
   }
 
-  return await response.json();
+  
+  const raw: RawProfile = await response.json();
+  return normalizeToUser(raw);
 };

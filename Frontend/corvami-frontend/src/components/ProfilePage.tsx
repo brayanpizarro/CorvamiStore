@@ -5,8 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
 import { ordersApi } from '../api/orders';
 import type { Order } from '../api/orders';
-import ReviewModal from './ReviewModal';
-import { FaBox, FaShoppingCart, FaUser, FaHistory, FaCheckCircle, FaClock, FaTruck, FaStar } from 'react-icons/fa';
+import { FaBox, FaShoppingCart, FaUser, FaHistory, FaCheckCircle, FaClock, FaTruck } from 'react-icons/fa';
 
 type TabType = 'orders' | 'cart' | 'account';
 
@@ -18,7 +17,6 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<TabType>('orders');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [reviewModal, setReviewModal] = useState<{ productId: string; productName: string } | null>(null);
 
   const loadOrders = useCallback(async () => {
     if (!user?.email) return;
@@ -232,7 +230,7 @@ export default function ProfilePage() {
                           </div>
                         </div>
 
-                        {/* Order Items Preview with Review Buttons */}
+                        {/* Order Items Preview */}
                         <div className="space-y-3 mb-4">
                           {order.items.map((item, index) => (
                             <div
@@ -256,22 +254,6 @@ export default function ProfilePage() {
                                   Cantidad: {item.quantity} | ${(item.unitPrice || 0).toLocaleString()} c/u
                                 </p>
                               </div>
-                              {order.isPaid && (
-                                <button
-                                  onClick={() => setReviewModal({ 
-                                    productId: item.productId, 
-                                    productName: item.name 
-                                  })}
-                                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium ${
-                                    isDark
-                                      ? 'bg-emerald-900/30 text-emerald-400 hover:bg-emerald-900/50'
-                                      : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                                  } transition-colors`}
-                                >
-                                  <FaStar className="text-yellow-400" />
-                                  Reseñar
-                                </button>
-                              )}
                             </div>
                           ))}
                         </div>
@@ -282,7 +264,7 @@ export default function ProfilePage() {
                             Dirección de envío:
                           </p>
                           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {order.customer.address}, {order.customer.city}
+                            {order.customer?.address}, {order.customer?.city}
                           </p>
                         </div>
 
@@ -441,19 +423,6 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-
-      {/* Review Modal */}
-      {reviewModal && user && (
-        <ReviewModal
-          productId={reviewModal.productId}
-          productName={reviewModal.productName}
-          userId={user.userId}
-          onClose={() => setReviewModal(null)}
-          onSuccess={() => {
-            // Opcional: recargar órdenes si quieres actualizar algo
-          }}
-        />
-      )}
     </div>
   );
 }

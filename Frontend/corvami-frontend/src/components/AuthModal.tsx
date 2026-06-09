@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { AiOutlineClose, AiOutlineMail, AiOutlineLock, AiOutlineUser, AiOutlinePhone } from 'react-icons/ai';
 
 const AuthModal: React.FC = () => {
-  const { theme } = useTheme();
   const { showAuthModal, setShowAuthModal, login, register, continueAsGuest } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
@@ -48,99 +46,84 @@ const AuthModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm" onClick={() => setShowAuthModal(false)}>
       <div 
-        className={`relative w-full max-w-md mx-4 rounded-2xl shadow-2xl overflow-hidden ${
-          theme === 'dark' ? 'bg-card border border-border' : 'bg-card border border-border'
-        }`}
+        className="relative w-full max-w-sm mx-4 rounded-xl shadow-2xl overflow-hidden bg-gray-900 border border-gray-700"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Botón cerrar */}
         <button
           onClick={() => setShowAuthModal(false)}
-          className={`absolute top-4 right-4 p-2 rounded-full transition-colors ${
-            theme === 'dark'
-              ? 'hover:bg-muted text-muted-foreground hover:text-foreground'
-              : 'hover:bg-muted text-muted-foreground hover:text-foreground'
-          }`}
+          className="absolute top-3 right-3 p-1.5 rounded-full transition-colors z-10 hover:bg-gray-800 text-gray-400 hover:text-white"
         >
-          <AiOutlineClose size={20} />
+          <AiOutlineClose size={18} />
         </button>
 
         {/* Contenido */}
-        <div className="p-8">
+        <div className="p-5">
           {/* Header */}
-          <div className="text-center mb-6">
-            <h2 className={`text-2xl font-bold mb-2 ${
-              theme === 'dark' ? 'text-foreground' : 'text-foreground'
-            }`}>
-              {isLogin ? '¡Bienvenido de vuelta!' : 'Crear cuenta'}
+          <div className="text-center mb-4">
+            <h2 className="text-xl font-bold mb-1 text-white">
+              {isLogin ? 'Bienvenido' : 'Crear cuenta'}
             </h2>
-            <p className={`text-sm ${
-              theme === 'dark' ? 'text-muted-foreground' : 'text-muted-foreground'
-            }`}>
-              Inicia sesión para continuar o compra como invitado
+            <p className="text-xs text-gray-400">
+              {isLogin 
+                ? 'Inicia sesión o compra como invitado'
+                : 'Regístrate para empezar a comprar'
+              }
             </p>
           </div>
 
           {/* Formulario */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Campos de registro */}
             {!isLogin && (
               <>
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${
-                    theme === 'dark' ? 'text-foreground/80' : 'text-foreground/80'
-                  }`}>
-                    Nombre *
+                  <label className="block text-xs font-medium mb-1 text-gray-300">
+                    Nombre completo <span className="text-emerald-500">*</span>
                   </label>
                   <div className="relative">
-                    <AiOutlineUser className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                      theme === 'dark' ? 'text-muted-foreground' : 'text-muted-foreground'
-                    }`} size={18} />
+                    <AiOutlineUser className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
                     <input
                       type="text"
                       name="name"
                       value={formData.name}
                       onChange={handleInputChange}
-                      placeholder="Tu nombre completo"
+                      placeholder="Juan Pérez"
                       required
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-input text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring"
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-700 bg-gray-800 text-white placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 focus:outline-none transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-medium mb-2 ${
-                    theme === 'dark' ? 'text-foreground/80' : 'text-foreground/80'
-                  }`}>
+                  <label className="block text-xs font-medium mb-1 text-gray-300">
                     Teléfono
                   </label>
                   <div className="relative">
-                    <AiOutlinePhone className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                      theme === 'dark' ? 'text-muted-foreground' : 'text-muted-foreground'
-                    }`} size={18} />
+                    <AiOutlinePhone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleInputChange}
-                      placeholder="3001234567"
-                      className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-input text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring"
+                      placeholder="+56 9 1234 5678"
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-700 bg-gray-800 text-white placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 focus:outline-none transition-all"
                     />
                   </div>
+                  <p className="text-xs text-gray-500 mt-0.5">Opcional</p>
                 </div>
               </>
             )}
 
+            {/* Email */}
             <div>
-              <label className={`block text-sm font-medium mb-2 ${
-                theme === 'dark' ? 'text-foreground/80' : 'text-foreground/80'
-              }`}>
-                Email *
+              <label className="block text-xs font-medium mb-1 text-gray-300">
+                Correo <span className="text-emerald-500">*</span>
               </label>
               <div className="relative">
-                <AiOutlineMail className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                  theme === 'dark' ? 'text-muted-foreground' : 'text-muted-foreground'
-                }`} size={18} />
+                <AiOutlineMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
                 <input
                   type="email"
                   name="email"
@@ -148,21 +131,18 @@ const AuthModal: React.FC = () => {
                   onChange={handleInputChange}
                   placeholder="tu@email.com"
                   required
-                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-input text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-700 bg-gray-800 text-white placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 focus:outline-none transition-all"
                 />
               </div>
             </div>
 
+            {/* Contraseña */}
             <div>
-              <label className={`block text-sm font-medium mb-2 ${
-                theme === 'dark' ? 'text-foreground/80' : 'text-foreground/80'
-              }`}>
-                Contraseña *
+              <label className="block text-xs font-medium mb-1 text-gray-300">
+                Contraseña <span className="text-emerald-500">*</span>
               </label>
               <div className="relative">
-                <AiOutlineLock className={`absolute left-3 top-1/2 -translate-y-1/2 ${
-                  theme === 'dark' ? 'text-muted-foreground' : 'text-muted-foreground'
-                }`} size={18} />
+                <AiOutlineLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
                 <input
                   type="password"
                   name="password"
@@ -171,13 +151,17 @@ const AuthModal: React.FC = () => {
                   placeholder="Mínimo 6 caracteres"
                   required
                   minLength={6}
-                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-border bg-input text-foreground placeholder:text-muted-foreground transition-colors focus:outline-none focus:ring-2 focus:ring-ring/30 focus:border-ring"
+                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-gray-700 bg-gray-800 text-white placeholder:text-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 focus:outline-none transition-all"
                 />
               </div>
+              {!isLogin && (
+                <p className="text-xs text-gray-500 mt-0.5">Mínimo 6 caracteres</p>
+              )}
             </div>
 
+            {/* Mensaje de error */}
             {error && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/40 text-destructive-foreground text-sm">
+              <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/40 text-red-400 text-xs">
                 {error}
               </div>
             )}
@@ -186,23 +170,23 @@ const AuthModal: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="neon-button w-full py-3 px-4 bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className={`w-full py-2 text-sm font-semibold rounded-lg transition-all ${
+                loading
+                  ? 'bg-gray-600 cursor-not-allowed text-gray-300'
+                  : 'bg-emerald-500 hover:bg-emerald-600 text-black shadow-md hover:shadow-lg'
+              }`}
             >
               {loading ? 'Cargando...' : isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
             </button>
           </form>
 
           {/* Divisor */}
-          <div className="relative my-6">
-            <div className={`absolute inset-0 flex items-center ${
-              theme === 'dark' ? 'border-border' : 'border-border'
-            }`}>
-              <div className="w-full border-t"></div>
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-700"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className={`px-2 ${
-                theme === 'dark' ? 'bg-card text-muted-foreground' : 'bg-card text-muted-foreground'
-              }`}>
+            <div className="relative flex justify-center text-xs">
+              <span className="px-2 bg-gray-900 text-gray-500">
                 o
               </span>
             </div>
@@ -211,24 +195,25 @@ const AuthModal: React.FC = () => {
           {/* Botón invitado */}
           <button
             onClick={handleGuestClick}
-            className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
-              theme === 'dark'
-                ? 'bg-secondary hover:bg-accent text-secondary-foreground border border-border'
-                : 'bg-secondary hover:bg-accent text-secondary-foreground border border-border'
-            }`}
+            className="w-full py-2 text-sm font-medium rounded-lg transition-all bg-gray-800 hover:bg-gray-700 text-gray-300 border border-gray-700"
           >
             Continuar como invitado
           </button>
 
           {/* Toggle login/register */}
-          <div className="mt-6 text-center">
+          <div className="mt-4 text-center">
             <button
-              onClick={() => setIsLogin(!isLogin)}
-              className={`text-sm font-medium transition-colors ${
-                theme === 'dark'
-                    ? 'text-muted-foreground hover:text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-              }`}
+              onClick={() => {
+                setIsLogin(!isLogin);
+                setError('');
+                setFormData({
+                  email: '',
+                  password: '',
+                  name: '',
+                  phone: '',
+                });
+              }}
+              className="text-xs font-medium transition-colors text-gray-400 hover:text-emerald-400"
             >
               {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
             </button>

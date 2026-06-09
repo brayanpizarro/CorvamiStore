@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { AiFillStar } from 'react-icons/ai';
-import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { productApi, type Product as ApiProduct } from '../api/products';
@@ -10,7 +8,6 @@ interface ProductsSectionProps {
 }
 
 const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
-  const { theme } = useTheme();
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated, isGuest, setShowAuthModal } = useAuth();
   const [products, setProducts] = useState<ApiProduct[]>([]);

@@ -5,21 +5,10 @@ import {
   logout as logoutApi, 
   getProfile, 
   isAuthenticated as checkAuth,
-  addBalance as addBalanceApi
+  addBalance as addBalanceApi,
+  type AuthResponse,
+  type User
 } from '../api/auth';
-
-interface User {
-  userId: string;
-  email: string;
-  name: string;
-  phone?: string;
-  rut?: string;
-  /** 'persona' = registrado desde el ecommerce | 'empresa' = proviene de RRHH */
-  tipo?: string;
-  balance: number;
-  isRegistered: boolean;
-  isActive: boolean;
-}
 
 interface AuthContextValue {
   user: User | null;
@@ -45,6 +34,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [isGuest, setIsGuest] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // Función helper para normalizar la respuesta básica de auth
+  const normalizeBasicUser = (authData: AuthResponse): User => {
+    return {
+      userId: authData.user.userId,
+      email: authData.user.email,
+      name: authData.user.name,
+      balance: typeof authData.user.balance === 'string'
+        ? parseFloat(authData.user.balance)
+        : authData.user.balance,
+      isRegistered: true,
+      isActive: true,
+      tipo: 'persona',
+      // Estos campos vendrán del refreshProfile
+      phone: undefined,
+      rut: undefined,
+    };
+  };
 
   useEffect(() => {
     const initAuth = async () => {
@@ -75,10 +82,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const login = async (email: string, password: string) => {
     try {
       const authData = await loginApi({ email, password });
-      setUser(authData.user);
+      
+      // Setear usuario básico primero
+      const basicUser = normalizeBasicUser(authData);
+      setUser(basicUser);
+      
       setIsGuest(false);
       localStorage.removeItem(STORAGE_GUEST_KEY);
       setShowAuthModal(false);
+      
+      // Obtener perfil completo (con phone, rut, etc.)
+      try {
+        const fullProfile = await getProfile();
+        setUser(fullProfile);
+      } catch (profileError) {
+        console.warn('No se pudo obtener el perfil completo:', profileError);
+      }
     } catch (error) {
       console.error('Error en login:', error);
       throw error;
@@ -98,18 +117,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         name,
         phone,
       });
-      setUser({
-        userId: authData.user.userId,
-        email: authData.user.email,
-        name: authData.user.name,
-        balance: Number(authData.user.balance),
-        isRegistered: true,
-        isActive: true,
-        tipo: 'persona',
-      });
+      
+      // Setear usuario básico primero
+      const basicUser = normalizeBasicUser(authData);
+      setUser(basicUser);
+      
       setIsGuest(false);
       localStorage.removeItem(STORAGE_GUEST_KEY);
       setShowAuthModal(false);
+      
+      // Obtener perfil completo (con phone, rut, etc.)
+      try {
+        const fullProfile = await getProfile();
+        setUser(fullProfile);
+      } catch (profileError) {
+        console.warn('No se pudo obtener el perfil completo:', profileError);
+      }
     } catch (error) {
       console.error('Error en registro:', error);
       throw error;

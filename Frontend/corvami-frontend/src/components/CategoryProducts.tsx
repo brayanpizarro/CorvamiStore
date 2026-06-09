@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { MdKeyboardArrowDown } from 'react-icons/md';
-import { AiFillStar, AiOutlineHeart, AiOutlineShoppingCart, AiOutlineSearch } from 'react-icons/ai';
+import { AiOutlineHeart, AiOutlineShoppingCart, AiOutlineSearch } from 'react-icons/ai';
 import ProductDetail from './ProductDetail';
 import { productApi, type Product as ApiProduct } from '../api/products';
 
@@ -40,13 +40,11 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
   const { addItem, loading: cartLoading } = useCart();
   const { isAuthenticated, isGuest, setShowAuthModal } = useAuth();
   
-  // Estados para filtros y vista
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('relevance');
   const [priceRange, setPriceRange] = useState([0, 5000000]);
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
-  const [selectedRating, setSelectedRating] = useState(0);
   const [showFilters, setShowFilters] = useState(false);
   const [products, setProducts] = useState<ApiProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +53,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
     loadProducts();
   }, []);
 
-  // Scroll al inicio cuando se selecciona un producto
   useEffect(() => {
     if (selectedProduct) {
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -74,7 +71,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
   };
 
   const handleAddToCart = async (product: Product) => {
-    // Verificar si el usuario está autenticado o es invitado
     if (!isAuthenticated && !isGuest) {
       setShowAuthModal(true);
       return;
@@ -92,7 +88,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
     }
   };
 
-  // Convertir productos de API a formato interno
   const allProducts: Product[] = useMemo(() => products.map(p => ({
     id: p.productId,
     name: p.name,
@@ -102,20 +97,18 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
     rating: 0,
     reviews: 0,
     brand: p.codigo || 'Sin código',
-    category: 'General',
-    subcategory: '',
+    category: p.category || 'General',
+    subcategory: p.subcategory || '',
     features: [p.description || 'Sin descripción'],
     inStock: p.stock > 0,
     description: p.description,
     stockQuantity: p.stock,
   })), [products]);
 
-  // Obtener marcas únicas
   const brands = useMemo(() => {
     return Array.from(new Set(allProducts.map(p => p.brand))).sort();
   }, [allProducts]);
 
-  // Función auxiliar para normalizar categorías (sin acentos, lowercase)
   const normalizeCategory = (cat: string) => {
     return cat.toLowerCase()
       .replace(/á/g, 'a')
@@ -126,50 +119,37 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
       .trim();
   };
 
-  // Filtrar productos
   const filteredProducts = useMemo(() => {
     const filtered = allProducts.filter(product => {
-      // Filtro por categoría (comparación normalizada, sin acentos ni case-sensitive)
-      // Si category es 'all', mostrar todos los productos
       if (category !== 'all') {
         const normalizedProductCategory = normalizeCategory(product.category);
         const normalizedFilterCategory = normalizeCategory(category);
         if (normalizedProductCategory !== normalizedFilterCategory) return false;
       }
       
-      // Filtro por subcategoría si está presente
       if (subcategory) {
         const normalizedProductSubcategory = normalizeCategory(product.subcategory || '');
         const normalizedFilterSubcategory = normalizeCategory(subcategory);
         if (normalizedProductSubcategory !== normalizedFilterSubcategory) return false;
       }
       
-      // Filtro por rango de precio
       if (product.price < priceRange[0] || product.price > priceRange[1]) return false;
-      
-      // Filtro por marcas seleccionadas
       if (selectedBrands.length > 0 && !selectedBrands.includes(product.brand)) return false;
-      
-      // Filtro por rating
-      if (selectedRating > 0 && product.rating < selectedRating) return false;
       
       return true;
     });
 
-    // Ordenar productos
     switch (sortBy) {
       case 'price_asc':
         return [...filtered].sort((a, b) => a.price - b.price);
       case 'price_desc':
         return [...filtered].sort((a, b) => b.price - a.price);
-      case 'rating':
-        return [...filtered].sort((a, b) => b.rating - a.rating);
       case 'name':
         return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
-      default: // relevance
+      default:
         return filtered;
     }
-  }, [allProducts, category, subcategory, priceRange, selectedBrands, selectedRating, sortBy]);
+  }, [allProducts, category, subcategory, priceRange, selectedBrands, sortBy]);
 
   const toggleBrand = (brand: string) => {
     setSelectedBrands(prev => 
@@ -188,25 +168,25 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
   };
 
   const clearFilters = () => {
-    setPriceRange([0, 2000000]);
+    setPriceRange([0, 5000000]);
     setSelectedBrands([]);
-    setSelectedRating(0);
   };
 
-  const hasActiveFilters = selectedBrands.length > 0 || selectedRating > 0 || priceRange[1] < 5000000;
+  const hasActiveFilters = selectedBrands.length > 0 || priceRange[1] < 5000000;
 
-  // Mostrar loading
   if (loading) {
     return (
-      <div className={`min-h-screen ${theme === 'dark' ? 'bg-black' : 'bg-white'}`}>
+      <div className={`min-h-screen ${theme === 'dark' ? 'bg-black' : 'bg-gray-50'} pt-16`}>
         <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-          <p className={theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}>Cargando productos...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
+          <p className={`mt-4 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+            Cargando productos...
+          </p>
         </div>
       </div>
     );
   }
 
-  // Si hay un producto seleccionado, mostrar el detalle
   if (selectedProduct) {
     return (
       <ProductDetail
@@ -214,8 +194,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
         onBack={() => setSelectedProduct(null)}
         onAddToCart={(quantity) => {
           console.log(`Agregando ${quantity} x ${selectedProduct.name} al carrito`);
-          // Aquí irá la lógica del carrito
-          setSelectedProduct(null); // Volver a la lista después de agregar
+          setSelectedProduct(null);
         }}
       />
     );
@@ -224,151 +203,145 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
   return (
     <div className={`min-h-screen transition-all duration-300 ${
       theme === 'dark' ? 'bg-black' : 'bg-gray-50'
-    }`}>
-      {/* Header de Categoría - Compacto */}
-      <div className={`py-4 ${
-        theme === 'dark' ? 'bg-gray-900' : 'bg-white'
-      } border-b ${theme === 'dark' ? 'border-gray-800' : 'border-gray-200'} shadow-sm`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Botón de regreso */}
-          <Link
-            to="/"
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 mb-3 rounded-lg text-sm font-medium transition-all hover:gap-2 ${
-              theme === 'dark'
-                ? 'bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900'
-            }`}
-          >
-            <span>←</span>
-            Volver
-          </Link>
-          
-          {/* Título y controles en la misma línea */}
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
-            {/* Título y contador */}
-            <div>
-              <h1 className={`text-2xl md:text-3xl font-bold mb-1 ${
-                theme === 'dark' ? 'text-white' : 'text-gray-900'
-              }`}>
-                {categoryTitle}
-                {subcategory && (
-                  <span className={`ml-2 text-lg font-normal ${
-                    theme === 'dark' ? 'text-green-400' : 'text-green-600'
-                  }`}>
-                    / {subcategory}
-                  </span>
-                )}
-              </h1>
-              <p className={`text-sm ${
-                theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-              }`}>
-                {filteredProducts.length} {filteredProducts.length === 1 ? 'producto' : 'productos'}
-              </p>
+    } pt-16`}>
+      
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        
+        {/* Botón Volver - Minimalista */}
+        <Link
+          to="/"
+          className={`inline-flex items-center gap-1 mb-4 text-sm font-medium transition-all hover:gap-2 ${
+            theme === 'dark'
+              ? 'text-gray-400 hover:text-white'
+              : 'text-gray-500 hover:text-gray-900'
+          }`}
+        >
+          <span>←</span>
+          Volver
+        </Link>
+
+        {/* Título y controles - Sin caja */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center justify-between mb-6">
+          {/* Título y contador */}
+          <div>
+            <h1 className={`text-2xl md:text-3xl font-bold ${
+              theme === 'dark' ? 'text-white' : 'text-gray-900'
+            }`}>
+              {categoryTitle}
+              {subcategory && (
+                <span className={`ml-2 text-lg font-normal ${
+                  theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
+                }`}>
+                  / {subcategory}
+                </span>
+              )}
+            </h1>
+            <p className={`text-sm mt-0.5 ${
+              theme === 'dark' ? 'text-gray-500' : 'text-gray-500'
+            }`}>
+              {filteredProducts.length} {filteredProducts.length === 1 ? 'producto' : 'productos'}
+            </p>
+          </div>
+
+          {/* Controles */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Botón de Filtros */}
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
+                showFilters
+                  ? theme === 'dark'
+                    ? 'bg-emerald-500 text-black'
+                    : 'bg-emerald-600 text-white'
+                  : theme === 'dark'
+                    ? 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-700'
+                    : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
+              }`}
+            >
+              Filtros
+              {hasActiveFilters && (
+                <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
+                  showFilters
+                    ? 'bg-black/20'
+                    : theme === 'dark' ? 'bg-emerald-500 text-black' : 'bg-emerald-600 text-white'
+                }`}>
+                  {selectedBrands.length + (priceRange[1] < 5000000 ? 1 : 0)}
+                </span>
+              )}
+            </button>
+
+            {hasActiveFilters && (
+              <button
+                onClick={clearFilters}
+                className={`text-xs font-medium underline ${
+                  theme === 'dark'
+                    ? 'text-gray-500 hover:text-white'
+                    : 'text-gray-500 hover:text-gray-900'
+                } transition-colors`}
+              >
+                Limpiar
+              </button>
+            )}
+
+            {/* Vista */}
+            <div className={`flex border rounded-lg overflow-hidden ${
+              theme === 'dark' ? 'border-gray-700' : 'border-gray-300'
+            }`}>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-2.5 py-1.5 text-sm transition-colors ${
+                  viewMode === 'grid'
+                    ? theme === 'dark' ? 'bg-emerald-500 text-black' : 'bg-emerald-600 text-white'
+                    : theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-600'
+                }`}
+                title="Vista en cuadrícula"
+              >
+                ▦
+              </button>
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-2.5 py-1.5 text-sm transition-colors ${
+                  viewMode === 'list'
+                    ? theme === 'dark' ? 'bg-emerald-500 text-black' : 'bg-emerald-600 text-white'
+                    : theme === 'dark' ? 'bg-gray-800 text-gray-400' : 'bg-white text-gray-600'
+                }`}
+                title="Vista en lista"
+              >
+                ≡
+              </button>
             </div>
 
-            {/* Controles compactos */}
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Botón de Filtros */}
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  showFilters
-                    ? theme === 'dark'
-                      ? 'bg-green-500 text-black'
-                      : 'bg-green-600 text-white'
-                    : theme === 'dark'
-                      ? 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-700'
-                      : 'bg-white hover:bg-gray-50 text-gray-900 border border-gray-300'
-                }`}
+            {/* Ordenamiento */}
+            <div className="relative">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className={`appearance-none pr-8 pl-3 py-1.5 rounded-lg border text-sm font-medium ${
+                  theme === 'dark'
+                    ? 'bg-gray-800 border-gray-700 text-white'
+                    : 'bg-white border-gray-300 text-gray-900'
+                } focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all`}
               >
-                Filtros
-                {hasActiveFilters && (
-                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${
-                    showFilters
-                      ? 'bg-black/20'
-                      : theme === 'dark' ? 'bg-green-500 text-black' : 'bg-green-600 text-white'
-                  }`}>
-                    {selectedBrands.length + (selectedRating > 0 ? 1 : 0) + (priceRange[1] < 5000000 ? 1 : 0)}
-                  </span>
-                )}
-              </button>
-
-              {hasActiveFilters && (
-                <button
-                  onClick={clearFilters}
-                  className={`text-xs font-medium underline ${
-                    theme === 'dark'
-                      ? 'text-gray-400 hover:text-white'
-                      : 'text-gray-600 hover:text-gray-900'
-                  } transition-colors`}
-                >
-                  Limpiar
-                </button>
-              )}
-
-              {/* Controles de Vista */}
-              <div className={`flex border rounded-lg overflow-hidden ${
-                theme === 'dark' ? 'border-gray-700' : 'border-gray-300'
-              }`}>
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`px-2 py-1.5 text-xs transition-colors ${
-                    viewMode === 'grid'
-                      ? theme === 'dark' ? 'bg-green-500 text-black' : 'bg-green-600 text-white'
-                      : theme === 'dark' ? 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700' : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                  title="Vista en cuadrícula"
-                >
-                  {/* <Grid3X3 size={16} /> */}
-                  ▦
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`px-2 py-1.5 text-xs transition-colors ${
-                    viewMode === 'list'
-                      ? theme === 'dark' ? 'bg-green-500 text-black' : 'bg-green-600 text-white'
-                      : theme === 'dark' ? 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700' : 'bg-white text-gray-600 hover:bg-gray-50'
-                  }`}
-                  title="Vista en lista"
-                >
-                  {/* <List size={16} /> */}
-                  ≡
-                </button>
-              </div>
-
-              {/* Ordenamiento */}
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className={`appearance-none pr-8 pl-3 py-1.5 rounded-lg border text-sm font-medium ${
-                    theme === 'dark'
-                      ? 'bg-gray-800 border-gray-700 text-white'
-                      : 'bg-white border-gray-300 text-gray-900'
-                  } focus:outline-none focus:ring-2 focus:ring-green-500 transition-all`}
-                >
-                  <option value="relevance">Relevante</option>
-                  <option value="price_asc">Menor precio</option>
-                  <option value="price_desc">Mayor precio</option>
-                  <option value="rating">Mejor calificación</option>
-                  <option value="name">A-Z</option>
-                </select>
-                <MdKeyboardArrowDown className={`absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
-                }`} size={16} />
-              </div>
+                <option value="relevance">Relevante</option>
+                <option value="price_asc">Menor precio</option>
+                <option value="price_desc">Mayor precio</option>
+                <option value="name">A-Z</option>
+              </select>
+              <MdKeyboardArrowDown className={`absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none ${
+                theme === 'dark' ? 'text-gray-400' : 'text-gray-500'
+              }`} size={16} />
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <div className="flex flex-col lg:flex-row gap-4">
+        {/* Filtros Sidebar y Productos */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          
           {/* Sidebar de Filtros */}
           {showFilters && (
-            <aside className={`w-full lg:w-80 ${
+            <aside className={`w-full lg:w-72 ${
               theme === 'dark' ? 'bg-gray-900' : 'bg-white'
-            } rounded-xl p-4 h-fit lg:sticky lg:top-4 shadow-sm border ${
+            } rounded-xl p-4 h-fit lg:sticky lg:top-20 shadow-sm border ${
               theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
             }`}>
               <div className="flex items-center justify-between mb-4">
@@ -382,11 +355,11 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                     onClick={clearFilters}
                     className={`text-xs font-medium px-2 py-1 rounded-full ${
                       theme === 'dark'
-                        ? 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                        ? 'bg-gray-800 text-gray-400 hover:text-white'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     } transition-colors`}
                   >
-                    Limpiar
+                    Limpiar todo
                   </button>
                 )}
               </div>
@@ -424,9 +397,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
               </div>
 
               {/* Marcas */}
-              <div className={`mb-4 pb-4 border-b ${
-                theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
-              }`}>
+              <div>
                 <h4 className={`font-semibold mb-3 text-sm ${
                   theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
                 }`}>
@@ -441,75 +412,15 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                         type="checkbox"
                         checked={selectedBrands.includes(brand)}
                         onChange={() => toggleBrand(brand)}
-                        className="w-4 h-4 accent-green-500 cursor-pointer"
+                        className="w-4 h-4 accent-emerald-500 cursor-pointer"
                       />
                       <span className={`ml-2 text-sm font-medium ${
                         selectedBrands.includes(brand)
-                          ? theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                          ? theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
                           : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                      } group-hover:text-green-500 transition-colors`}>
+                      } group-hover:text-emerald-500 transition-colors`}>
                         {brand}
                       </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Calificación */}
-              <div>
-                <h4 className={`font-semibold mb-3 text-sm ${
-                  theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
-                }`}>
-                  Calificación Mínima
-                </h4>
-                <div className="space-y-2">
-                  <label className={`flex items-center cursor-pointer group p-1.5 rounded-lg transition-colors ${
-                    theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'
-                  }`}>
-                    <input
-                      type="radio"
-                      name="rating"
-                      checked={selectedRating === 0}
-                      onChange={() => setSelectedRating(0)}
-                      className="w-4 h-4 accent-green-500 cursor-pointer"
-                    />
-                    <span className={`ml-2 text-sm font-medium ${
-                      selectedRating === 0
-                        ? theme === 'dark' ? 'text-green-400' : 'text-green-600'
-                        : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                    }`}>
-                      Todas las calificaciones
-                    </span>
-                  </label>
-                  {[4, 3, 2, 1].map(rating => (
-                    <label key={rating} className={`flex items-center cursor-pointer group p-1.5 rounded-lg transition-colors ${
-                      theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-50'
-                    }`}>
-                      <input
-                        type="radio"
-                        name="rating"
-                        checked={selectedRating === rating}
-                        onChange={() => setSelectedRating(rating)}
-                        className="w-4 h-4 accent-green-500 cursor-pointer"
-                      />
-                      <div className="flex items-center gap-2 ml-2">
-                        <div className="flex items-center">
-                          {[...Array(5)].map((_, i) => (
-                            <AiFillStar
-                              key={i}
-                              size={14}
-                              className={i < rating ? 'text-yellow-400' : 'text-gray-300'}
-                            />
-                          ))}
-                        </div>
-                        <span className={`text-xs font-medium ${
-                          selectedRating === rating
-                            ? theme === 'dark' ? 'text-green-400' : 'text-green-600'
-                            : theme === 'dark' ? 'text-gray-300' : 'text-gray-700'
-                        }`}>
-                          y más
-                        </span>
-                      </div>
                     </label>
                   ))}
                 </div>
@@ -525,29 +436,36 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
               } rounded-xl border ${
                 theme === 'dark' ? 'border-gray-800' : 'border-gray-200'
               }`}>
-                <div className={`text-6xl mb-4 flex justify-center ${
-                  theme === 'dark' ? 'text-gray-700' : 'text-gray-300'
-                }`}>
-                  <AiOutlineSearch size={64} />
+                <div className="mb-6">
+                  <div className={`w-20 h-20 mx-auto rounded-full flex items-center justify-center ${
+                    theme === 'dark' ? 'bg-gray-800' : 'bg-gray-100'
+                  }`}>
+                    <AiOutlineSearch size={40} className={theme === 'dark' ? 'text-gray-600' : 'text-gray-400'} />
+                  </div>
                 </div>
-                <p className={`text-xl font-semibold mb-2 ${
+                
+                <h3 className={`text-lg font-bold mb-2 ${
                   theme === 'dark' ? 'text-white' : 'text-gray-900'
                 }`}>
                   No se encontraron productos
-                </p>
-                <p className={`text-base ${
+                </h3>
+                
+                <p className={`text-sm max-w-md mx-auto ${
                   theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
                 }`}>
-                  Intenta ajustar los filtros o buscar en otra categoría
+                  {hasActiveFilters 
+                    ? "No hay productos que coincidan con los filtros seleccionados."
+                    : "No hay productos disponibles en esta categoría."}
                 </p>
+                
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className={`mt-6 px-6 py-2.5 rounded-lg font-medium ${
+                    className={`mt-5 px-5 py-2 rounded-lg font-medium text-sm transition-all ${
                       theme === 'dark'
-                        ? 'bg-green-500 text-black hover:bg-green-400'
-                        : 'bg-green-600 text-white hover:bg-green-700'
-                    } transition-colors`}
+                        ? 'bg-emerald-500 text-black hover:bg-emerald-400'
+                        : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                    }`}
                   >
                     Limpiar filtros
                   </button>
@@ -570,7 +488,7 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                       viewMode === 'list' ? 'flex flex-col sm:flex-row' : ''
                     } ${!product.inStock ? 'opacity-75' : ''}`}
                   >
-                    {/* Imagen del Producto */}
+                    {/* Imagen */}
                     <div className={`relative overflow-hidden ${
                       viewMode === 'list' ? 'w-full sm:w-56 flex-shrink-0' : ''
                     }`}>
@@ -582,14 +500,12 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                         }`}
                       />
                       
-                      {/* Badge de Descuento */}
                       {product.discount && (
                         <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1.5 rounded-lg text-sm font-bold shadow-lg">
                           -{product.discount}%
                         </div>
                       )}
                       
-                      {/* Estado de Stock */}
                       {!product.inStock && (
                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-sm">
                           <span className="bg-red-600 text-white px-4 py-2 rounded-lg font-bold text-sm shadow-lg">
@@ -598,25 +514,23 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                         </div>
                       )}
 
-                      {/* Botón de Favorito */}
                       <button 
                         onClick={(e) => {
                           e.stopPropagation();
-                          // Lógica de favoritos aquí
                         }}
                         className={`absolute top-3 right-3 p-2.5 rounded-full ${
                           theme === 'dark' ? 'bg-gray-900/90' : 'bg-white/90'
-                        } hover:bg-red-500 hover:text-white transition-all hover:scale-110 group/heart shadow-lg`}
+                        } hover:bg-red-500 hover:text-white transition-all hover:scale-110 shadow-lg`}
                         title="Agregar a favoritos"
                       >
                         <AiOutlineHeart size={18} />
                       </button>
                     </div>
 
-                    {/* Información del Producto */}
+                    {/* Información */}
                     <div className="p-5 flex-1 flex flex-col">
                       <div className="flex-1">
-                        <h3 className={`font-semibold mb-2 group-hover:text-green-500 transition-colors line-clamp-2 ${
+                        <h3 className={`font-semibold mb-2 group-hover:text-emerald-500 transition-colors line-clamp-2 ${
                           theme === 'dark' ? 'text-white' : 'text-gray-900'
                         } ${viewMode === 'list' ? 'text-lg' : 'text-base'}`}>
                           {product.name}
@@ -628,33 +542,9 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                           {product.brand}
                         </p>
 
-                        {/* Rating - Solo mostrar si hay reseñas */}
-                        {product.rating > 0 && product.reviews > 0 && (
-                          <div className="flex items-center gap-2 mb-4">
-                            <div className="flex items-center">
-                              {[...Array(5)].map((_, i) => (
-                                <AiFillStar
-                                  key={i}
-                                  size={16}
-                                  className={i < Math.floor(product.rating) 
-                                    ? 'text-yellow-400' 
-                                    : 'text-gray-300'
-                                  }
-                                />
-                              ))}
-                            </div>
-                            <span className={`text-sm font-medium ${
-                              theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                            }`}>
-                              {product.rating} ({product.reviews})
-                            </span>
-                          </div>
-                        )}
-
-                        {/* Características */}
-                        {viewMode === 'list' && (
+                        {viewMode === 'list' && product.features && (
                           <div className="flex flex-wrap gap-2 mb-4">
-                            {product.features.slice(0, 4).map((feature, index) => (
+                            {product.features.slice(0, 3).map((feature, index) => (
                               <span
                                 key={index}
                                 className={`px-2.5 py-1 text-xs font-medium rounded-lg ${
@@ -663,18 +553,18 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                                     : 'bg-gray-100 text-gray-700'
                                 }`}
                               >
-                                {feature}
+                                {feature.length > 40 ? feature.substring(0, 40) + '...' : feature}
                               </span>
                             ))}
                           </div>
                         )}
                       </div>
 
-                      {/* Precio y Botón */}
+                      {/* Precio y botón */}
                       <div className="flex items-end justify-between gap-4 mt-auto">
                         <div>
                           <div className={`text-2xl font-bold ${
-                            theme === 'dark' ? 'text-green-400' : 'text-green-600'
+                            theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
                           }`}>
                             {formatPrice(product.price)}
                           </div>
@@ -687,7 +577,6 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                           )}
                         </div>
 
-                        {/* Botón de Compra */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -697,8 +586,8 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                           className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-semibold transition-all whitespace-nowrap ${
                             product.inStock && !cartLoading
                               ? theme === 'dark'
-                                ? 'bg-green-500 hover:bg-green-400 text-black shadow-lg hover:shadow-green-500/50'
-                                : 'bg-green-600 hover:bg-green-700 text-white shadow-lg hover:shadow-green-600/50'
+                                ? 'bg-emerald-500 hover:bg-emerald-400 text-black shadow-lg hover:shadow-emerald-500/50'
+                                : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg hover:shadow-emerald-600/50'
                               : 'bg-gray-400 text-gray-200 cursor-not-allowed'
                           } ${viewMode === 'grid' ? 'hover:scale-105' : ''}`}
                           title={product.inStock ? 'Agregar al carrito' : 'Producto agotado'}

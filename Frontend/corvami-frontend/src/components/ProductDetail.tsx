@@ -1,9 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
-import ProductReviews from './ProductReviews';
-import { reviewsApi } from '../api/reviews';
 import { AiFillStar, AiOutlineHeart, AiFillHeart, AiOutlineShoppingCart, AiOutlinePlus, AiOutlineMinus, AiOutlineCheck } from 'react-icons/ai';
 import { MdOutlineLocalShipping, MdOutlineShield, MdOutlineLoop } from 'react-icons/md';
 import { IoChevronBack, IoChevronForward } from 'react-icons/io5';
@@ -42,23 +40,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
   const { isAuthenticated, isGuest, setShowAuthModal } = useAuth();
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [activeTab, setActiveTab] = useState<'description' | 'specs' | 'reviews'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'specs'>('description');
   const [isFavorite, setIsFavorite] = useState(false);
-  const [reviewsSummary, setReviewsSummary] = useState<{ averageRating: number; totalReviews: number } | null>(null);
-
+  
   const images = product.images || [product.image];
-
-  useEffect(() => {
-    const loadReviewsSummary = async () => {
-      try {
-        const summary = await reviewsApi.getReviewsSummary(String(product.id));
-        setReviewsSummary(summary);
-      } catch (error) {
-        console.error('Error loading reviews summary:', error);
-      }
-    };
-    loadReviewsSummary();
-  }, [product.id]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -121,6 +106,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Galería de imágenes */}
           <div>
             <div className={`relative rounded-2xl overflow-hidden mb-4 ${
               theme === 'dark' ? 'bg-gray-900' : 'bg-white'
@@ -188,6 +174,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
               </div>
             )}
           </div>
+
+          {/* Información del producto */}
           <div>
             <div className="mb-4">
               <p className={`text-sm font-medium mb-2 ${
@@ -201,6 +189,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 {product.name}
               </h1>
             </div>
+
+            {/* Calificación - solo visual, sin funcionalidad */}
             <div className="flex items-center gap-4 mb-6">
               <div className="flex items-center gap-2">
                 <div className="flex items-center">
@@ -208,29 +198,20 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                     <AiFillStar
                       key={i}
                       size={20}
-                      className={i < Math.floor(reviewsSummary?.averageRating || 0)
-                        ? 'text-yellow-400'
-                        : 'text-gray-300'
-                      }
+                      className={i < product.rating ? 'text-yellow-400' : 'text-gray-300'}
                     />
                   ))}
                 </div>
-                {reviewsSummary && reviewsSummary.averageRating > 0 && (
-                  <span className={`font-semibold ${
-                    theme === 'dark' ? 'text-white' : 'text-gray-900'
-                  }`}>
-                    {reviewsSummary.averageRating.toFixed(1)}
-                  </span>
-                )}
-              </div>
-              {reviewsSummary && reviewsSummary.totalReviews > 0 && (
-                <span className={`text-sm ${
-                  theme === 'dark' ? 'text-gray-400' : 'text-gray-600'
-                }`}>
-                  ({reviewsSummary.totalReviews} {reviewsSummary.totalReviews === 1 ? 'reseña' : 'reseñas'})
+                <span className={`font-semibold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+                  {product.rating.toFixed(1)}
                 </span>
-              )}
+              </div>
+              <span className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
+                ({product.reviews} reseñas)
+              </span>
             </div>
+
+            {/* Precio */}
             <div className="mb-6">
               <div className={`text-4xl font-bold mb-2 ${
                 theme === 'dark' ? 'text-green-400' : 'text-green-600'
@@ -250,6 +231,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 </div>
               )}
             </div>
+
+            {/* Stock */}
             <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg mb-6 ${
               product.inStock
                 ? theme === 'dark' ? 'bg-green-500/20 text-green-400' : 'bg-green-50 text-green-700'
@@ -260,6 +243,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 {product.inStock ? 'En Stock' : 'Agotado'}
               </span>
             </div>
+
+            {/* Características */}
             <div className={`rounded-xl p-4 mb-6 ${
               theme === 'dark' ? 'bg-gray-900 border border-gray-800' : 'bg-gray-50 border border-gray-200'
             }`}>
@@ -279,6 +264,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 ))}
               </ul>
             </div>
+
+            {/* Cantidad */}
             {product.inStock && (
               <div className="mb-6">
                 <label className={`block text-sm font-semibold mb-3 ${
@@ -330,6 +317,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 </div>
               </div>
             )}
+
+            {/* Botón agregar al carrito */}
             <div className="flex gap-3 mb-6">
               <button
                 onClick={handleAddToCart}
@@ -346,6 +335,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                 {cartLoading ? 'Agregando...' : 'Agregar al Carrito'}
               </button>
             </div>
+
+            {/* Beneficios */}
             <div className="grid grid-cols-2 gap-3">
               <div className={`flex items-center gap-3 p-3 rounded-lg ${
                 theme === 'dark' ? 'bg-gray-900' : 'bg-gray-50'
@@ -418,6 +409,8 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
             </div>
           </div>
         </div>
+
+        {/* Tabs: Descripción y Especificaciones (sin reseñas) */}
         <div className={`rounded-2xl overflow-hidden ${
           theme === 'dark' ? 'bg-gray-900 border border-gray-800' : 'bg-white border border-gray-200'
         }`}>
@@ -452,20 +445,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
             >
               Especificaciones
             </button>
-            <button
-              onClick={() => setActiveTab('reviews')}
-              className={`flex-1 px-6 py-4 font-semibold transition-colors ${
-                activeTab === 'reviews'
-                  ? theme === 'dark'
-                    ? 'bg-green-500/10 text-green-400 border-b-2 border-green-500'
-                    : 'bg-green-50 text-green-600 border-b-2 border-green-600'
-                  : theme === 'dark'
-                    ? 'text-gray-400 hover:text-white'
-                    : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Reseñas ({product.reviews})
-            </button>
           </div>
           <div className="p-6">
             {activeTab === 'description' && (
@@ -499,11 +478,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({ product, onBack, onAddToC
                     No hay especificaciones disponibles
                   </div>
                 )}
-              </div>
-            )}
-            {activeTab === 'reviews' && (
-              <div>
-                <ProductReviews productId={product.id.toString()} />
               </div>
             )}
           </div>

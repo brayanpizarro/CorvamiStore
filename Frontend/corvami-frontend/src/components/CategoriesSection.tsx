@@ -36,7 +36,7 @@ const CategoriesSection: React.FC = () => {
 
       // Contar productos por categoría
       products.forEach(product => {
-        const normalized = normalizeCategory(product.category);
+        const normalized = normalizeCategory(product.category || 'Sin categoría');
         counts[normalized] = (counts[normalized] || 0) + 1;
       });
 

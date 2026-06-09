@@ -28,7 +28,7 @@ const CartPage: React.FC = () => {
         cartItems.forEach(item => {
           const product = products.find(p => p.productId === item.productId);
           if (product?.category) {
-            cartCategories.add(product.category);
+            cartCategories.add(product.category.toLowerCase());
           }
         });
 

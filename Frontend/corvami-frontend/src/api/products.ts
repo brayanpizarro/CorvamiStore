@@ -9,6 +9,7 @@ interface RawProduct {
   precio: number;
   stock_actual: number;
   stock_minimo?: number;
+  categoria?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -21,13 +22,14 @@ export interface Product {
   description?: string;
   stock: number;
   codigo?: string;
+  category?: string;
   imageUrl?: string;
   isActive?: boolean;
   createdAt?: string;
   updatedAt?: string;
 }
 
-export { Product as default };
+export type { Product as default };
 
 function mapProduct(raw: RawProduct): Product {
   return {
@@ -37,6 +39,7 @@ function mapProduct(raw: RawProduct): Product {
     description: raw.descripcion,
     stock: raw.stock_actual ?? 0,
     codigo: raw.codigo,
+    category: raw.categoria || 'Sin categoría',
     imageUrl: undefined,
     isActive: (raw.stock_actual ?? 0) > 0,
     createdAt: raw.createdAt,

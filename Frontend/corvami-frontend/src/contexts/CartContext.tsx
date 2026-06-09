@@ -1,12 +1,5 @@
 import React, { createContext, useContext, useEffect, useCallback, useState } from 'react';
 
-// Importar tipos de AuthContext pero sin crear dependencia circular
-let authContextInstance: any = null;
-
-export const setAuthContextInstance = (instance: any) => {
-  authContextInstance = instance;
-};
-
 export interface CartItem {
   productId: string;
   name?: string;

@@ -142,7 +142,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className={`text-lg font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                    Orden #{selectedOrder.orderId.slice(-8)}
+                    Orden #{selectedOrder.orderId?.slice(-8)}
                   </h3>
                   <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                     {formatDate(selectedOrder.createdAt)}
@@ -164,7 +164,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
                       {item.name} x {item.quantity}
                     </span>
                     <span className="font-semibold text-green-500">
-                      {formatPrice(item.price * item.quantity)}
+                      {formatPrice(item.unitPrice * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -176,13 +176,13 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
                   Información de envío:
                 </h4>
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <strong>Nombre:</strong> {selectedOrder.shippingInfo.name}
+                  <strong>Nombre:</strong> {selectedOrder.shippingInfo?.name}
                 </p>
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <strong>Dirección:</strong> {selectedOrder.shippingInfo.address}, {selectedOrder.shippingInfo.city}
+                  <strong>Dirección:</strong> {selectedOrder.shippingInfo?.address}, {selectedOrder.shippingInfo?.city}
                 </p>
                 <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}>
-                  <strong>Teléfono:</strong> {selectedOrder.shippingInfo.phone}
+                  <strong>Teléfono:</strong> {selectedOrder.shippingInfo?.phone}
                 </p>
               </div>
 
@@ -211,7 +211,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
                 <div className="flex justify-between items-start mb-2">
                   <div>
                     <h3 className={`font-bold ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-                      Orden #{order.orderId.slice(-8)}
+                      Orden #{order.orderId?.slice(-8)}
                     </h3>
                     <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`}>
                       {formatDate(order.createdAt)}

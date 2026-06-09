@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Wallet, Plus, X } from 'lucide-react';
+import {WalletCards, Plus, X } from 'lucide-react';
 
 interface AddBalanceModalProps {
   isOpen: boolean;
@@ -65,7 +65,7 @@ const AddBalanceModal: React.FC<AddBalanceModalProps> = ({ isOpen, onClose }) =>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="p-3 rounded-xl bg-emerald-500/15">
-              <Wallet className="text-emerald-300" size={24} />
+              <WalletCards className="text-emerald-300" size={24} />
             </div>
             <div>
               <h2 className={`text-2xl font-bold ${
