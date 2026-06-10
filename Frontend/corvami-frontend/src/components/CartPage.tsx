@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useCart } from '../contexts/CartContext';
+import { useAuth } from '../contexts/AuthContext';
 import { AiOutlineDelete, AiOutlinePlus, AiOutlineMinus, AiFillStar, AiOutlineShoppingCart } from 'react-icons/ai';
 import { MdArrowBack } from 'react-icons/md';
 import { productApi, type Product as ApiProduct } from '../api/products';
@@ -9,6 +10,7 @@ import { productApi, type Product as ApiProduct } from '../api/products';
 const CartPage: React.FC = () => {
   const { theme } = useTheme();
   const { cart, updateItem, removeItem, loading } = useCart();
+  const { isAuthenticated, setShowAuthModal } = useAuth();
   const [recommendedProducts, setRecommendedProducts] = useState<ApiProduct[]>([]);
   const [loadingRecommendations, setLoadingRecommendations] = useState(true);
 
@@ -305,8 +307,26 @@ const CartPage: React.FC = () => {
                 </div>
               </div>
 
+              {/* Aviso si no está autenticado */}
+              {!isAuthenticated && (
+                <div className={`mb-4 p-4 rounded-lg border-2 ${
+                  theme === 'dark'
+                    ? 'bg-yellow-500/10 border-yellow-500/40 text-yellow-300'
+                    : 'bg-yellow-50 border-yellow-300 text-yellow-800'
+                }`}>
+                  <p className="text-sm font-semibold mb-2">⚠️ Necesitas iniciar sesión para comprar</p>
+                  <button
+                    onClick={() => setShowAuthModal(true)}
+                    className="text-sm underline font-bold"
+                  >
+                    Iniciar sesión o registrarse
+                  </button>
+                </div>
+              )}
+
               <Link
                 to="/checkout"
+                onClick={(e) => { if (!isAuthenticated) { e.preventDefault(); setShowAuthModal(true); } }}
                 className="block w-full py-4 bg-gradient-to-r from-emerald-400 to-teal-400 text-slate-950 font-bold rounded-lg hover:from-emerald-300 hover:to-teal-300 transition-all transform hover:scale-105 shadow-lg mb-4 text-center"
               >
                 Proceder al Pago

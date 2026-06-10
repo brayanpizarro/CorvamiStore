@@ -86,7 +86,7 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
             <div key={product.productId} className="backdrop-blur-sm rounded-xl border-2 shadow-lg transition-all duration-300 overflow-hidden group hover:scale-105 bg-card/80 border-border hover:border-primary/40 hover:bg-card/95 hover:shadow-primary/10">
               <div className="relative overflow-hidden aspect-video sm:aspect-square">
                 <img
-                  src={product.imageUrl || 'https://via.placeholder.com/400'}
+                  src={product.imageUrl || 'https://placehold.co/400x400?text=Sin+imagen'}
                   alt={product.name}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
@@ -100,7 +100,10 @@ const ProductsSection: React.FC<ProductsSectionProps> = ({ onAddToCart }) => {
                 <h3 className="font-bold text-sm sm:text-base mb-2 line-clamp-2 group-hover:text-primary transition-colors text-foreground">{product.name}</h3>
                 <p className="text-xs sm:text-sm mb-3 line-clamp-2 text-muted-foreground">{product.description}</p>
                 <div className="flex items-center justify-between mb-3 sm:mb-4">
-                  <span className="text-xl sm:text-2xl font-bold text-primary">{formatPrice(product.price)}</span>
+                  <div>
+                    <span className="text-xl sm:text-2xl font-bold text-primary">{formatPrice(product.price)}</span>
+                    <p className="text-xs text-muted-foreground mt-0.5">IVA incl. 19% ({formatPrice(product.ivaAmount ?? 0)})</p>
+                  </div>
                 </div>
                 <button
                   onClick={() => handleAddToCart(product)}

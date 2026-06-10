@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { ordersApi } from '../api/orders';
+import { ordersApi, getMyOrders } from '../api/orders';
 import type { Order } from '../api/orders';
 import { FaBox, FaShoppingCart, FaUser, FaHistory, FaCheckCircle, FaClock, FaTruck } from 'react-icons/fa';
 
@@ -19,36 +19,49 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
 
   const loadOrders = useCallback(async () => {
-    if (!user?.email) return;
+    if (!user) return;
     
     try {
       setLoading(true);
-      const userOrders = await ordersApi.getOrdersByEmail(user.email);
-      // Ordenar por fecha descendente (más reciente primero)
-      const sorted = userOrders.sort((a: Order, b: Order) => 
-        new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime()
-      );
+      const userOrders = await getMyOrders();
+      const sorted = userOrders.sort((a: Order, b: Order) => {
+        const dateA = new Date((a as any).fecha || a.createdAt || '').getTime();
+        const dateB = new Date((b as any).fecha || b.createdAt || '').getTime();
+        return dateB - dateA;
+      });
       setOrders(sorted);
     } catch (error) {
       console.error('Error loading orders:', error);
     } finally {
       setLoading(false);
     }
-  }, [user?.email]);
+  }, [user]);
 
   useEffect(() => {
-    if (user?.email) {
+    if (user) {
       loadOrders();
     }
-  }, [user?.email, loadOrders]);
+  }, [user, loadOrders]);
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; bgColor: string; textColor: string; icon: any }> = {
+      'pendiente': {
+        label: 'Pendiente',
+        bgColor: isDark ? 'bg-red-900/20' : 'bg-red-100',
+        textColor: isDark ? 'text-red-300' : 'text-red-800',
+        icon: FaClock
+      },
       'pending': {
         label: 'Pendiente',
         bgColor: isDark ? 'bg-red-900/20' : 'bg-red-100',
         textColor: isDark ? 'text-red-300' : 'text-red-800',
         icon: FaClock
+      },
+      'pagado': {
+        label: 'Pagado',
+        bgColor: isDark ? 'bg-emerald-900/20' : 'bg-emerald-100',
+        textColor: isDark ? 'text-emerald-300' : 'text-emerald-800',
+        icon: FaCheckCircle
       },
       'paid': {
         label: 'Pagado',
@@ -56,11 +69,23 @@ export default function ProfilePage() {
         textColor: isDark ? 'text-emerald-300' : 'text-emerald-800',
         icon: FaCheckCircle
       },
+      'procesando': {
+        label: 'Procesando',
+        bgColor: isDark ? 'bg-teal-900/20' : 'bg-teal-100',
+        textColor: isDark ? 'text-teal-300' : 'text-teal-800',
+        icon: FaBox
+      },
       'processing': {
         label: 'Procesando',
         bgColor: isDark ? 'bg-teal-900/20' : 'bg-teal-100',
         textColor: isDark ? 'text-teal-300' : 'text-teal-800',
         icon: FaBox
+      },
+      'enviado': {
+        label: 'Enviado',
+        bgColor: isDark ? 'bg-slate-800' : 'bg-slate-100',
+        textColor: isDark ? 'text-slate-300' : 'text-slate-700',
+        icon: FaTruck
       },
       'shipped': {
         label: 'Enviado',
@@ -68,15 +93,21 @@ export default function ProfilePage() {
         textColor: isDark ? 'text-slate-300' : 'text-slate-700',
         icon: FaTruck
       },
+      'entregado': {
+        label: 'Entregado',
+        bgColor: isDark ? 'bg-emerald-900/20' : 'bg-emerald-100',
+        textColor: isDark ? 'text-emerald-300' : 'text-emerald-800',
+        icon: FaCheckCircle
+      },
       'delivered': {
         label: 'Entregado',
         bgColor: isDark ? 'bg-emerald-900/20' : 'bg-emerald-100',
         textColor: isDark ? 'text-emerald-300' : 'text-emerald-800',
         icon: FaCheckCircle
-      }
+      },
     };
 
-    const config = statusConfig[status] || statusConfig['pending'];
+    const config = statusConfig[status] ?? statusConfig['pendiente'];
     const Icon = config.icon;
 
     return (
@@ -201,9 +232,18 @@ export default function ProfilePage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {orders.map((order) => (
+                    {orders.map((order) => {
+                      const rawOrder = order as any;
+                      const orderId = String(rawOrder.id_pedido ?? rawOrder.id ?? '');
+                      const estado = rawOrder.estado ?? rawOrder.status ?? 'pendiente';
+                      const fecha = rawOrder.fecha ?? rawOrder.createdAt;
+                      const total = Number(rawOrder.total ?? 0);
+                      const items = rawOrder.items ?? rawOrder.detalles ?? [];
+                      const shipping = rawOrder.shippingInfo ?? rawOrder.customer;
+
+                      return (
                       <div
-                        key={order.id}
+                        key={orderId}
                         className={`${
                           isDark ? 'bg-gray-700' : 'bg-gray-50'
                         } rounded-lg p-6 hover:shadow-lg transition-shadow`}
@@ -212,46 +252,50 @@ export default function ProfilePage() {
                           <div>
                             <div className="flex items-center gap-3 mb-2">
                               <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                                Pedido #{order.id.substring(0, 8).toUpperCase()}
+                                Pedido #{orderId}
                               </h3>
-                              {getStatusBadge(order.status || 'pending')}
+                              {getStatusBadge(estado)}
                             </div>
                             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                              Fecha: {formatDate(order.createdAt)}
+                              Fecha: {formatDate(fecha)}
                             </p>
                           </div>
                           <div className="text-left lg:text-right">
                             <p className={`text-2xl font-bold text-emerald-600`}>
-                              ${order.total.toLocaleString()}
+                              ${total.toLocaleString()}
                             </p>
                             <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                              {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
+                              {items.length} {items.length === 1 ? 'producto' : 'productos'}
                             </p>
                           </div>
                         </div>
 
                         {/* Order Items Preview */}
                         <div className="space-y-3 mb-4">
-                          {order.items.map((item, index) => (
+                          {items.map((item: any, index: number) => (
                             <div
                               key={index}
                               className={`flex items-center gap-3 p-3 rounded ${
                                 isDark ? 'bg-gray-800' : 'bg-white'
                               }`}
                             >
-                              <img
-                                src={item.image}
-                                alt={item.name}
-                                className="w-16 h-16 object-cover rounded"
-                              />
+                              <div className={`w-16 h-16 rounded flex items-center justify-center ${
+                                isDark ? 'bg-gray-700' : 'bg-gray-100'
+                              }`}>
+                                {item.image ? (
+                                  <img src={item.image} alt={item.name} className="w-16 h-16 object-cover rounded" />
+                                ) : (
+                                  <FaBox className={`text-2xl ${isDark ? 'text-gray-500' : 'text-gray-400'}`} />
+                                )}
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <p className={`text-sm font-medium ${
                                   isDark ? 'text-white' : 'text-gray-900'
                                 }`}>
-                                  {item.name}
+                                  {item.name ?? `Producto ${item.id_producto ?? item.productId}`}
                                 </p>
                                 <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                                  Cantidad: {item.quantity} | ${(item.unitPrice || 0).toLocaleString()} c/u
+                                  Cantidad: {item.cantidad ?? item.quantity} | ${Number(item.precio_unit ?? item.unitPrice ?? 0).toLocaleString()} c/u
                                 </p>
                               </div>
                             </div>
@@ -259,23 +303,26 @@ export default function ProfilePage() {
                         </div>
 
                         {/* Shipping Address */}
+                        {shipping && (
                         <div className={`p-3 rounded ${isDark ? 'bg-gray-800' : 'bg-white'} mb-4`}>
                           <p className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'} mb-1`}>
                             Dirección de envío:
                           </p>
                           <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                            {order.customer?.address}, {order.customer?.city}
+                            {shipping.address}, {shipping.city}
                           </p>
                         </div>
+                        )}
 
                         <Link
-                          to={`/order-confirmation/${order.id}`}
+                          to={`/order-confirmation/${orderId}`}
                           className="inline-block px-4 py-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-lg hover:from-emerald-700 hover:to-green-700 transition-colors text-sm font-semibold"
                         >
                           Ver detalles
                         </Link>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>

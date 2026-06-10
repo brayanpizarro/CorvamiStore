@@ -5,12 +5,12 @@ import { useAuth } from '../contexts/AuthContext';
 import { useTheme } from '../contexts/ThemeContext';
 import { ordersApi } from '../api/orders';
 import type { CreateOrderData, ProcessPaymentData } from '../api/orders';
-import { FaCreditCard, FaLock, FaShippingFast, FaWallet, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { FaCreditCard, FaLock, FaShippingFast, FaWallet, FaCheckCircle } from 'react-icons/fa';
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { cart, clear } = useCart();
-  const { user, isAuthenticated, refreshProfile } = useAuth();
+  const { user, isAuthenticated, isGuest, refreshProfile, setShowAuthModal } = useAuth();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -38,7 +38,12 @@ export default function CheckoutPage() {
     if (!cart || !cart.items || cart.items.length === 0) {
       navigate('/cart');
     }
-  }, [cart, navigate]);
+    // Si es invitado (no registrado), redirigir a login
+    if (!isAuthenticated && !isGuest) {
+      setShowAuthModal(true);
+      navigate('/cart');
+    }
+  }, [cart, navigate, isAuthenticated, isGuest, setShowAuthModal]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -122,11 +127,8 @@ export default function CheckoutPage() {
         newErrors.cvv = 'CVV inválido';
       }
     } else if (paymentMethod === 'balance') {
-      // Validar que el usuario tenga saldo suficiente (solo usuarios registrados)
       if (!isAuthenticated) {
         newErrors.payment = 'El pago con saldo solo está disponible para usuarios registrados';
-      } else if (user && user.balance < total) {
-        newErrors.payment = `Saldo insuficiente. Tienes ${formatPrice(user.balance)} y necesitas ${formatPrice(total)}`;
       }
     }
 
@@ -154,7 +156,7 @@ export default function CheckoutPage() {
           city: formData.city,
           department: formData.department,
           zipCode: formData.zipCode,
-          isGuest: !user,
+          isGuest: false,
           userId: user?.userId,
         },
         items: (cart?.items || []).map((item) => ({
@@ -564,45 +566,28 @@ export default function CheckoutPage() {
                 )}
 
                 {paymentMethod === 'balance' && (
-                  <div className={`p-6 rounded-lg ${isDark ? 'bg-emerald-900/20' : 'bg-emerald-50'} border-2 ${
-                    user && user.balance >= total ? 'border-emerald-500' : 'border-red-500'
-                  }`}>
+                  <div className={`p-6 rounded-lg ${isDark ? 'bg-emerald-900/20' : 'bg-emerald-50'} border-2 border-emerald-500`}>
                     <div className="flex items-center justify-between mb-4">
                       <div>
                         <p className={`text-sm font-medium ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                           Tu Saldo Actual
                         </p>
-                        <p className={`text-3xl font-bold ${
-                          user && user.balance >= total ? 'text-emerald-500' : 'text-red-500'
-                        }`}>
-                          {user && formatPrice(user.balance)}
+                        <p className="text-3xl font-bold text-emerald-500">
+                          {user ? formatPrice(user.balance) : '...'}
                         </p>
                       </div>
                       <FaWallet className="text-4xl text-emerald-500" />
                     </div>
-                    
+
                     <div className={`pt-4 border-t ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
                       <div className="flex justify-between mb-2">
                         <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>Total a pagar:</span>
                         <span className="font-bold">{formatPrice(total)}</span>
                       </div>
-                      {user && user.balance >= total ? (
-                        <>
-                          <div className="flex justify-between mb-2">
-                            <span className={isDark ? 'text-gray-300' : 'text-gray-700'}>Saldo restante:</span>
-                            <span className="font-bold text-emerald-500">{formatPrice(user.balance - total)}</span>
-                          </div>
-                          <p className={`text-sm mt-3 flex items-center gap-2 ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
-                            <FaCheckCircle className="flex-shrink-0" />
-                            <span>Tienes saldo suficiente para completar esta compra</span>
-                          </p>
-                        </>
-                      ) : (
-                        <p className={`text-sm mt-3 flex items-center gap-2 ${isDark ? 'text-red-300' : 'text-red-700'}`}>
-                          <FaExclamationTriangle className="flex-shrink-0" />
-                          <span>Saldo insuficiente. Necesitas agregar {user && formatPrice(total - user.balance)} más</span>
-                        </p>
-                      )}
+                      <p className={`text-sm mt-3 flex items-center gap-2 ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
+                        <FaCheckCircle className="flex-shrink-0" />
+                        <span>Se descontará de tu saldo al confirmar el pedido</span>
+                      </p>
                     </div>
                   </div>
                 )}

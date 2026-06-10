@@ -1,6 +1,6 @@
 import { getAuthToken } from './auth';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 export interface OrderItem {
   productId: string;
@@ -76,57 +76,62 @@ export interface Order {
 
 // Helper para normalizar la orden del backend
 const normalizeOrder = (order: any): Order => {
+  // El backend devuelve id_pedido (número entero)
+  const id = String(order.id_pedido ?? order.orderId ?? order.id ?? '');
   return {
     ...order,
-    id: order.orderId || order.id,
-    shipping: order.shippingCost || order.shipping || 0,
-    customer: order.shippingInfo ? {
-      name: order.shippingInfo.name,
-      email: order.shippingInfo.email,
-      phone: order.shippingInfo.phone,
-      address: order.shippingInfo.address,
-      city: order.shippingInfo.city,
-      department: order.shippingInfo.department,
-      zipCode: order.shippingInfo.zipCode,
-      isGuest: !order.userId,
-      userId: order.userId,
-    } : order.customer,
-    items: order.items.map((item: any) => ({
+    id,
+    shipping: order.costo_envio ?? order.shippingCost ?? order.shipping ?? 0,
+    customer: order.shippingInfo ?? order.customer,
+    items: (order.detalles ?? order.items ?? []).map((item: any) => ({
       ...item,
-      unitPrice: item.unitPrice || item.price,
+      productId: item.id_producto ?? item.productId,
+      quantity: item.cantidad ?? item.quantity,
+      unitPrice: item.precio_unit ?? item.unitPrice ?? item.precio_unitario ?? 0,
+      totalPrice: item.subtotal ?? item.totalPrice ?? 0,
     })),
   };
 };
 
 export const ordersApi = {
   createOrder: async (orderData: CreateOrderData): Promise<Order> => {
+    const token = getAuthToken();
+    if (!token) throw new Error('Se requiere autenticación para crear un pedido');
+
     const response = await fetch(`${API_URL}/orders`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(orderData),
     });
 
     if (!response.ok) {
-      throw new Error('Error al crear la orden');
+      const error = await response.json().catch(() => ({}));
+      throw new Error(error.message || 'Error al crear la orden');
     }
 
     const order = await response.json();
+    console.log('[createOrder] respuesta backend:', JSON.stringify(order));
     return normalizeOrder(order);
   },
 
   processPayment: async (orderId: string, paymentData: ProcessPaymentData): Promise<Order> => {
+    const token = getAuthToken();
+    if (!token) throw new Error('Se requiere autenticación para procesar el pago');
+
     const response = await fetch(`${API_URL}/orders/${orderId}/payment`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify(paymentData),
     });
 
     if (!response.ok) {
-      const error = await response.json();
+      const error = await response.json().catch(() => ({}));
       throw new Error(error.message || 'Error al procesar el pago');
     }
 

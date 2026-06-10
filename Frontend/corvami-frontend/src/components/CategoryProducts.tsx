@@ -12,6 +12,8 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  basePrice?: number;
+  ivaAmount?: number;
   originalPrice?: number;
   image: string;
   images?: string[];
@@ -88,22 +90,30 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
     }
   };
 
-  const allProducts: Product[] = useMemo(() => products.map(p => ({
+  const allProducts: Product[] = useMemo(() => products.map(p => {
+    // Construir array de imágenes: usar todas las imágenes de Cloudinary si existen
+    const imageUrls = p.images && p.images.length > 0
+      ? p.images.map(img => img.url)
+      : [p.imageUrl || 'https://placehold.co/400x400?text=Sin+imagen'];
+
+    return {
     id: p.productId,
     name: p.name,
     price: p.price,
-    image: p.imageUrl || 'https://via.placeholder.com/400',
-    images: [p.imageUrl || 'https://via.placeholder.com/400'],
+    basePrice: p.basePrice,
+    ivaAmount: p.ivaAmount,
+    image: imageUrls[0],
+    images: imageUrls,
     rating: 0,
     reviews: 0,
     brand: p.codigo || 'Sin código',
     category: p.category || 'General',
-    subcategory: p.subcategory || '',
+    subcategory: '',
     features: [p.description || 'Sin descripción'],
     inStock: p.stock > 0,
     description: p.description,
     stockQuantity: p.stock,
-  })), [products]);
+  }; }), [products]);
 
   const brands = useMemo(() => {
     return Array.from(new Set(allProducts.map(p => p.brand))).sort();
@@ -567,6 +577,11 @@ const CategoryProducts: React.FC<CategoryProductsProps> = ({ category, categoryT
                             theme === 'dark' ? 'text-emerald-400' : 'text-emerald-600'
                           }`}>
                             {formatPrice(product.price)}
+                          </div>
+                          <div className={`text-xs mt-0.5 ${
+                            theme === 'dark' ? 'text-gray-500' : 'text-gray-400'
+                          }`}>
+                            IVA incl. 19% ({formatPrice(product.ivaAmount ?? 0)})
                           </div>
                           {product.originalPrice && (
                             <div className={`text-sm line-through ${
