@@ -26,7 +26,23 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
     setLoading(true);
     setError('');
     try {
-      const data = await getMyOrders();
+      const raw = await getMyOrders();
+      // Normalizar campos del backend (id_pedido, estado, fecha, detalles)
+      const data = raw.map((o: any) => ({
+        ...o,
+        orderId: String(o.id_pedido ?? o.orderId ?? o.id ?? ''),
+        status: o.estado ?? o.status ?? 'pendiente',
+        createdAt: o.fecha ?? o.createdAt,
+        total: Number(o.total ?? 0),
+        items: (o.detalles ?? o.items ?? []).map((item: any) => ({
+          ...item,
+          productId: item.id_producto ?? item.productId,
+          quantity: item.cantidad ?? item.quantity,
+          unitPrice: Number(item.precio_unit ?? item.unitPrice ?? 0),
+          totalPrice: Number(item.subtotal ?? item.totalPrice ?? 0),
+          name: item.name ?? `Producto ${item.id_producto ?? item.productId}`,
+        })),
+      }));
       setOrders(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al cargar órdenes');
@@ -53,8 +69,8 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose }) => {
     });
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
+  const getStatusColor = (status: string | undefined) => {
+    switch ((status ?? '').toLowerCase()) {
       case 'completed':
       case 'completado':
         return 'text-emerald-400 bg-emerald-500/10';
