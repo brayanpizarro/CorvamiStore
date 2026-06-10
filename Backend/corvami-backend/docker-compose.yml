@@ -5,7 +5,7 @@ services:
     build: .
     container_name: corvami-backend
     ports:
-      - "3000:3000"
+      - "6000:6000"
     environment:
       # ── BD propia (schema Ventas en si2 Neon) ────────────────────────────────
       - DB_HOST=ep-royal-glade-ac55fitc-pooler.sa-east-1.aws.neon.tech
@@ -21,12 +21,15 @@ services:
       - EXT_DB_PASSWORD=npg_V58gYFmBOPda
       - EXT_DB_NAME=si2
       # ── Aplicación ────────────────────────────────────────────────────────────
-      - PORT=3000
+      - PORT=6000
       - CLOUDINARY_CLOUD_NAME=def0eymwn
       - CLOUDINARY_API_KEY=298765669195532
       - CLOUDINARY_API_SECRET=7ybs0jIHP5eS2IO-XzcsWpTZPps
       - EMAIL_USER=soporteucenin@gmail.com
       - EMAIL_PASSWORD=xsdkpcsxftgnnfcn
+      # ── APIs externas (otros proctors) ──────────────────────────────────────
+      - INVENTORY_API_URL=http://localhost:5000
+      - PURCHASE_API_URL=http://localhost:4000
     networks:
       - corvami-network
 

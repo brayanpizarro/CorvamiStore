@@ -20,7 +20,7 @@ export interface OutputMovementItem {
 export class InventoryService {
   private readonly logger = new Logger(InventoryService.name);
   private readonly baseUrl =
-    process.env.INVENTORY_API_URL ?? 'http://localhost:5000/api';
+    process.env.INVENTORY_API_URL ?? 'http://localhost:5000';
   private readonly empleadoId =
     process.env.INVENTORY_EMPLEADO_ID ?? 'system-ventas';
 

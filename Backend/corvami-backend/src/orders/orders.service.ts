@@ -13,6 +13,7 @@ import { VentasFactura } from './entities/ventas-factura.entity';
 import { Cliente } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { InventoryService } from '../inventory/inventory.service';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class OrdersService {
@@ -27,6 +28,7 @@ export class OrdersService {
     private readonly clientesRepo: Repository<Cliente>,
     private readonly usersService: UsersService,
     private readonly inventoryService: InventoryService,
+    private readonly emailService: EmailService,
   ) {}
 
   private parseId(id: string | number): number {
@@ -190,6 +192,7 @@ export class OrdersService {
       saved.detalles.map((d) => ({ producto_id: d.id_producto, cantidad: d.cantidad })),
       `Despacho ventas #${saved.id_pedido}`,
     );
+    await this.emailService.sendOrderConfirmation(saved);
     return saved;
   }
 
@@ -228,6 +231,7 @@ export class OrdersService {
       saved.detalles.map((d) => ({ producto_id: d.id_producto, cantidad: d.cantidad })),
       `Despacho ventas #${saved.id_pedido}`,
     );
+    await this.emailService.sendOrderConfirmation(saved);
     return saved;
   }
 
